@@ -16,16 +16,15 @@ RUN if [[ -d /cachi2/output/deps/npm/ ]]; then \
     fi
 
 
-# Install dependencies & build
-USER root
-RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
-    yarn build
+## Install dependencies & build
+#RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
+#    yarn build
 
 FROM $RUNTIME
-ARG VERSION=console-plugin-next
+ARG VERSION=1.22.0
 
-COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
-COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
+#COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
+#COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
 
 USER 1001
 
