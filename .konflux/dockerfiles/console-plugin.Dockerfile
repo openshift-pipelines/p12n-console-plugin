@@ -4,7 +4,7 @@ ARG RUNTIME=registry.redhat.io/ubi9/nginx-124@sha256:b9c2c8657761ea521f49ade5b33
 FROM $BUILDER AS builder-ui
 
 WORKDIR /go/src/github.com/openshift-pipelines/console-plugin
-COPY . .
+COPY upstream .
 #Install Yarn
 RUN if [[ -d /cachi2/output/deps/npm/ ]]; then \
       npm install -g /cachi2/output/deps/npm/yarnpkg-cli-dist-4.6.0.tgz; \
@@ -15,16 +15,17 @@ RUN if [[ -d /cachi2/output/deps/npm/ ]]; then \
       corepack prepare yarn@4.6.0 --activate;  \
     fi
 
+# Install dependencies & build
+USER root
+RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
+    yarn build
 
-## Install dependencies & build
-#RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
-#    yarn build
 
 FROM $RUNTIME
-ARG VERSION=1.22.0
+ARG VERSION=console-plugin-1.22
 
-#COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
-#COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
+COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
 
 USER 1001
 
@@ -39,4 +40,5 @@ LABEL \
       description="Red Hat OpenShift Pipelines Console Plugin" \
       io.k8s.display-name="Red Hat OpenShift Pipelines Console Plugin" \
       io.k8s.description="Red Hat OpenShift Pipelines Console Plugin" \
-      io.openshift.tags="pipelines,tekton,openshift"
+      io.openshift.tags="pipelines,tekton,openshift" \
+      cpe="cpe:/a:redhat:openshift_pipelines:1.20::el9"
