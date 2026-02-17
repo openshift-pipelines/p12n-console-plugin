@@ -33,12 +33,12 @@ ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
 LABEL \
       com.redhat.component="openshift-pipelines-console-plugin-rhel9-container" \
-      name="openshift-pipelines/pipelines-console-plugin-rhel9" \
-      version=$VERSION \
-      summary="Red Hat OpenShift Pipelines Console Plugin" \
+      cpe="cpe:/a:redhat:openshift_pipelines:1.22::el9" \
+      description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
+      io.k8s.description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
+      io.k8s.display-name="Red Hat OpenShift Pipelines console-plugin console-plugin" \
+      io.openshift.tags="tekton,openshift,console-plugin,console-plugin" \
       maintainer="pipelines-extcomm@redhat.com" \
-      description="Red Hat OpenShift Pipelines Console Plugin" \
-      io.k8s.display-name="Red Hat OpenShift Pipelines Console Plugin" \
-      io.k8s.description="Red Hat OpenShift Pipelines Console Plugin" \
-      io.openshift.tags="pipelines,tekton,openshift" \
-      cpe="cpe:/a:redhat:openshift_pipelines:1.20::el9"
+      name="openshift-pipelines/pipelines-console-plugin-rhel9" \
+      summary="Red Hat OpenShift Pipelines console-plugin console-plugin" \
+      version="v1.22.0"
