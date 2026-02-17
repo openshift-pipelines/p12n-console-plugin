@@ -38,7 +38,7 @@ spec:
       - "v1.22.0"
   - name: prefetch-input
     value: |
-      [{"type": "yarn", "path": "upstream"}, {"type": "npm", "path": ".konflux/npm"}]
+      [{"type": "yarn"}, {"type": "npm", "path": ".konflux/npm"}]
   pipelineRef:
     name: docker-build-ta
   taskRunTemplate:
