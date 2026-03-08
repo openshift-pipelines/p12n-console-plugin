@@ -6,7 +6,7 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { adjustToStartOfWeek } from '../pipelines-metrics/utils';
 
@@ -53,7 +53,7 @@ export const TimeRangeOptions = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return {
     '1d': t('Last day'),
-    '1w': t('Last week'),
+    '2w': t('Last weeks'),
     '4w 2d': t('Last month'),
     '12w': t('Last quarter'),
     '52w': t('Last year'),
@@ -64,7 +64,7 @@ export const TimeRangeOptionsK8s = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return {
     '1d': t('Last day'),
-    '1w': t('Last week'),
+    '2w': t('Last weeks'),
     '4w 2d': t('Last month'),
     '12w': t('Last quarter'),
   };
@@ -287,10 +287,9 @@ export const useQueryParams = (param) => {
     value,
   } = param;
   const [isLoaded, setIsLoaded] = React.useState(0);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const history = useHistory();
   const queryParams = {};
-  location.search
+  history.location.search
     .substring(1)
     ?.split('&')
     .forEach((_) => {
@@ -299,10 +298,10 @@ export const useQueryParams = (param) => {
     });
 
   function setQueryParams(key?: string, value?: string) {
-    const path = location.pathname;
+    const path = history.location.pathname;
 
     if (key && value) queryParams[key] = value;
-    navigate(
+    history.push(
       `${path}?${Object.keys(queryParams)
         .map((k) => {
           const v = queryParams[k];

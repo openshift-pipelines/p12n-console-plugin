@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { debounce } from 'lodash-es';
-import { useHistory } from 'react-router';
 import { ResizeDirection } from 're-resizable';
 import { Rnd } from 'react-rnd';
-import { CatalogItem, useFlag } from '@openshift-console/dynamic-plugin-sdk';
+import { CatalogItem } from '@openshift-console/dynamic-plugin-sdk';
 import QuickSearchBar from './QuickSearchBar';
 import QuickSearchContent from './QuickSearchContent';
 import { DetailsRendererFunction } from './QuickSearchDetails';
@@ -15,13 +13,9 @@ import {
   removeQueryArgument,
   setQueryArgument,
 } from '../utils/router';
-import { fetchArtifactHubTasks } from '../catalog/apis/artifactHub';
-import { normalizeArtifactHubTasks } from '../catalog/providers/useArtifactHubTasksProvider';
-import { TaskSearchCallback } from '../pipeline-builder/types';
-import useTasksProvider from '../catalog/providers/useTasksProvider';
+import { useHistory } from 'react-router';
 
 import './QuickSearchModalBody.scss';
-import { FLAGS } from '../../types';
 
 interface QuickSearchModalBodyProps {
   allCatalogItemsLoaded: boolean;
@@ -33,9 +27,7 @@ interface QuickSearchModalBodyProps {
   icon?: React.ReactNode;
   detailsRenderer?: DetailsRendererFunction;
   maxDimension?: { maxHeight: number; maxWidth: number };
-  viewContainer?: HTMLElement; // pass the html container element to specifythe movement boundary
-  callback?: TaskSearchCallback;
-  setFailedTasks?: React.Dispatch<React.SetStateAction<string[]>>;
+  viewContainer?: HTMLElement; // pass the html container element to specify the movement boundary
 }
 
 const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
@@ -49,15 +41,12 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
   detailsRenderer,
   maxDimension,
   viewContainer,
-  callback,
-  setFailedTasks,
 }) => {
   const DEFAULT_HEIGHT_WITH_NO_ITEMS = 60;
   const DEFAULT_HEIGHT_WITH_ITEMS = 483;
   const MIN_HEIGHT = 240;
   const MIN_WIDTH = 225;
   const history = useHistory();
-  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   const [catalogItems, setCatalogItems] = React.useState<CatalogItem[]>(null);
   const [catalogTypes, setCatalogTypes] = React.useState<CatalogType[]>([]);
   const [isRndActive, setIsRndActive] = React.useState(false);
@@ -79,7 +68,6 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
     height: number;
     width: number;
   }>();
-  const [tektonTasks] = useTasksProvider({});
   const [draggableBoundary, setDraggableBoundary] =
     React.useState<string>(null);
   const ref = React.useRef<HTMLDivElement>();
@@ -125,6 +113,17 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
   }, []);
 
   React.useEffect(() => {
+    if (searchTerm) {
+      const { filteredItems, viewAllLinks, catalogItemTypes } =
+        searchCatalog(searchTerm);
+      setCatalogItems(filteredItems);
+      setCatalogTypes(catalogItemTypes);
+      setViewAll(viewAllLinks);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchCatalog]);
+
+  React.useEffect(() => {
     if (catalogItems && !selectedItemId) {
       setSelectedItemId(catalogItems[0]?.uid);
       setSelectedItem(catalogItems[0]);
@@ -151,65 +150,24 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
     setTimeout(() => setIsRndActive(false), 0);
   };
 
-  const searchVersion = React.useRef(0);
-
-  const handleSearch = React.useCallback(
-    async (value: string) => {
-      const currentVersion = ++searchVersion.current;
-
-      if (!value) {
-        setCatalogItems(null);
-        removeQueryArgument('catalogSearch');
-        return;
-      }
-
-      const [artifactHubResults, catalogResults] = await Promise.all([
-        fetchArtifactHubTasks(value),
-        searchCatalog(value),
-      ]);
-
-      // Ignore results if a newer search version has started
-      if (currentVersion !== searchVersion.current) return;
-
-      const normalizedArtifactHubItems = normalizeArtifactHubTasks(
-        artifactHubResults,
-        tektonTasks,
-      );
-      const { filteredItems, viewAllLinks, catalogItemTypes } = catalogResults;
-
-      const mergedItems = [
-        ...filteredItems,
-        ...normalizedArtifactHubItems,
-      ].filter(
-        (item, index, self) =>
-          index ===
-          self.findIndex(
-            (i) =>
-              i.name === item.name &&
-              i.data?.version === item.data?.version &&
-              i.provider === item.provider,
-          ),
-      );
-      setCatalogItems(mergedItems);
-      setCatalogTypes(catalogItemTypes);
-      setViewAll(viewAllLinks);
-      setQueryArgument('catalogSearch', value);
-      setSelectedItemId(null);
-    },
-    [searchCatalog],
-  );
-
-  const debouncedHandleSearch = React.useMemo(
-    () => debounce(handleSearch, 300),
-    [handleSearch],
-  );
-
   const onSearch = React.useCallback(
     (_event: React.FormEvent<HTMLInputElement>, value: string) => {
       setSearchTerm(value);
-      debouncedHandleSearch(value);
+      if (value) {
+        const { filteredItems, viewAllLinks, catalogItemTypes } =
+          searchCatalog(value);
+        setCatalogItems(filteredItems);
+        setCatalogTypes(catalogItemTypes);
+        setViewAll(viewAllLinks);
+        setQueryArgument('catalogSearch', value);
+      } else {
+        setCatalogItems(null);
+        removeQueryArgument('catalogSearch');
+      }
+      setSelectedItemId('');
+      setSelectedItem(null);
     },
-    [debouncedHandleSearch],
+    [searchCatalog],
   );
 
   const onCancel = React.useCallback(() => {
@@ -237,12 +195,7 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
       if (activeViewAllLink) {
         history.push(activeViewAllLink.to);
       } else if (selectedItem) {
-        handleCta(e, selectedItem, closeModal, history, {
-          callback,
-          setFailedTasks,
-          namespace,
-          isDevConsoleProxyAvailable,
-        });
+        handleCta(e, selectedItem, closeModal, history);
       }
     },
     [closeModal, selectedItem, viewAll],
@@ -380,8 +333,6 @@ const QuickSearchModalBody: React.FC<QuickSearchModalBodyProps> = ({
                 catalogItems?.find((item) => item.uid === itemId),
               );
             }}
-            callback={callback}
-            setFailedTasks={setFailedTasks}
           />
         )}
       </div>

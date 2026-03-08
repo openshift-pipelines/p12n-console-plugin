@@ -10,7 +10,7 @@ import RemoveNodeDecorator from './RemoveNodeDecorator';
 import { KebabOption, NewTaskNodeCallback } from './types';
 import { TaskKind } from '../../types';
 import { getReferenceForModel } from '../pipelines-overview/utils';
-import { getResourceModelFromTaskKind, getTaskName } from '../utils/pipeline-augment';
+import { getResourceModelFromTaskKind } from '../utils/pipeline-augment';
 import { ResourceIcon } from '@openshift-console/dynamic-plugin-sdk';
 import { truncateMiddle } from './truncate-middle';
 
@@ -20,8 +20,10 @@ const taskToOption = (
   task: TaskKind,
   callback: NewTaskNodeCallback,
 ): KeyedKebabOption => {
-  const { kind } = task;
-  const name = getTaskName(task)
+  const {
+    kind,
+    metadata: { name },
+  } = task;
 
   return {
     key: `${name}-${kind}`,

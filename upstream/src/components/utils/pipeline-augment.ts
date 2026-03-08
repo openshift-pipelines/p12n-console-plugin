@@ -22,7 +22,6 @@ import {
   PipelineKind,
   PipelineRunKind,
   PipelineTask,
-  TaskKind,
   TaskRunKind,
 } from '../../types';
 import { getReferenceForModel } from '../pipelines-overview/utils';
@@ -308,10 +307,6 @@ export const getTaskStatus = (
     taskStatus[ComputedStatus.PipelineNotStarted]++;
   }
   return taskStatus;
-};
-
-export const getTaskName = (task: TaskKind): string => {
-  return task?.spec?.displayName || task?.metadata?.name || 'anonymous-task';
 };
 
 export const getResourceModelFromTaskKind = (kind: string): K8sKind => {

@@ -3,29 +3,29 @@
   "[javascript]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "never",
-      "source.sortImports": "never"
+      "source.organizeImports": false,
+      "source.sortImports": false
     }
   },
   "[javascriptreact]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "never",
-      "source.sortImports": "never"
+      "source.organizeImports": false,
+      "source.sortImports": false
     }
   },
   "[typescript]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.sortImports": "explicit"
+      "source.organizeImports": true,
+      "source.sortImports": true
     }
   },
   "[typescriptreact]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "never",
-      "source.sortImports": "never"
+      "source.organizeImports": false,
+      "source.sortImports": false
     }
   },
   "[json]": {

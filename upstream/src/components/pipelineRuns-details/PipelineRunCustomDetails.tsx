@@ -1,13 +1,7 @@
 import * as React from 'react';
-import {
-  ClipboardCopy,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
+import { ClipboardCopy } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 import { getPLRLogSnippet } from '../logs/pipelineRunLogSnippet';
 import RunDetailsErrorLog from '../logs/RunDetailsErrorLog';
 import { getReferenceForModel } from '../pipelines-overview/utils';
@@ -15,7 +9,7 @@ import Status from '../status/Status';
 import { ExternalLink } from '../utils/link';
 import { TaskRunModel } from '../../models';
 import { Timestamp } from '@openshift-console/dynamic-plugin-sdk';
-import { ComputedStatus, PipelineRunKind } from '../../types';
+import { PipelineRunKind } from '../../types';
 import {
   pipelineRunFilterReducer,
   pipelineRunTitleFilterReducer,
@@ -31,7 +25,6 @@ import { convertBackingPipelineToPipelineResourceRefProps } from './utils';
 import RepositoryLinkList from './RepositoryLinkList';
 import PipelineRunVulnerabilities from '../pipelines-list/status/PipelineRunVulnerabilities';
 import { useTaskRuns } from '../hooks/useTaskRuns';
-import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 import TriggeredBySection from './TriggeredBySection';
 import PipelineResourceRef from '../triggers-details/PipelineResourceRef';
 import WorkspaceResourceLinkList from '../workspaces/WorkspaceResourceLinkList';
@@ -44,19 +37,9 @@ const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
   pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
-  const plrStatus = pipelineRunFilterReducer(pipelineRun);
-  const pipelineRunFinished =
-    plrStatus !== ComputedStatus.Running &&
-    plrStatus !== ComputedStatus.Pending &&
-    plrStatus !== ComputedStatus.Cancelling;
   const [taskRuns, taskRunsLoaded] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
-    { 
-      pipelineRunFinished,
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy
-    },
   );
 
   const sbomTaskRun = taskRunsLoaded ? getSbomTaskRun(taskRuns) : null;
@@ -65,45 +48,38 @@ const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
   const isExternalLink = hasExternalLink(sbomTaskRun);
   return (
     <>
-      <DescriptionList>
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            <Status
-              status={pipelineRunFilterReducer(pipelineRun)}
-              title={pipelineRunTitleFilterReducer(pipelineRun)}
-            />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-        {taskRunsLoaded && (
-          <RunDetailsErrorLog
-            logDetails={getPLRLogSnippet(pipelineRun, taskRuns)}
-            namespace={pipelineRun.metadata.namespace}
-            isResourceManagedByKueue={isResourceManagedByKueue}
-            pipelineRunName={pipelineRun.metadata.name}
+      <dl>
+        <dt>{t('Status')}</dt>
+        <dd>
+          <Status
+            status={pipelineRunFilterReducer(pipelineRun)}
+            title={pipelineRunTitleFilterReducer(pipelineRun)}
           />
-        )}
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Vulnerabilities')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            <PipelineRunVulnerabilities pipelineRun={pipelineRun} />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Pipeline')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            <PipelineResourceRef
-              {...convertBackingPipelineToPipelineResourceRefProps(pipelineRun)}
-            />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
+        </dd>
+      </dl>
+      {taskRunsLoaded && (
+        <RunDetailsErrorLog
+          logDetails={getPLRLogSnippet(pipelineRun, taskRuns)}
+          namespace={pipelineRun.metadata.namespace}
+        />
+      )}
+      <dl>
+        <dt>{t('Vulnerabilities')}</dt>
+        <dd>
+          <PipelineRunVulnerabilities pipelineRun={pipelineRun} />
+        </dd>
+      </dl>
+      <dl>
+        <dt>{t('Pipeline')}</dt>
+        <dd>
+          <PipelineResourceRef
+            {...convertBackingPipelineToPipelineResourceRefProps(pipelineRun)}
+          />
+        </dd>
         {buildImage && sbomTaskRun && (
-          <DescriptionListGroup>
-            <DescriptionListTerm data-test="download-sbom">
-              {t('Download SBOM')}
-            </DescriptionListTerm>
-            <DescriptionListDescription>
+          <>
+            <dt data-test="download-sbom">{t('Download SBOM')}</dt>
+            <dd>
               <ClipboardCopy
                 isReadOnly
                 hoverTip={t('Copy')}
@@ -114,15 +90,13 @@ const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
               <ExternalLink href="https://docs.sigstore.dev/cosign/installation">
                 {t('Install Cosign')}
               </ExternalLink>
-            </DescriptionListDescription>
-          </DescriptionListGroup>
+            </dd>
+          </>
         )}
         {sbomTaskRun && (
-          <DescriptionListGroup>
-            <DescriptionListTerm data-test="view-sbom">
-              {t('SBOM')}
-            </DescriptionListTerm>
-            <DescriptionListDescription>
+          <>
+            <dt data-test="view-sbom">{t('SBOM')}</dt>
+            <dd>
               {isExternalLink &&
               linkToSbom &&
               (linkToSbom.startsWith('http://') ||
@@ -139,36 +113,29 @@ const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
                   {t('View SBOM')}
                 </Link>
               )}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
+            </dd>
+          </>
         )}
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Start time')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            <Timestamp timestamp={pipelineRun?.status?.startTime} />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Completion time')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            <Timestamp timestamp={pipelineRun?.status?.completionTime} />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>{t('Duration')}</DescriptionListTerm>
-          <DescriptionListDescription>
-            {pipelineRunDuration(pipelineRun)}
-          </DescriptionListDescription>
-        </DescriptionListGroup>
+      </dl>
+
+      <dl>
+        <dt>{t('Start time')}</dt>
+        <dd>
+          <Timestamp timestamp={pipelineRun?.status?.startTime} />
+        </dd>
+        <dt>{t('Completion time')}</dt>
+        <dd>
+          <Timestamp timestamp={pipelineRun?.status?.completionTime} />
+        </dd>
+        <dt>{t('Duration')}</dt>
+        <dd>{pipelineRunDuration(pipelineRun)}</dd>
         {pipelineRun.spec?.timeouts && (
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Timeouts')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {pipelineRun.spec?.timeouts?.pipeline}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
+          <>
+            <dt>{t('Timeouts')}</dt>
+            <dd>{pipelineRun.spec?.timeouts?.pipeline}</dd>
+          </>
         )}
-      </DescriptionList>
+      </dl>
       <TriggeredBySection pipelineRun={pipelineRun} />
       <RepositoryLinkList pipelineRun={pipelineRun} />
       <WorkspaceResourceLinkList
