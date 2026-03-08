@@ -5,8 +5,7 @@ import { TaskRunKind } from '../../types';
 import { TektonResourceLabel } from '../../consts';
 import { LoadingInline } from '../Loading';
 import { useTRTaskRunLog } from '../hooks/useTektonResult';
-import { Banner } from '@patternfly/react-core';
-import './TektonTaskRunLog.scss';
+import './MultiStreamLogs.scss';
 
 type TektonTaskRunLogProps = {
   taskRun?: TaskRunKind;
@@ -46,33 +45,41 @@ export const TektonTaskRunLog: React.FC<TektonTaskRunLogProps> = ({
   return (
     <>
       <div
-        data-test-id="tr-logs-task-container"
-        className="odc-tekton-taskrun-log pf-v5-u-h-100 pf-v5-u-w-100"
+        className="odc-multi-stream-logs__taskName"
+        data-test-id="logs-taskName"
       >
-        <LogViewer
-          useAnsiClasses={true}
-          header={
-            <Banner className="pf-v5-l-flex pf-v5-l-gap-md">
-              <span
-                data-test-id="logs-taskName"
-                className="pf-v5-u-font-size-md"
-              >
-                {taskName}
-              </span>
-              {!trLoaded && !errorMessage ? (
-                <span data-test-id="loading-indicator">
-                  <LoadingInline />
-                </span>
-              ) : null}
-            </Banner>
-          }
-          hasLineNumbers={false}
-          isTextWrapped={false}
-          data={errorMessage ?? (!trLoaded ? '' : formattedResults)}
-          height="100%"
-          scrollToRow={lastRowIndex}
-          theme="dark"
-        />
+        {taskName}
+        {!trLoaded && !errorMessage ? (
+          <span
+            className="odc-multi-stream-logs__taskName__loading-indicator"
+            data-test-id="loading-indicator"
+          >
+            <LoadingInline />
+          </span>
+        ) : null}
+      </div>
+      <div
+        className="odc-multi-stream-logs__logviewer"
+        data-test-id="tr-logs-task-container"
+      >
+        {errorMessage && (
+          <div
+            className="odc-pipeline-run-logs__logtext"
+            data-testid="tr-logs-error-message"
+          >
+            {errorMessage}
+          </div>
+        )}
+        {!errorMessage && trLoaded ? (
+          <LogViewer
+            hasLineNumbers={false}
+            isTextWrapped={false}
+            data={formattedResults}
+            theme="dark"
+            height="100%"
+            scrollToRow={lastRowIndex}
+          />
+        ) : null}
       </div>
     </>
   );

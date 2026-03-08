@@ -6,16 +6,12 @@ type LogSnippetBlockProps = {
   children: (logSnippet: string) => React.ReactNode;
   logDetails: CombinedErrorDetails;
   namespace: string;
-  isResourceManagedByKueue?: boolean;
-  pipelineRunName?: string;
 };
 
 const LogSnippetBlock: React.FC<LogSnippetBlockProps> = ({
   children,
   logDetails,
   namespace,
-  isResourceManagedByKueue,
-  pipelineRunName,
 }) => {
   return 'podName' in logDetails ? (
     <LogSnippetFromPod
@@ -24,8 +20,6 @@ const LogSnippetBlock: React.FC<LogSnippetBlockProps> = ({
       podName={logDetails.podName}
       title={logDetails.title}
       staticMessage={logDetails.staticMessage}
-      isResourceManagedByKueue={isResourceManagedByKueue}
-      pipelineRunName={pipelineRunName}
     >
       {children}
     </LogSnippetFromPod>
