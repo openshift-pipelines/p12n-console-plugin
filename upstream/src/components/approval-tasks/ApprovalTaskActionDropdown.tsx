@@ -1,26 +1,28 @@
 import * as React from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: FIXME missing exports due to out-of-sync @types/react-redux version
+import { useSelector } from 'react-redux';
 import { ApprovalTaskKind, PipelineRunKind } from '../../types';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
+import { SDKStoreState } from '@openshift-console/dynamic-plugin-sdk/lib/app/redux-types';
 import {
   Dropdown,
   DropdownItem,
   DropdownList,
   MenuToggle,
   MenuToggleElement,
-  Spinner,
   Tooltip,
 } from '@patternfly/react-core';
 import { KEBAB_BUTTON_ID } from '../../consts';
 import { useTranslation } from 'react-i18next';
 import {
+  UserInfo,
   useAccessReview,
   useModal,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { ApprovalTaskModel } from '../../models';
 import { approvalModal } from './modal';
 import { ApproverStatusResponse } from '../../types';
-import { useActiveUserWithUpdate } from '../hooks/hooks';
-import { isUserAuthorizedForApproval } from '../utils/approval-group-utils';
 
 type ApprovalTaskActionDropdownProps = {
   approvalTask: ApprovalTaskKind;
@@ -31,16 +33,16 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
   approvalTask,
   pipelineRun,
 }) => {
-  const { currentUser, updateUserInfo } = useActiveUserWithUpdate();
+  const currentUser: UserInfo = useSelector(
+    (state: SDKStoreState) => state.sdkCore.user,
+  );
   const launchModal = useModal();
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const {
     metadata: { name, namespace },
-    status: { state },
-    spec: { approvers },
+    status: { approvers, state },
   } = approvalTask;
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isAuthorized, setIsAuthorized] = React.useState<boolean | null>(null);
   const onToggle = () => {
     setIsOpen(!isOpen);
   };
@@ -51,8 +53,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     launchModal(approvalModal, {
       resource: approvalTask,
       pipelineRunName: pipelineRun?.metadata?.name,
-      userName: currentUser?.username,
-      currentUser: currentUser,
+      userName: currentUser.username,
       type: 'approve',
     });
   };
@@ -61,8 +62,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     launchModal(approvalModal, {
       resource: approvalTask,
       pipelineRunName: pipelineRun?.metadata?.name,
-      userName: currentUser?.username,
-      currentUser: currentUser,
+      userName: currentUser.username,
       type: 'reject',
     });
   };
@@ -75,36 +75,10 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     namespace,
   });
 
-  // Check group-based authorization
-  React.useEffect(() => {
-    const checkAuthorization = async () => {
-      if (currentUser && approvers) {
-        try {
-          if (currentUser?.username) {
-            const authorized = await isUserAuthorizedForApproval(
-              currentUser.username,
-              approvers,
-              currentUser,
-              updateUserInfo,
-            );
-            setIsAuthorized(authorized);
-          }
-        } catch (error) {
-          console.error('Error checking group authorization:', error);
-          setIsAuthorized(false);
-        }
-      } else {
-        setIsAuthorized(false);
-      }
-    };
-    checkAuthorization();
-  }, [currentUser, approvers]);
-
   const isDropdownDisabled =
     !canApproveAndRejectResource ||
     state !== ApproverStatusResponse.Pending ||
-    isAuthorized === null || // Still loading
-    !isAuthorized; // Not authorized (includes both direct user and group checks)
+    !approvers?.find((approver) => approver === currentUser.username);
 
   const tooltipContent = () => {
     if (!canApproveAndRejectResource) {
@@ -116,18 +90,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     if (state !== ApproverStatusResponse.Pending) {
       return t(`PipelineRun has been {{state}}`, { state });
     }
-    if (isAuthorized === null) {
-      return (
-        (
-          <Spinner
-            className="pf-v5-u-mr-xs"
-            size="sm"
-            aria-label={t('Checking authorization...')}
-          />
-        ) + t('Checking authorization...')
-      );
-    }
-    if (!isAuthorized) {
+    if (!approvers?.find((approver) => approver === currentUser.username)) {
       return t('User not an approver');
     }
     return t('Permission denied');

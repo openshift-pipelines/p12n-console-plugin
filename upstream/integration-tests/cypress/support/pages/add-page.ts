@@ -15,7 +15,6 @@ export const addPage = {
         cy.testA11y('Import from Git Page');
         detailsPage.titleShouldContain(pageTitle.Git);
         break;
-      case 'Software Catalog':
       case 'Developer Catalog':
       case 'From Catalog':
       case addOptions.DeveloperCatalog:
@@ -28,7 +27,7 @@ export const addPage = {
         /* eslint-disable-next-line cypress/no-unnecessary-waiting */
         cy.wait(3000);
         cy.byTestID('item pipeline').click();
-        cy.get('.odc-pipeline-builder-header__content').should(
+        cy.get('.odc-pipeline-builder-header__title').should(
           'have.text',
           pageTitle.PipelineBuilder,
         );

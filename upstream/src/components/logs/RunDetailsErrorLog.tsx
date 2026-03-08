@@ -1,26 +1,16 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
 import { CombinedErrorDetails } from './log-snippet-types';
 import LogSnippetBlock from './LogSnippetBlock';
 
 type RunDetailErrorLogProps = {
   logDetails: CombinedErrorDetails;
   namespace: string;
-  isResourceManagedByKueue?: boolean;
-  pipelineRunName?: string;
 };
 
 const RunDetailsErrorLog: React.FC<RunDetailErrorLogProps> = ({
   logDetails,
   namespace,
-  isResourceManagedByKueue,
-  pipelineRunName,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   if (!logDetails) {
@@ -28,27 +18,20 @@ const RunDetailsErrorLog: React.FC<RunDetailErrorLogProps> = ({
   }
 
   return (
-    <DescriptionList>
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('Message')}</DescriptionListTerm>
-        <DescriptionListDescription>
-          {logDetails.title}
-        </DescriptionListDescription>
-      </DescriptionListGroup>
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('Log snippet')}</DescriptionListTerm>
-        <DescriptionListDescription>
-          <LogSnippetBlock
-            logDetails={logDetails}
-            namespace={namespace}
-            isResourceManagedByKueue={isResourceManagedByKueue}
-            pipelineRunName={pipelineRunName}
-          >
+    <>
+      <dl>
+        <dt>{t('Message')}</dt>
+        <dd>{logDetails.title}</dd>
+      </dl>
+      <dl>
+        <dt>{t('Log snippet')}</dt>
+        <dd>
+          <LogSnippetBlock logDetails={logDetails} namespace={namespace}>
             {(logSnippet: string) => <pre className="co-pre">{logSnippet}</pre>}
           </LogSnippetBlock>
-        </DescriptionListDescription>
-      </DescriptionListGroup>
-    </DescriptionList>
+        </dd>
+      </dl>
+    </>
   );
 };
 
