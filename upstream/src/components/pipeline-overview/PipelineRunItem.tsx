@@ -3,10 +3,9 @@ import { Grid, GridItem } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom-v5-compat';
 import { useTaskRuns } from '../hooks/useTaskRuns';
-import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 import { resourcePath } from '../utils/resource-link';
 import { PipelineRunModel } from '../../models';
-import { ComputedStatus, PipelineRunKind } from '../../types';
+import { PipelineRunKind } from '../../types';
 import { getPLRLogSnippet } from '../logs/pipelineRunLogSnippet';
 import { pipelineRunStatus } from '../utils/pipeline-filter-reducer';
 import Status from '../status/Status';
@@ -21,23 +20,13 @@ type PipelineRunItemProps = {
 
 const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
   const {
     metadata: { name, namespace, creationTimestamp },
     status,
   } = pipelineRun;
-  const plrStatus = pipelineRunStatus(pipelineRun);
-  const pipelineRunFinished =
-    plrStatus !== ComputedStatus.Running &&
-    plrStatus !== ComputedStatus.Pending &&
-    plrStatus !== ComputedStatus.Cancelling;
   const [taskRuns] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
-    { 
-      pipelineRunFinished, 
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy 
-    },
   );
   const path = resourcePath(PipelineRunModel, name, namespace);
   const lastUpdated = status
@@ -68,12 +57,7 @@ const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
         </GridItem>
         {logDetails && (
           <GridItem>
-            <LogSnippetBlock
-              logDetails={logDetails}
-              namespace={namespace}
-              isResourceManagedByKueue={isResourceManagedByKueue}
-              pipelineRunName={name}
-            >
+            <LogSnippetBlock logDetails={logDetails} namespace={namespace}>
               {(logSnippet: string) => (
                 <LogSnippet
                   message={logDetails.title}
