@@ -36,12 +36,9 @@ export const tasksPage = {
       .click({ force: true });
   },
   clickOnCreatePipeline: () => {
-    cy.get('[data-test="item-create"]')
+    cy.get('[data-test-id="dropdown-button"]')
       .contains('Create')
       .click({ force: true });
-    // cy.byTestDropDownMenu('pipeline').click();
-    cy.get(
-      '[data-test="list-page-create-dropdown-item-pipeline"] button',
-    ).click();
+    cy.byTestDropDownMenu('pipeline').click();
   },
 };

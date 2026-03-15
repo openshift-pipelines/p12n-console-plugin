@@ -22,7 +22,6 @@ async function setupNodeEvents(
           rules: [
             {
               test: /\.tsx?$/,
-              type: 'javascript/auto',
               use: [
                 {
                   loader: 'ts-loader',
@@ -37,16 +36,6 @@ async function setupNodeEvents(
                   options: config,
                 },
               ],
-            },
-            {
-              test: /node_modules\/yaml\/browser\/dist\/.*/,
-              type: 'javascript/auto',
-              use: {
-                loader: 'babel-loader',
-                options: {
-                  presets: ['@babel/preset-env'],
-                },
-              },
             },
           ],
         },
@@ -91,14 +80,14 @@ export default defineConfig({
   pageLoadTimeout: 90000,
   requestTimeout: 15000,
   responseTimeout: 15000,
-  screenshotsFolder: './gui_test_screenshots/cypress/screenshots',
-  videosFolder: './gui_test_screenshots/cypress/videos',
+  screenshotsFolder: './screenshots',
+  videosFolder: './videos',
   video: true,
   reporter: '../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: 'reporter-config.json',
   },
-  fixturesFolder: 'cypress/testData',
+  fixturesFolder: 'testData',
   chromeWebSecurity: false,
   env: {
     TAGS: '(@pre-condition or @smoke or @regression) and not (@manual or @to-do or @un-verified or @broken-test)',

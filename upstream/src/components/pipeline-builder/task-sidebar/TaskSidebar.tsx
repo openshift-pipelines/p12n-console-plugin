@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Stack, StackItem, Title } from '@patternfly/react-core';
+import { Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors, useField } from 'formik';
 import { Trans, useTranslation } from 'react-i18next';
 import {
@@ -111,7 +111,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
 
         {params.length > 0 && (
           <div>
-            <Title headingLevel="h2">{t('Parameters')}</Title>
+            <h2>{t('Parameters')}</h2>
             <p className="co-help-text opp-task-sidebar__paragraph">
               <Trans ns="plugin__pipelines-console-plugin">
                 Use this format when you reference variables in this form:{' '}

@@ -42,7 +42,6 @@ const processWorkspaces = (
 export const submitStartPipeline = async (
   values: StartPipelineFormValues,
   pipeline: PipelineKind,
-  currentUser: string,
   labels?: { [key: string]: string },
   annotations?: { [key: string]: string },
 ): Promise<PipelineRunKind> => {
@@ -51,13 +50,7 @@ export const submitStartPipeline = async (
 
   const pipelineRunResource: PipelineRunKind = await k8sCreate({
     model: PipelineRunModel,
-    data: getPipelineRunFromForm(
-      pipeline,
-      formValues,
-      currentUser,
-      labels,
-      annotations,
-    ),
+    data: getPipelineRunFromForm(pipeline, formValues, labels, annotations),
   });
 
   return Promise.resolve(pipelineRunResource);
@@ -66,7 +59,6 @@ export const submitStartPipeline = async (
 export const submitTrigger = async (
   pipeline: PipelineKind,
   formValues: AddTriggerFormValues,
-  currentUser: string,
 ): Promise<K8sResourceKind[]> => {
   const { triggerBinding } = formValues;
   const thisNamespace = pipeline.metadata.namespace;
@@ -74,7 +66,6 @@ export const submitTrigger = async (
   const pipelineRun: PipelineRunKind = getPipelineRunFromForm(
     pipeline,
     formValues,
-    currentUser,
     null,
     null,
     {

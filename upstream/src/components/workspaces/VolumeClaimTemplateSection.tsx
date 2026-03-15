@@ -4,11 +4,6 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
 import { PersistentVolumeClaimModel, PipelineRunModel } from '../../models';
 import { PersistentVolumeClaimKind } from '../../types';
 import { getMatchedPVCs } from '../utils/pipeline-utils';
@@ -48,11 +43,9 @@ const VolumeClaimTemplatesSection: React.FC<
   if (!matchedPVCs || matchedPVCs.length === 0) return null;
 
   return (
-    <DescriptionListGroup data-test-id="volumeClaimTemplate-resources-section">
-      <DescriptionListTerm>
-        {t('VolumeClaimTemplate Resources')}
-      </DescriptionListTerm>
-      <DescriptionListDescription>
+    <dl data-test-id="volumeClaimTemplate-resources-section">
+      <dt>{t('VolumeClaimTemplate Resources')}</dt>
+      <dd>
         {matchedPVCs.map((pvcResource) => {
           return (
             <ResourceLink
@@ -63,8 +56,8 @@ const VolumeClaimTemplatesSection: React.FC<
             />
           );
         })}
-      </DescriptionListDescription>
-    </DescriptionListGroup>
+      </dd>
+    </dl>
   );
 };
 

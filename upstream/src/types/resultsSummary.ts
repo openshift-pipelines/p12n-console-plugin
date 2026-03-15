@@ -1,5 +1,5 @@
 import { Selector } from '@openshift-console/dynamic-plugin-sdk';
-import { SummaryProps } from '../components/pipelines-overview/utils';
+import { SummaryProps } from 'src/components/pipelines-overview/utils';
 
 export enum DataType {
   PipelineRun = 'tekton.dev/v1.PipelineRun',
@@ -37,7 +37,6 @@ export type Log = {
 
 export type RecordsList = {
   nextPageToken?: string;
-  next_page_token?: string;
   records: ResultRecord[];
 };
 

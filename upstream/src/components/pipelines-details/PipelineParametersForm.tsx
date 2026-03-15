@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, PageSection } from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 import { FormikProps, FormikValues, getIn } from 'formik';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -31,11 +31,7 @@ const PipelineParametersForm: React.FC<PipelineParametersFormProps> = ({
     !dirty || !_.isEmpty(_.compact(getIn(errors, 'parameters')));
   return (
     <Form onSubmit={handleSubmit}>
-      <PageSection
-        isFilled
-        variant="light"
-        className="pipelines-console-plugin__page-section-width pf-v5-u-p-0 pipelines-console-plugin__background-transparent"
-      >
+      <div className="co-m-pane__body">
         <PipelineParameters
           fieldName="parameters"
           isReadOnly={!pipelineParameterAccess}
@@ -48,9 +44,8 @@ const PipelineParametersForm: React.FC<PipelineParametersFormProps> = ({
           valueFieldName="default"
           emptyMessage={t('No parameters are associated with this Pipeline.')}
           emptyValues={{ name: '', description: '', default: '' }}
-          className="pipelines-console-plugin__background-transparent"
         />
-      </PageSection>
+      </div>
       {pipelineParameterAccess && (
         <FormFooter
           handleReset={handleReset}
