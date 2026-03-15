@@ -14,7 +14,7 @@ import {
   TextVariants,
   Tooltip,
 } from '@patternfly/react-core';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { navFactory } from '../utils/horizontal-nav';
 import PipelineRunDetails from './PipelineRunDetails';
@@ -23,12 +23,10 @@ import {
   chainsSignedAnnotation,
   DELETED_RESOURCE_IN_K8S_ANNOTATION,
   RESOURCE_LOADED_FROM_RESULTS_ANNOTATION,
-  PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL,
 } from '../../consts';
-import { ArchiveIcon, MulticlusterIcon } from '@patternfly/react-icons';
+import { ArchiveIcon } from '@patternfly/react-icons';
 import SignedBadgeIcon from '../../images/SignedBadge';
 import Status from '../status/Status';
-import { ComputedStatus } from '../../types';
 import {
   pipelineRunFilterReducer,
   pipelineRunTitleFilterReducer,
@@ -53,7 +51,6 @@ import {
   usePipelineRun,
   useTaskRuns,
 } from '../hooks/useTaskRuns';
-import { useGetActiveUser } from '../hooks/hooks';
 
 type PipelineRunDetailsPageProps = {
   name: string;
@@ -67,18 +64,8 @@ const PipelineRunDetailsPage: React.FC<PipelineRunDetailsPageProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const navigate = useNavigate();
   const [pipelineRun, pipelineRunLoaded] = usePipelineRun(namespace, name);
-  const plrStatus = pipelineRunFilterReducer(pipelineRun);
-  const pipelineRunFinished =
-    plrStatus !== ComputedStatus.Running &&
-    plrStatus !== ComputedStatus.Pending &&
-    plrStatus !== ComputedStatus.Cancelling;
-  const [taskRuns] = useTaskRuns(namespace, name, {
-    pipelineRunFinished,
-    pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
-  });
+  const [taskRuns] = useTaskRuns(namespace, name);
   const PLRTasks = getTaskRunsOfPipelineRun(taskRuns, name);
-  const currentUser = useGetActiveUser();
-
   const reRunAction = () => {
     const { pipelineRef, pipelineSpec } = pipelineRun.spec;
     if (
@@ -87,7 +74,7 @@ const PipelineRunDetailsPage: React.FC<PipelineRunDetailsPageProps> = ({
     ) {
       k8sCreate({
         model: returnValidPipelineRunModel(pipelineRun),
-        data: getPipelineRunData(null, currentUser, pipelineRun),
+        data: getPipelineRunData(null, pipelineRun),
       }).then((plr) => {
         navigate(
           resourcePathFromModel(
@@ -156,7 +143,7 @@ const PipelineRunDetailsPage: React.FC<PipelineRunDetailsPageProps> = ({
 
   const resourceTitleFunc = React.useMemo((): string | JSX.Element => {
     return (
-      <div className="pipelinerun-details-page pf-v5-l-flex pf-v5-l-gap-md pf-v5-u-align-items-center">
+      <div className="pipelinerun-details-page">
         {pipelineRun?.metadata?.name}{' '}
         {pipelineRun?.metadata?.annotations?.[chainsSignedAnnotation] ===
           'true' && (
@@ -174,12 +161,6 @@ const PipelineRunDetailsPage: React.FC<PipelineRunDetailsPageProps> = ({
           ] === 'true') && (
           <Tooltip content={t('Archived in Tekton results')}>
             <ArchiveIcon className="pipelinerun-details-page__results-indicator" />
-          </Tooltip>
-        )}
-        {pipelineRun?.spec?.managedBy ===
-          PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL && (
-          <Tooltip content={t('Multicluster Pipeline Run')}>
-            <MulticlusterIcon className="pipelinerun-details-page__results-indicator" />
           </Tooltip>
         )}
         <ResourceStatus>

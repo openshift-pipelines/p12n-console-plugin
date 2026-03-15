@@ -1,10 +1,5 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
 import { PipelineRunWorkspace } from '../../types';
 
 type EmptyDirectoriesSectionProps = {
@@ -24,9 +19,9 @@ const EmptyDirectoriesSection: React.FC<EmptyDirectoriesSectionProps> = ({
   if (emptyDirectoryWorkspaces.length === 0) return null;
 
   return (
-    <DescriptionListGroup data-test-id="empty-directories-section">
-      <DescriptionListTerm>{t('Empty Directories')}</DescriptionListTerm>
-      <DescriptionListDescription>
+    <dl data-test-id="empty-directories-section">
+      <dt>{t('Empty Directories')}</dt>
+      <dd>
         {emptyDirectoryWorkspaces.map((workspace) => (
           <div key={workspace.name} data-test-id="empty-directory-workspace">
             {t(`Empty Directory ({{workspaceName}})`, {
@@ -34,8 +29,8 @@ const EmptyDirectoriesSection: React.FC<EmptyDirectoriesSectionProps> = ({
             })}
           </div>
         ))}
-      </DescriptionListDescription>
-    </DescriptionListGroup>
+      </dd>
+    </dl>
   );
 };
 

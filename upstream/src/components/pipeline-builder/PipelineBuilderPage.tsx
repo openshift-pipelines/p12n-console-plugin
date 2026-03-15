@@ -3,6 +3,7 @@ import { Formik, FormikBag } from 'formik';
 import { load } from 'js-yaml';
 import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { PipelineKind } from '../../types';
 import { initialPipelineFormData } from './const';
 import { sanitizeToYaml } from './form-switcher-validation';
@@ -20,7 +21,7 @@ import { validationSchema } from './validation-utils';
 import { k8sCreate, k8sUpdate } from '@openshift-console/dynamic-plugin-sdk';
 import { returnValidPipelineModel } from '../utils/pipeline-utils';
 import { getReferenceForModel } from '../pipelines-overview/utils';
-import { useNavigate, useParams } from 'react-router-dom-v5-compat';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import './PipelineBuilderPage.scss';
 
@@ -30,7 +31,7 @@ type PipelineBuilderPageProps = {
 
 const PipelineBuilderPage: React.FC<PipelineBuilderPageProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const navigate = useNavigate();
+  const history = useHistory();
   const { ns } = useParams();
   const { existingPipeline } = props;
 
@@ -86,7 +87,7 @@ const PipelineBuilderPage: React.FC<PipelineBuilderPageProps> = (props) => {
 
     return resourceCall
       .then(() => {
-        navigate(
+        history.push(
           `/k8s/ns/${ns}/${getReferenceForModel(pipelineModel)}/${
             pipeline.metadata.name
           }`,
@@ -105,7 +106,7 @@ const PipelineBuilderPage: React.FC<PipelineBuilderPageProps> = (props) => {
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
-        onReset={() => navigate(-1)}
+        onReset={history.goBack}
         validationSchema={validationSchema(t)}
       >
         {(formikProps) => (
