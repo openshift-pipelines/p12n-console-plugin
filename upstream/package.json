@@ -119,8 +119,8 @@
     "react-transition-group": "2.3.x",
     "react-virtualized": "9.x",
     "resolve-url-loader": "5.0.0",
-    "sass": "^1.90.0",
-    "sass-loader": "^16.0.5",
+    "sass": "^1.42.1",
+    "sass-loader": "^10.1.1",
     "style-loader": "^3.3.1",
     "stylelint": "16.12.0",
     "stylelint-config-standard": "^31.0.0",
@@ -164,8 +164,7 @@
       "taskDetails": "./components/tasks",
       "pacComponent": "./components/pac/",
       "yamlTemplates": "./components/templates",
-      "topology": "./components/topology",
-      "pipelinesOverviewFiltersReducer": "./redux/reducers/pipelines-overview-filters"
+      "topology": "./components/topology"
     },
     "dependencies": {
       "@console/pluginAPI": ">=4.15"
