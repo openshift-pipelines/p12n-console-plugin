@@ -30,7 +30,7 @@ const BuilderFinallyNode: React.FC<BuilderFinallyNodeProps> = ({ element }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { width, height } = element.getBounds();
   const {
-    clusterResolverTaskList = [],
+    clusterTaskList = [],
     namespaceTaskList = [],
     task,
     namespace,
@@ -159,7 +159,7 @@ const BuilderFinallyNode: React.FC<BuilderFinallyNodeProps> = ({ element }) => {
             <TaskList
               width={NODE_WIDTH}
               height={NODE_HEIGHT}
-              listOptions={[...clusterResolverTaskList, ...namespaceTaskList]}
+              listOptions={[...clusterTaskList, ...namespaceTaskList]}
               onRemoveTask={ivl.onRemoveTask}
               onNewTask={ivl.convertList}
               onTaskSearch={onTaskSearch}
@@ -203,7 +203,7 @@ const BuilderFinallyNode: React.FC<BuilderFinallyNodeProps> = ({ element }) => {
             <TaskList
               width={NODE_WIDTH}
               height={NODE_HEIGHT}
-              listOptions={[...clusterResolverTaskList, ...namespaceTaskList]}
+              listOptions={[...clusterTaskList, ...namespaceTaskList]}
               onRemoveTask={flt.onRemoveTask}
               onNewTask={flt.convertList}
               onTaskSearch={onTaskSearch}

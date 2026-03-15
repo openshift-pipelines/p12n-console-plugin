@@ -1,16 +1,12 @@
-import {
-  K8sResourceCommon,
-  useFlag,
-} from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
+import { PipelineRunKind, TaskRunKind } from '../../types';
 import {
-  FLAGS,
-  PipelineRunKind,
   RecordsList,
-  TaskRunKind,
   TektonResultsOptions,
-} from '../../types';
-import { getPipelineRuns, getTaskRuns } from '../utils/tekton-results';
+  getPipelineRuns,
+  getTaskRuns,
+} from '../utils/tekton-results';
 
 export type GetNextPage = () => void | undefined;
 
@@ -20,13 +16,11 @@ const useTRRuns = <Kind extends K8sResourceCommon>(
     options?: TektonResultsOptions,
     nextPageToken?: string,
     cacheKey?: string,
-    isDevConsoleProxyAvailable?: boolean,
   ) => Promise<[Kind[], RecordsList, boolean?]>,
   namespace: string,
   options?: TektonResultsOptions,
   cacheKey?: string,
 ): [Kind[], boolean, unknown, GetNextPage] => {
-  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   const [nextPageToken, setNextPageToken] = React.useState<string>(null);
   const [localCacheKey, setLocalCacheKey] = React.useState(cacheKey);
 
@@ -54,12 +48,9 @@ const useTRRuns = <Kind extends K8sResourceCommon>(
           options,
           nextPageToken,
           localCacheKey,
-          isDevConsoleProxyAvailable,
         );
         if (!disposed) {
-          const token =
-            tkPipelineRuns[1].nextPageToken ||
-            tkPipelineRuns[1].next_page_token;
+          const token = tkPipelineRuns[1].nextPageToken;
           const callInflight = !!tkPipelineRuns?.[2];
           const loaded = !callInflight;
           if (!callInflight) {

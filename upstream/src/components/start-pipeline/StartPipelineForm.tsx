@@ -7,7 +7,6 @@ import { FormSection } from '@patternfly/react-core';
 import PipelineParameterSection from './form-sections/PipelineParameterSection';
 import PipelineWorkspacesSection from './form-sections/PipelineWorkspacesSection';
 import PipelineSecretSection from '../common/PipelineSecretSection';
-import PipelineTimeoutSection from './form-sections/PipelineTimeoutSection';
 
 const StartPipelineForm: React.FC<
   FormikProps<StartPipelineFormValues>
@@ -16,7 +15,6 @@ const StartPipelineForm: React.FC<
   return (
     <>
       <PipelineParameterSection />
-      <PipelineTimeoutSection />
       <PipelineWorkspacesSection />
       <FormSection title={t('Advanced options')}>
         <PipelineSecretSection />

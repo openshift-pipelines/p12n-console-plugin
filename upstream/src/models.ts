@@ -53,7 +53,7 @@ export const PipelineModelV1Beta1 = {
   color,
 };
 
-export const RepositoryModel: K8sKind = {
+export const RepositoryModel = {
   apiGroup: 'pipelinesascode.tekton.dev',
   apiVersion: 'v1alpha1',
   label: 'Repository',
@@ -259,6 +259,24 @@ export const EventListenerModel: K8sKind = {
   color,
 };
 
+export const ClusterTaskModel: K8sKind = {
+  apiGroup: 'tekton.dev',
+  apiVersion: 'v1beta1',
+  label: 'ClusterTask',
+  // t('plugin__pipelines-console-plugin~ClusterTask')
+  labelKey: 'ClusterTask',
+  // t('plugin__pipelines-console-plugin~ClusterTasks')
+  labelPluralKey: 'ClusterTasks',
+  plural: 'clustertasks',
+  abbr: 'CT',
+  namespaced: false,
+  kind: 'ClusterTask',
+  id: 'clustertask',
+  labelPlural: 'ClusterTasks',
+  crd: true,
+  color,
+};
+
 export const TriggerTemplateModel: K8sKind = {
   apiGroup: 'triggers.tekton.dev',
   apiVersion: 'v1beta1',
@@ -451,70 +469,4 @@ export const ProjectModel: K8sKind = {
   labelPlural: 'Projects',
   // t('plugin__pipelines-console-plugin~Projects')
   labelPluralKey: 'Projects',
-};
-
-export const ConsoleYAMLSampleModel: K8sKind = {
-  label: 'ConsoleYAMLSample',
-  // t('plugin__pipelines-console-plugin~ConsoleYAMLSample')
-  labelKey: 'plugin__pipelines-console-plugin~ConsoleYAMLSample',
-  labelPlural: 'ConsoleYAMLSamples',
-  // t('plugin__pipelines-console-plugin~ConsoleYAMLSamples')
-  labelPluralKey: 'plugin__pipelines-console-plugin~ConsoleYAMLSamples',
-  apiVersion: 'v1',
-  apiGroup: 'console.openshift.io',
-  plural: 'consoleyamlsamples',
-  abbr: 'CYS',
-  namespaced: false,
-  kind: 'ConsoleYAMLSample',
-  id: 'consoleyamlsample',
-  crd: true,
-};
-
-export const TektonHubModel: K8sKind = {
-  apiGroup: 'operator.tekton.dev',
-  apiVersion: 'v1alpha1',
-  label: 'TektonHub',
-  // t('plugin__pipelines-console-plugin~TektonHub')
-  labelKey: 'plugin__pipelines-console-plugin~TektonHub',
-  // t('plugin__pipelines-console-plugin~TektonHubs')
-  labelPluralKey: 'plugin__pipelines-console-plugin~TektonHubs',
-  plural: 'tektonhubs',
-  abbr: 'TH',
-  namespaced: false,
-  kind: 'TektonHub',
-  id: 'tektonhub',
-  labelPlural: 'TektonHubs',
-  crd: true,
-};
-
-export const TektonConfigModel: K8sKind = {
-  apiGroup: 'operator.tekton.dev',
-  apiVersion: 'v1alpha1',
-  label: 'TektonConfig',
-  // t('plugin__pipelines-console-plugin~TektonConfig')
-  labelKey: 'plugin__pipelines-console-plugin~TektonConfig',
-  // t('plugin__pipelines-console-plugin~TektonConfigs')
-  labelPluralKey: 'plugin__pipelines-console-plugin~TektonConfigs',
-  plural: 'tektonconfigs',
-  abbr: 'TC',
-  namespaced: false,
-  kind: 'TektonConfig',
-  id: 'tektonconfig',
-  labelPlural: 'TektonConfigs',
-  crd: true,
-};
-
-export const GroupModel: K8sKind = {
-  apiGroup: 'user.openshift.io',
-  apiVersion: 'v1',
-  label: 'Group',
-  labelKey: 'Group',
-  labelPluralKey: 'Groups',
-  plural: 'groups',
-  abbr: 'G',
-  kind: 'Group',
-  id: 'group',
-  labelPlural: 'Groups',
-  crd: true,
-  color,
 };

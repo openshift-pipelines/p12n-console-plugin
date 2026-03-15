@@ -1,7 +1,6 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
-import { PageSection } from '@patternfly/react-core';
-import classNames from 'classnames';
+import * as classNames from 'classnames';
 import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom-v5-compat';
 import { Trans, useTranslation } from 'react-i18next';
@@ -185,7 +184,7 @@ export const NoEvents = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Box className="co-sysevent-stream__status-box-empty">
-      <div className="cp-text-align-center cos-status-box__detail">
+      <div className="pf-v5-u-text-align-center cos-status-box__detail">
         {t('No events')}
       </div>
     </Box>
@@ -197,7 +196,7 @@ export const NoMatchingEvents = ({ allCount }) => {
   return (
     <Box className="co-sysevent-stream__status-box-empty">
       <div className="cos-status-box__title">{t('No matching events')}</div>
-      <div className="cp-text-align-center cos-status-box__detail">
+      <div className="pf-v5-u-text-align-center cos-status-box__detail">
         {allCount >= maxMessages
           ? t('{{count}}+ event exist, but none match the current filter', {
               count: maxMessages,
@@ -217,7 +216,7 @@ export const ErrorLoadingEvents = () => {
       <div className="cos-status-box__title cos-error-title">
         {t('Error loading events')}
       </div>
-      <div className="cos-status-box__detail cp-text-align-center">
+      <div className="cos-status-box__detail pf-v5-u-text-align-center">
         {t(
           'An error occurred during event retrieval. Attempting to reconnect...',
         )}
@@ -378,7 +377,7 @@ const EventStream = ({
       : t('Showing most recent {{count}} event', { count });
 
   return (
-    <PageSection isFilled variant="light">
+    <div className="co-m-pane__body">
       <div className="co-sysevent-stream">
         <div className="co-sysevent-stream__status">
           <div className="co-sysevent-stream__timeline__btn-text">
@@ -407,7 +406,7 @@ const EventStream = ({
         )}
         {sysEventStatus}
       </div>
-    </PageSection>
+    </div>
   );
 };
 

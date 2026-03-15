@@ -1,6 +1,7 @@
 import { BreadcrumbItem, Text, TextVariants } from '@patternfly/react-core';
+import { Link, useHistory } from 'react-router-dom';
 import * as React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom-v5-compat';
+import { useNavigate, useParams } from 'react-router-dom-v5-compat';
 import { useTranslation } from 'react-i18next';
 import {
   getGroupVersionKindForModel,
@@ -20,7 +21,7 @@ import PipelineDetails from './PipelineDetails';
 import { PipelineKind, PipelineRunKind } from '../../types';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import PipelineParamatersTab from './PipelineParamatersTab';
-import { useGetActiveUser, useLatestPipelineRun } from '../hooks/hooks';
+import { useLatestPipelineRun } from '../hooks/hooks';
 import { rerunPipeline } from '../utils/pipelines-actions';
 import _ from 'lodash';
 import {
@@ -32,15 +33,14 @@ import { triggerPipeline } from '../pipelines-list/PipelineKebab';
 import { StartedByAnnotation } from '../../consts';
 import { usePipelineTriggerTemplateNames } from '../utils/triggers';
 import { resourcePathFromModel } from '../utils/utils';
-import { ErrorPage404 } from '../common/error';
 
 const PipelineDetailsPage = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const params = useParams();
+  const history = useHistory();
   const navigate = useNavigate();
-  const currentUser = useGetActiveUser();
   const { name, ns: namespace } = params;
-  const [pipeline, loaded, loadError] = useK8sWatchResource<PipelineKind>({
+  const [pipeline, loaded] = useK8sWatchResource<PipelineKind>({
     groupVersionKind: getGroupVersionKindForModel(PipelineModel),
     namespace,
     name,
@@ -97,20 +97,14 @@ const PipelineDetailsPage = () => {
         onSubmit: handlePipelineRunSubmit,
       });
     } else {
-      triggerPipeline(pipeline, currentUser, handlePipelineRunSubmit);
+      triggerPipeline(pipeline, handlePipelineRunSubmit);
     }
   };
 
   const rerunPipelineAndRedirect = () => {
-    rerunPipeline(
-      PipelineRunModel,
-      latestPipelineRun,
-      currentUser,
-      launchModal,
-      {
-        onComplete: handlePipelineRunSubmit,
-      },
-    );
+    rerunPipeline(PipelineRunModel, latestPipelineRun, launchModal, {
+      onComplete: handlePipelineRunSubmit,
+    });
   };
 
   const addTrigger = () => {
@@ -131,7 +125,7 @@ const PipelineDetailsPage = () => {
   };
 
   if (!loaded) {
-    return loadError ? <ErrorPage404 /> : <LoadingBox />;
+    return <LoadingBox />;
   }
   return (
     <DetailsPage
@@ -210,7 +204,7 @@ const PipelineDetailsPage = () => {
           label: t('Edit {{resourceKind}}', {
             resourceKind: PipelineModel.kind,
           }),
-          onClick: () => navigate(editURL),
+          onClick: () => history.push(editURL),
           disabled: !canEditResource[0],
         },
         {

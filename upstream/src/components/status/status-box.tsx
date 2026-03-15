@@ -1,6 +1,6 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
-import classNames from 'classnames';
+import * as classNames from 'classnames';
 import { Button } from '@patternfly/react-core';
 import { useTranslation, Trans } from 'react-i18next';
 import './status-box.scss';
@@ -18,7 +18,7 @@ export const LoadError: React.FC<LoadErrorProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Box className={className}>
-      <div className="cp-text-align-center cos-error-title">
+      <div className="pf-v5-u-text-align-center cos-error-title">
         {_.isString(message)
           ? t('Error Loading {{label}}: {{message}}', {
               label,
@@ -27,7 +27,7 @@ export const LoadError: React.FC<LoadErrorProps> = ({
           : t('Error Loading {{label}}', { label })}
       </div>
       {canRetry && (
-        <div className="cp-text-align-center">
+        <div className="pf-v5-u-text-align-center">
           <Trans ns="plugin__pipelines-console-plugin">
             Please{' '}
             <Button

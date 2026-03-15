@@ -22,7 +22,6 @@ import { YellowExclamationTriangleIcon } from '@openshift-console/dynamic-plugin
 import TimeoutApprovalTaskIcon from '../../images/TimeoutApprovalTaskIcon';
 import FailedApprovalTaskIcon from '../../images/FailedApprovalTaskIcon';
 import SuccessApprovalTaskIcon from '../../images/SuccessApprovalTaskIcon';
-import '../styles/common.scss';
 
 interface StatusIconProps {
   status: string;
@@ -40,10 +39,7 @@ export const StatusIcon: React.FC<StatusIconProps> = ({
     case ComputedStatus['In Progress']:
     case ComputedStatus.Running:
       return (
-        <SyncAltIcon
-          {...props}
-          className={cx({ 'pipelines-console-plugin__spin': !disableSpin })}
-        />
+        <SyncAltIcon {...props} className={cx({ 'fa-spin': !disableSpin })} />
       );
 
     case ComputedStatus.Succeeded:

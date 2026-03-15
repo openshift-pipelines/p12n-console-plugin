@@ -24,7 +24,7 @@ export const getApprovalStatusInfo = (status: string): StatusMessage => {
       };
     case ApprovalStatus.RequestSent:
       return {
-        message: t('Pending'),
+        message: t('Waiting'),
         pftoken: waitColor,
       };
     case ApprovalStatus.PartiallyApproved:
@@ -69,7 +69,7 @@ export const getApprovalStatus = (
     pipelineRun && pipelineRunFilterReducer(pipelineRun);
 
   const approvalsRequired = approvalTask?.spec?.numberOfApprovalsRequired;
-  const currentApprovals = approvalTask?.status?.approvalsReceived;
+  const currentApprovals = approvalTask?.status?.approversResponse?.length;
   const approvalState = approvalTask?.status?.state;
   const approvalPercentage = (currentApprovals / approvalsRequired) * 100;
 

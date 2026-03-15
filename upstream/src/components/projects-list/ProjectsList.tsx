@@ -35,7 +35,7 @@ const ProjectsList = () => {
       <VirtualizedTable
         EmptyMsg={() => (
           <div
-            className="cp-text-align-center virtualized-table-empty-msg"
+            className="pf-u-text-align-center virtualized-table-empty-msg"
             id="no-templates-msg"
           >
             {t('No Projects found')}

@@ -12,8 +12,6 @@ import { TaskKind } from './task';
 export type PipelineTaskRef = {
   kind?: string;
   name?: string;
-  resolver?: string;
-  params?: PipelineTaskParam[];
 };
 
 export type PipelineTaskWorkspace = {
@@ -30,7 +28,7 @@ export type PipelineTaskResource = {
 
 export type PipelineTaskParam = {
   name: string;
-  value: any;
+  value: never;
 };
 
 export type WhenExpression = {
@@ -73,7 +71,7 @@ export type PipelineSpec = {
 };
 
 export type PipelineKind = K8sResourceCommon & {
-  spec?: PipelineSpec;
+  spec: PipelineSpec;
 };
 
 export enum SecretType {
@@ -88,6 +86,6 @@ export enum SecretType {
 
 export type PipelineBuilderTaskResources = {
   namespacedTasks: TaskKind[];
-  clusterResolverTasks: TaskKind[];
+  clusterTasks: TaskKind[];
   tasksLoaded: boolean;
 };

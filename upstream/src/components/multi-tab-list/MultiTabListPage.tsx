@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { ActionList, ActionListItem, Button } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom-v5-compat';
+import { useParams } from 'react-router-dom-v5-compat';
 import {
   MenuActions,
   MenuAction,
@@ -32,7 +31,6 @@ const MultiTabListPage: React.FC<MultiTabListPageProps> = ({
   badge,
   pages,
   menuActions,
-  secondaryButtonAction,
   telemetryPrefix,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -82,31 +80,9 @@ const MultiTabListPage: React.FC<MultiTabListPageProps> = ({
   return (
     <PageTitleContext.Provider value={titleProviderValues}>
       <ListPageHeader title={title} badge={badge}>
-        <ActionList>
-          <ActionListItem>
-            {secondaryButtonAction && (
-              <Button
-                type="button"
-                className="opp-secondary-action-btn"
-                variant="secondary"
-                data-test="secondary-action"
-                component={(props) => (
-                  <Link {...props} to={secondaryButtonAction.href} />
-                )}
-              >
-                {secondaryButtonAction.label}
-              </Button>
-            )}
-          </ActionListItem>
-          <ActionListItem>
-            <ListPageCreateDropdown
-              items={items}
-              onClick={onSelectCreateAction}
-            >
-              {t('Create')}
-            </ListPageCreateDropdown>
-          </ActionListItem>
-        </ActionList>
+        <ListPageCreateDropdown items={items} onClick={onSelectCreateAction}>
+          {t('Create')}
+        </ListPageCreateDropdown>
       </ListPageHeader>
       <HorizontalNav pages={pages} />
     </PageTitleContext.Provider>

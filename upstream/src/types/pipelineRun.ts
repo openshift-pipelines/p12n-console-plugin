@@ -26,8 +26,8 @@ export type PLRTaskRunStep = {
 };
 
 export type PLRTaskRunData = {
-  pipelineTaskName?: string;
-  status?: {
+  pipelineTaskName: string;
+  status: {
     completionTime?: string;
     conditions: Condition[];
     /** Can be empty */
@@ -158,7 +158,6 @@ export type PipelineRunStatus = {
 
 export type PipelineRunKind = K8sResourceCommon & {
   spec: {
-    managedBy?: string;
     pipelineRef?: {
       name?: string;
       resolver?: string;
@@ -169,11 +168,7 @@ export type PipelineRunKind = K8sResourceCommon & {
     workspaces?: PipelineRunWorkspace[];
     resources?: PipelineRunResource[];
     serviceAccountName?: string;
-    timeouts?: {
-      pipeline?: string;
-      tasks?: string;
-      finally?: string;
-    };
+    timeout?: string;
     // Only used in a single case - cancelling a pipeline; should not be copied between PLRs
     status?: 'StoppedRunFinally' | 'PipelineRunPending' | 'CancelledRunFinally';
     // In tekton v1 ServiceAccountName is moved

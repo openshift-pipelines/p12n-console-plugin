@@ -58,26 +58,6 @@ export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_PIPELINERUN_DETAIL_OUTPUT_TAB =
   'HIDE_STATIC_PIPELINE_PLUGIN_PIPELINERUN_DETAIL_OUTPUT_TAB';
 export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_PIPELINERUN_DETAIL_APPROVALS_TAB =
   'HIDE_STATIC_PIPELINE_PLUGIN_PIPELINERUN_DETAIL_APPROVALS_TAB';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER =
-  'HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_REPOSITORY_FORM =
-  'HIDE_STATIC_PIPELINE_PLUGIN_REPOSITORY_FORM';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DATA_FACTORY_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DATA_FACTORY_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DECORATOR_PROVIDER_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DECORATOR_PROVIDER_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DETAILS_TABSECTION_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DETAILS_TABSECTION_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_DEVCONSOLE_ADD_ACTION_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_DEVCONSOLE_ADD_ACTION_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_FLAG_MODEL_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_FLAG_MODEL_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_PAGE_ROUTE_EXTENSION =
-  'HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_PAGE_ROUTE_EXTENSION';
-export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_PAC_FORM =
-  'HIDE_STATIC_PIPELINE_PLUGIN_PAC_FORM';
 
 export const RESOURCE_LOADED_FROM_RESULTS_ANNOTATION =
   'resource.loaded.from.tektonResults';
@@ -101,7 +81,6 @@ export enum StartedByAnnotation {
 export enum TektonResourceLabel {
   pipeline = 'tekton.dev/pipeline',
   pipelinerun = 'tekton.dev/pipelineRun',
-  pipelineRunUid = 'tekton.dev/pipelineRunUID',
   taskrun = 'tekton.dev/taskRun',
   pipelineTask = 'tekton.dev/pipelineTask',
 }
@@ -173,30 +152,9 @@ export const FLAG_OPENSHIFT_PIPELINE_APPROVAL_TASK =
   'OPENSHIFT_PIPELINE_APPROVAL_TASK';
 export const PAC_INFO = 'pipelines-as-code-info';
 export const PIPELINE_NAMESPACE = 'openshift-pipelines';
-export const PIPELINERUN_TEMPLATE_NAMESPACE = 'openshift';
-export const PAC_TEMPLATE_DEFAULT = 'pipelines-as-code-pipelinerun-generic';
 
 export enum StartedByLabel {
   triggers = 'triggers.tekton.dev/eventlistener',
 }
 
 export const TRIGGER_BINDING_EMPTY = '#empty-trigger-binding#';
-
-export const GITHUB_BASE_URL = 'https://github.com';
-
-/* Backend API Endpoints */
-export const TEKTON_RESULTS_TASKRUN_LOGS_URL =
-  '/api/dev-console/tekton-results/logs';
-export const TEKTON_RESULTS_FETCH_URL = '/api/dev-console/tekton-results/get';
-export const SUMMARY_FETCH_URL = '/api/dev-console/tekton-results/summary';
-
-export const ARTIFACTHUB_SEARCH_URL = '/api/dev-console/artifacthub/search';
-export const ARTIFACTHUB_TASK_DETAILS_URL = '/api/dev-console/artifacthub/get';
-export const GITHUB_ARTIFACTHUB_TASK_YAML_URL =
-  '/api/dev-console/artifacthub/yaml';
-export const FLAG_OPENSHIFT_PIPELINE = 'OPENSHIFT_PIPELINE';
-export const PIPELINE_RUN_AUTO_START_FAILED = `bridge/pipeline-run-auto-start-failed`;
-export const PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL = 'kueue.x-k8s.io/multikueue';
-export const PIPELINE_RUN_KUEUE_ORIGIN_LABEL =
-  'kueue.x-k8s.io/multikueue-origin';
-export const KUEUE_LABEL_PREFIX = 'kueue.x-k8s.io';

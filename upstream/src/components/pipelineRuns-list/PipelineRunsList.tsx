@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom-v5-compat';
 import { SortByDirection } from '@patternfly/react-table';
 import {
   ListPageBody,
+  ListPageFilter,
   VirtualizedTable,
   useListPageFilter,
 } from '@openshift-console/dynamic-plugin-sdk';
@@ -12,9 +11,8 @@ import { usePipelineRunsFilters } from './usePipelineRunsFilters';
 import { PipelineRunKind } from '../../types';
 import { useGetPipelineRuns } from '../hooks/useTektonResult';
 import PipelineRunsRow from './PipelineRunsRow';
-import { useLoadMoreOnScroll } from '../utils/tekton-results';
-import { useGetActiveUser } from '../hooks/hooks';
-import { ListPageFilter } from '../list-pages/ListPageFilter';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import './PipelineRunsList.scss';
 
@@ -34,9 +32,7 @@ const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
   PLRsForKind,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
   const { ns } = useParams();
-  const currentUser = useGetActiveUser();
   namespace = namespace || ns;
   const columns = usePipelineRunsColumns(namespace, repositoryPLRs);
   const filters = usePipelineRunsFilters();
@@ -48,19 +44,12 @@ const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
     ? 5
     : 4;
 
-  const [
-    pipelineRuns,
-    pipelineRunsLoaded,
-    pipelineRunsLoadError,
-    nextPageToken,
-  ] = useGetPipelineRuns(namespace, { name: PLRsForName, kind: PLRsForKind });
+  const [pipelineRuns, pipelineRunsLoaded, pipelineRunsLoadError] =
+    useGetPipelineRuns(namespace, { name: PLRsForName, kind: PLRsForKind });
   const [data, filteredData, onFilterChange] = useListPageFilter(
     pipelineRuns,
     filters,
   );
-
-  useLoadMoreOnScroll(loadMoreRef, nextPageToken, pipelineRunsLoaded);
-
   return (
     <ListPageBody>
       <ListPageFilter
@@ -80,7 +69,10 @@ const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
       <VirtualizedTable<PipelineRunKind>
         key={sortColumnIndex}
         EmptyMsg={() => (
-          <div className="cp-text-align-center" id="no-resource-msg">
+          <div
+            className="pf-u-text-align-center virtualized-table-empty-msg"
+            id="no-templates-msg"
+          >
             {t('No PipelineRuns found')}
           </div>
         )}
@@ -92,12 +84,10 @@ const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
         unfilteredData={data}
         rowData={{
           repositoryPLRs,
-          currentUser,
         }}
         sortColumnIndex={sortColumnIndex}
         sortDirection={SortByDirection.desc}
       />
-      <div ref={loadMoreRef}></div>
     </ListPageBody>
   );
 };

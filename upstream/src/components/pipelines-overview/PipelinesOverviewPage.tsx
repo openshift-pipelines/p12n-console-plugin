@@ -1,11 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flex, FlexItem, PageSection, Title } from '@patternfly/react-core';
 import PipelineRunsStatusCard from './PipelineRunsStatusCard';
-import {
-  useActiveNamespace,
-  useFlag,
-} from '@openshift-console/dynamic-plugin-sdk';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import PipelinesRunsDurationCard from './PipelineRunsDurationCard';
 import PipelinesRunsTotalCard from './PipelineRunsTotalCard';
 import PipelinesRunsNumbersChart from './PipelineRunsNumbersChart';
@@ -14,55 +10,51 @@ import NameSpaceDropdown from './NamespaceDropdown';
 import PipelineRunsListPage from './list-pages/PipelineRunsListPage';
 import TimeRangeDropdown from './TimeRangeDropdown';
 import RefreshDropdown from './RefreshDropdown';
-import { IntervalOptions, TimeRangeOptions } from './utils';
-import { ALL_NAMESPACES_KEY } from '../../consts';
-import AllProjectsPage from '../projects-list/AllProjectsPage';
-import { FLAGS } from '../../types';
-import {
-  usePersistedTimespanWithUrl,
-  usePersistedIntervalWithUrl,
-} from '../hooks/usePersistedFiltersForPipelineOverview';
+import { IntervalOptions, TimeRangeOptions, useQueryParams } from './utils';
+import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 
 const PipelinesOverviewPage: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const canListNS = useFlag(FLAGS.CAN_LIST_NS);
   const [activeNamespace, setActiveNamespace] = useActiveNamespace();
-
-  const [timespan, setTimespan] = usePersistedTimespanWithUrl(
-    parsePrometheusDuration('1d'),
-    {
-      options: TimeRangeOptions(),
-      displayFormat: formatPrometheusDuration,
-      loadFormat: parsePrometheusDuration,
-    },
-    activeNamespace,
-  );
-
-  const [interval, setInterval] = usePersistedIntervalWithUrl(
+  const [namespace, setNamespace] = React.useState(activeNamespace);
+  const [timespan, setTimespan] = React.useState(parsePrometheusDuration('1d'));
+  const [interval, setInterval] = React.useState(
     parsePrometheusDuration('30s'),
-    {
-      options: { ...IntervalOptions(), off: 'OFF_KEY' },
-      displayFormat: (v) => (v ? formatPrometheusDuration(v) : 'off'),
-      loadFormat: (v) => (v == 'off' ? null : parsePrometheusDuration(v)),
-    },
-    activeNamespace,
   );
+  React.useEffect(() => {
+    setActiveNamespace(namespace);
+  }, [namespace]);
 
-  if (!canListNS && activeNamespace === ALL_NAMESPACES_KEY) {
-    return <AllProjectsPage pageTitle={t('Overview')} />;
-  }
+  useQueryParams({
+    key: 'refreshinterval',
+    value: interval,
+    setValue: setInterval,
+    defaultValue: parsePrometheusDuration('30s'),
+    options: { ...IntervalOptions(), off: 'OFF_KEY' },
+    displayFormat: (v) => (v ? formatPrometheusDuration(v) : 'off'),
+    loadFormat: (v) => (v == 'off' ? null : parsePrometheusDuration(v)),
+  });
+
+  useQueryParams({
+    key: 'timerange',
+    value: timespan,
+    setValue: setTimespan,
+    defaultValue: parsePrometheusDuration('1w'),
+    options: TimeRangeOptions(),
+    displayFormat: formatPrometheusDuration,
+    loadFormat: parsePrometheusDuration,
+  });
 
   return (
     <>
-      <PageSection variant="light" className="pf-v5-u-pl-md">
-        <Title headingLevel="h2">{t('Overview')}</Title>
-      </PageSection>
-      <Flex className="project-dropdown-label__flex pf-v5-u-mt-md">
+      <div className="co-m-nav-title">
+        <h1 className="co-m-pane__heading">
+          <span>{t('Overview')}</span>
+        </h1>
+      </div>
+      <Flex className="project-dropdown-label__flex">
         <FlexItem>
-          <NameSpaceDropdown
-            selected={activeNamespace}
-            setSelected={setActiveNamespace}
-          />
+          <NameSpaceDropdown selected={namespace} setSelected={setNamespace} />
         </FlexItem>
         <FlexItem>
           <TimeRangeDropdown timespan={timespan} setTimespan={setTimespan} />
@@ -76,7 +68,7 @@ const PipelinesOverviewPage: React.FC = () => {
           timespan={timespan}
           domain={{ y: [0, 100] }}
           bordered={true}
-          namespace={activeNamespace}
+          namespace={namespace}
           interval={interval}
         />
 
@@ -87,7 +79,7 @@ const PipelinesOverviewPage: React.FC = () => {
             className="pipelines-overview__cards"
           >
             <PipelinesRunsDurationCard
-              namespace={activeNamespace}
+              namespace={namespace}
               timespan={timespan}
               interval={interval}
               bordered={true}
@@ -99,18 +91,19 @@ const PipelinesOverviewPage: React.FC = () => {
             className="pipelines-overview__cards"
           >
             <PipelinesRunsTotalCard
-              namespace={activeNamespace}
+              namespace={namespace}
               timespan={timespan}
               interval={interval}
               bordered={true}
             />
           </FlexItem>
           <FlexItem
+            spacer={{ default: 'spacerXs' }}
             grow={{ default: 'grow' }}
             className="pipelines-overview__cards"
           >
             <PipelinesRunsNumbersChart
-              namespace={activeNamespace}
+              namespace={namespace}
               timespan={timespan}
               interval={interval}
               domain={{ y: [0, 500] }}
@@ -118,12 +111,12 @@ const PipelinesOverviewPage: React.FC = () => {
             />
           </FlexItem>
         </Flex>
-
+      </div>
+      <div className="pipelines-metrics__background">
         <PipelineRunsListPage
-          namespace={activeNamespace}
+          namespace={namespace}
           timespan={timespan}
           interval={interval}
-          bordered
         />
       </div>
     </>

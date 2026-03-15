@@ -6,7 +6,7 @@ import {
   ButtonVariant,
 } from '@patternfly/react-core';
 import { DownloadIcon } from '@patternfly/react-icons/dist/esm/icons/download-icon';
-import classnames from 'classnames';
+import * as cx from 'classnames';
 import { useTranslation } from 'react-i18next';
 
 import './FormFooter.scss';
@@ -57,7 +57,7 @@ const FormFooter: React.FC<FormFooterProps> = ({
   const shadowPosition = useScrollShadows(sticky ? scrollContainer : null);
   return (
     <div
-      className={classnames('ocs-form-footer', {
+      className={cx('ocs-form-footer', {
         'ocs-form-footer__sticky': sticky,
         'ocs-form-footer__shadow':
           sticky &&
@@ -89,7 +89,7 @@ const FormFooter: React.FC<FormFooterProps> = ({
               )}
           </Alert>
         )}
-        <ActionGroup className="pf-v5-c-form pf-v5-c-form__group--no-top-margin pf-v5-u-mt-0">
+        <ActionGroup className="pf-v5-c-form pf-v5-c-form__group--no-top-margin">
           {!hideSubmit && (
             <Button
               type={handleSubmit ? 'button' : 'submit'}

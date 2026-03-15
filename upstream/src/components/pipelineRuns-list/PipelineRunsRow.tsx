@@ -6,7 +6,7 @@ import {
   getGroupVersionKindForModel,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
-import { ArchiveIcon, MulticlusterIcon } from '@patternfly/react-icons';
+import { ArchiveIcon } from '@patternfly/react-icons';
 import { ComputedStatus, PipelineRunKind, TaskRunKind } from '../../types';
 import { ResourceLinkWithIcon } from '../utils/resource-link';
 import { PipelineRunModel } from '../../models';
@@ -14,7 +14,6 @@ import { Tooltip } from '@patternfly/react-core';
 import {
   DELETED_RESOURCE_IN_K8S_ANNOTATION,
   RESOURCE_LOADED_FROM_RESULTS_ANNOTATION,
-  PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL,
   RepoAnnotationFields,
   RepositoryAnnotations,
   RepositoryFields,
@@ -63,14 +62,12 @@ type PipelineRunRowWithoutTaskRunsProps = {
   obj: PipelineRunKind;
   taskRunStatusObj: TaskStatus;
   activeColumnIDs: Set<string>;
-  currentUser: string;
   repositoryPLRs?: boolean;
 };
 
 type PipelineRunRowWithTaskRunsProps = {
   obj: PipelineRunKind;
   activeColumnIDs: Set<string>;
-  currentUser: string;
   repositoryPLRs?: boolean;
 };
 
@@ -94,7 +91,6 @@ const PipelineRunRowTable = ({
   taskRunStatusObj,
   activeColumnIDs,
   repositoryPLRs,
-  currentUser,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const plrLabels = obj.metadata.labels;
@@ -135,11 +131,6 @@ const PipelineRunRowTable = ({
                   <div className="opp-pipeline-run-list__results-indicator">
                     <ArchiveIcon />
                   </div>
-                </Tooltip>
-              ) : null}
-              {obj.spec?.managedBy === PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL ? (
-                <Tooltip content={t('Multicluster Pipeline Run')}>
-                  <MulticlusterIcon className="opp-pipeline-run-list__results-indicator" />
                 </Tooltip>
               ) : null}
             </>
@@ -246,7 +237,6 @@ const PipelineRunRowTable = ({
           obj={obj}
           taskRuns={PLRTaskRuns}
           taskRunStatusObj={taskRunStatusObj}
-          currentUser={currentUser}
         />
       </TableData>
     </>
@@ -254,44 +244,27 @@ const PipelineRunRowTable = ({
 };
 
 const PipelineRunRowWithoutTaskRuns: React.FC<PipelineRunRowWithoutTaskRunsProps> =
-  React.memo(
-    ({
-      obj,
-      taskRunStatusObj,
-      activeColumnIDs,
-      repositoryPLRs,
-      currentUser,
-    }) => {
-      return (
-        <PipelineRunRowTable
-          obj={obj}
-          PLRTaskRuns={[]}
-          taskRunsLoaded
-          taskRunStatusObj={taskRunStatusObj}
-          activeColumnIDs={activeColumnIDs}
-          repositoryPLRs={repositoryPLRs}
-          currentUser={currentUser}
-        />
-      );
-    },
-  );
+  React.memo(({ obj, taskRunStatusObj, activeColumnIDs, repositoryPLRs }) => {
+    return (
+      <PipelineRunRowTable
+        obj={obj}
+        PLRTaskRuns={[]}
+        taskRunsLoaded
+        taskRunStatusObj={taskRunStatusObj}
+        activeColumnIDs={activeColumnIDs}
+        repositoryPLRs={repositoryPLRs}
+      />
+    );
+  });
 
 const PipelineRunRowWithTaskRunsFetch: React.FC<PipelineRunRowWithTaskRunsProps> =
-  React.memo(({ obj, activeColumnIDs, repositoryPLRs, currentUser }) => {
+  React.memo(({ obj, activeColumnIDs, repositoryPLRs }) => {
     const cacheKey = `${obj.metadata.namespace}-${obj.metadata.name}`;
-    const plrStatus = pipelineRunStatus(obj);
-    const pipelineRunFinished =
-      plrStatus !== ComputedStatus.Running &&
-      plrStatus !== ComputedStatus.Pending &&
-      plrStatus !== ComputedStatus.Cancelling;
     const [PLRTaskRuns, taskRunsLoaded] = useTaskRuns(
       obj.metadata.namespace,
       obj.metadata.name,
-      {
-        cacheKey: `${obj.metadata.namespace}-${obj.metadata.name}`,
-        pipelineRunFinished,
-        pipelineRunManagedBy: obj?.spec?.managedBy 
-      },
+      undefined,
+      `${obj.metadata.namespace}-${obj.metadata.name}`,
     );
     InFlightStoreForTaskRunsForPLR[cacheKey] = false;
     if (taskRunsLoaded) {
@@ -305,13 +278,12 @@ const PipelineRunRowWithTaskRunsFetch: React.FC<PipelineRunRowWithTaskRunsProps>
         taskRunStatusObj={undefined}
         activeColumnIDs={activeColumnIDs}
         repositoryPLRs={repositoryPLRs}
-        currentUser={currentUser}
       />
     );
   });
 
 const PipelineRunRowWithTaskRuns: React.FC<PipelineRunRowWithTaskRunsProps> =
-  React.memo(({ obj, activeColumnIDs, repositoryPLRs, currentUser }) => {
+  React.memo(({ obj, activeColumnIDs, repositoryPLRs }) => {
     let PLRTaskRuns: TaskRunKind[];
     let taskRunsLoaded: boolean;
     const cacheKey = `${obj.metadata.namespace}-${obj.metadata.name}`;
@@ -328,7 +300,6 @@ const PipelineRunRowWithTaskRuns: React.FC<PipelineRunRowWithTaskRunsProps> =
         <PipelineRunRowWithTaskRunsFetch
           obj={obj}
           activeColumnIDs={activeColumnIDs}
-          currentUser={currentUser}
         />
       );
     }
@@ -340,7 +311,6 @@ const PipelineRunRowWithTaskRuns: React.FC<PipelineRunRowWithTaskRunsProps> =
         taskRunStatusObj={undefined}
         activeColumnIDs={activeColumnIDs}
         repositoryPLRs={repositoryPLRs}
-        currentUser={currentUser}
       />
     );
   });
@@ -350,10 +320,9 @@ const PipelineRunRow: React.FC<
     PipelineRunKind,
     {
       repositoryPLRs?: boolean;
-      currentUser?: string;
     }
   >
-> = ({ obj, activeColumnIDs, rowData: { repositoryPLRs, currentUser } }) => {
+> = ({ obj, activeColumnIDs, rowData: { repositoryPLRs } }) => {
   const plrStatus = pipelineRunStatus(obj);
   if (
     plrStatus === ComputedStatus.Cancelled &&
@@ -364,7 +333,6 @@ const PipelineRunRow: React.FC<
         obj={obj}
         activeColumnIDs={activeColumnIDs}
         repositoryPLRs={repositoryPLRs}
-        currentUser={currentUser}
       />
     );
   }
@@ -375,7 +343,6 @@ const PipelineRunRow: React.FC<
       taskRunStatusObj={taskRunStatusObj}
       activeColumnIDs={activeColumnIDs}
       repositoryPLRs={repositoryPLRs}
-      currentUser={currentUser}
     />
   );
 };

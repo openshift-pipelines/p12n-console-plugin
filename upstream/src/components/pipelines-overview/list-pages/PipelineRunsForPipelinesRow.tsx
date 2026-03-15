@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 import {
   SummaryProps,
   getReferenceForModel,
@@ -16,14 +16,9 @@ import { formatTime, formatTimeLastRunTime } from '../dateTime';
 import { ALL_NAMESPACES_KEY } from '../../../consts';
 import { PipelineModel, PipelineModelV1Beta1 } from '../../../models';
 
-const PipelineRunsForPipelinesRow: React.FC<
-  RowProps<
-    SummaryProps,
-    {
-      hideLastRunTime?: boolean;
-    }
-  >
-> = ({ obj, rowData: { hideLastRunTime } }) => {
+const PipelineRunsForPipelinesRow: React.FC<RowProps<SummaryProps>> = ({
+  obj,
+}) => {
   const [activeNamespace] = useActiveNamespace();
   const [namespace, name] = obj.group_value.split('/');
   const clusterVersion = (window as any).SERVER_FLAGS?.releaseVersion;
@@ -63,11 +58,9 @@ const PipelineRunsForPipelinesRow: React.FC<
       <td className={tableColumnClasses[5]}>{`${Math.round(
         (100 * obj.succeeded) / obj.total,
       )}%`}</td>
-      {!hideLastRunTime && (
-        <td className={tableColumnClasses[6]}>{`${formatTimeLastRunTime(
-          obj.last_runtime,
-        )}`}</td>
-      )}
+      <td className={tableColumnClasses[6]}>{`${formatTimeLastRunTime(
+        obj.last_runtime,
+      )}`}</td>
     </>
   );
 };

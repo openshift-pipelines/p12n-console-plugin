@@ -483,7 +483,7 @@ export const getGraphDataModel = (
       (t) => t.name === task.name,
     );
     const getNodeType = (taskKind: string) => {
-      if (!taskKind || taskKind === 'Task' || taskKind === 'task') {
+      if (!taskKind || taskKind === 'Task' || taskKind === 'ClusterTask') {
         return NodeType.TASK_NODE;
       }
       if (taskKind === 'ApprovalTask') {
@@ -492,13 +492,8 @@ export const getGraphDataModel = (
       return NodeType.CUSTOM_TASK_NODE;
     };
 
-    const taskKind =
-      task?.taskRef?.resolver === 'cluster'
-        ? task?.taskRef?.params?.find((param) => param.name === 'kind')?.value
-        : task?.taskRef?.kind;
-
     nodes.push(
-      createPipelineTaskNode(getNodeType(taskKind), {
+      createPipelineTaskNode(getNodeType(task?.taskRef?.kind), {
         id: vertex.name,
         label: vertex.name,
         width:
