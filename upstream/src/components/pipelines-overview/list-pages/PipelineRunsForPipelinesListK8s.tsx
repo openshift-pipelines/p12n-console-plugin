@@ -134,7 +134,7 @@ const PipelineRunsForPipelinesListK8s: React.FC<
     (!summaryDataFiltered || summaryDataFiltered.length === 0) &&
     (!summaryData || summaryData.length === 0);
 
-  if (loaded && isEmptyData) {
+  if (isEmptyData) {
     return <EmptyMsg />;
   }
   return (

@@ -5,7 +5,7 @@ import {
 import _ from 'lodash';
 import { getPrometheusURL } from './helpers';
 import { useURLPoll } from './url-poll-hook';
-import { metricsQueries, MetricsQueryPrefix, PipelineQuery } from './utils';
+import { metricsQueries } from './utils';
 
 export const calculateTotalValues = (
   prometheusResponse: PrometheusResponse,
@@ -34,13 +34,6 @@ export const usePipelineMetricsForAllNamespacePoll = ({
   timespan,
   queryPrefix,
   metricsQuery,
-  timeout,
-}: {
-  delay: number;
-  timespan: number;
-  queryPrefix: MetricsQueryPrefix;
-  metricsQuery: PipelineQuery;
-  timeout?: number;
 }) => {
   const queries = metricsQueries(queryPrefix);
   return useURLPoll<PrometheusResponse>(
@@ -52,7 +45,6 @@ export const usePipelineMetricsForAllNamespacePoll = ({
       timespan,
     }),
     delay,
-    timeout,
     timespan,
   );
 };
@@ -64,15 +56,6 @@ export const usePipelineMetricsForNamespaceForPipelinePoll = ({
   queryPrefix,
   name,
   metricsQuery,
-  timeout,
-}: {
-  delay: number;
-  namespace: string;
-  timespan: number;
-  queryPrefix: MetricsQueryPrefix;
-  name: string;
-  metricsQuery: PipelineQuery;
-  timeout?: number;
 }) => {
   const queries = metricsQueries(queryPrefix);
   return useURLPoll<PrometheusResponse>(
@@ -88,7 +71,6 @@ export const usePipelineMetricsForNamespaceForPipelinePoll = ({
       namespace,
     }),
     delay,
-    timeout,
     namespace,
     timespan,
   );
@@ -100,14 +82,6 @@ export const usePipelineMetricsForNamespacePoll = ({
   timespan,
   queryPrefix,
   metricsQuery,
-  timeout,
-}: {
-  delay: number;
-  namespace: string;
-  timespan: number;
-  queryPrefix: MetricsQueryPrefix;
-  metricsQuery: PipelineQuery;
-  timeout?: number;
 }) => {
   const queries = metricsQueries(queryPrefix);
   return useURLPoll<PrometheusResponse>(
@@ -122,7 +96,6 @@ export const usePipelineMetricsForNamespacePoll = ({
       namespace,
     }),
     delay,
-    timeout,
     namespace,
     timespan,
   );

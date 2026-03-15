@@ -22,10 +22,20 @@ RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
 
 
 FROM $RUNTIME
-ARG VERSION=console-plugin-main
+ARG VERSION=console-plugin-1.20
 
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
+
+USER root
+# Enable FIPS mode in runtime container
+RUN fips-mode-setup --enable && \
+    update-crypto-policies --set FIPS && \
+    echo "Runtime stage - Verifying FIPS kernel parameter:" && \
+    cat /proc/sys/crypto/fips_enabled && \
+    echo "Runtime stage - Verifying OpenSSL FIPS status:" && \
+    openssl version -a | grep -i fips && \
+    (openssl md5 /dev/null || echo "MD5 test passed (expected failure in FIPS mode)")
 
 USER 1001
 
@@ -40,4 +50,5 @@ LABEL \
       description="Red Hat OpenShift Pipelines Console Plugin" \
       io.k8s.display-name="Red Hat OpenShift Pipelines Console Plugin" \
       io.k8s.description="Red Hat OpenShift Pipelines Console Plugin" \
-      io.openshift.tags="pipelines,tekton,openshift"
+      io.openshift.tags="pipelines,tekton,openshift" \
+      cpe="cpe:/a:redhat:openshift_pipelines:1.20::el9"

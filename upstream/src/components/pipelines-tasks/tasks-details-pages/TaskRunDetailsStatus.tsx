@@ -20,7 +20,6 @@ import RunDetailsErrorLog from '../../../components/logs/RunDetailsErrorLog';
 import { getTRLogSnippet } from '../taskRunLogSnippet';
 import Status from '../../status/Status';
 import WorkspaceResourceLinkList from '../../workspaces/WorkspaceResourceLinkList';
-import { useMultiClusterProxyService } from '../../hooks/useMultiClusterProxyService';
 
 export interface TaskRunDetailsStatusProps {
   taskRun: TaskRunKind;
@@ -30,9 +29,6 @@ const TaskRunDetailsStatus: React.FC<TaskRunDetailsStatusProps> = ({
   taskRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const {isResourceManagedByKueue} = useMultiClusterProxyService({ labels: taskRun?.metadata?.labels });
-  const pipelineRunName =
-    taskRun.metadata?.labels?.[TektonResourceLabel.pipelinerun];
 
   return (
     <DescriptionList>
@@ -72,8 +68,6 @@ const TaskRunDetailsStatus: React.FC<TaskRunDetailsStatusProps> = ({
       <RunDetailsErrorLog
         logDetails={getTRLogSnippet(taskRun)}
         namespace={taskRun.metadata?.namespace}
-        isResourceManagedByKueue={isResourceManagedByKueue}
-        pipelineRunName={pipelineRunName}
       />
       {taskRun?.status?.podName && (
         <DescriptionListGroup data-test="pod">
