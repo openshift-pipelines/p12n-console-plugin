@@ -8,7 +8,6 @@ import StatusPopoverContent from './StatusPopoverContent';
 import { LoadingInline } from '../../Loading';
 import { getPLRLogSnippet } from '../../logs/pipelineRunLogSnippet';
 import { getReferenceForModel } from '../../pipelines-overview/utils';
-import { useMultiClusterProxyService } from '../../hooks/useMultiClusterProxyService';
 
 type PipelineRunStatusProps = {
   status: string;
@@ -25,7 +24,6 @@ const PipelineRunStatus: React.FC<PipelineRunStatusProps> = ({
   taskRunsLoaded,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
   const logPath = `/k8s/ns/${
     pipelineRun?.metadata.namespace
   }/${getReferenceForModel(PipelineRunModel)}/${
@@ -38,8 +36,6 @@ const PipelineRunStatus: React.FC<PipelineRunStatusProps> = ({
           logDetails={getPLRLogSnippet(pipelineRun, taskRuns)}
           namespace={pipelineRun?.metadata.namespace}
           link={<Link to={logPath}>{t('View logs')}</Link>}
-          isResourceManagedByKueue={isResourceManagedByKueue}
-          pipelineRunName={pipelineRun?.metadata.name}
         />
       </PipelineResourceStatus>
     ) : (
