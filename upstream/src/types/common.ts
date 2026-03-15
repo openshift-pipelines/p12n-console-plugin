@@ -388,7 +388,6 @@ export enum FLAGS {
   CONSOLE_NOTIFICATION = 'CONSOLE_NOTIFICATION',
   CONSOLE_EXTERNAL_LOG_LINK = 'CONSOLE_EXTERNAL_LOG_LINK',
   CONSOLE_YAML_SAMPLE = 'CONSOLE_YAML_SAMPLE',
-  DEVCONSOLE_PROXY = 'DEVCONSOLE_PROXY',
 }
 
 export type CommonPipelineModalFormikValues = FormikValues & {
@@ -396,10 +395,3 @@ export type CommonPipelineModalFormikValues = FormikValues & {
   parameters: ModalParameter[];
   workspaces: PipelineModalFormWorkspace[];
 };
-
-export enum ImportStrategy {
-  S2I,
-  DOCKERFILE,
-  DEVFILE,
-  SERVERLESS_FUNCTION,
-}

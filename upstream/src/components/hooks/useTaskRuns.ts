@@ -1,10 +1,10 @@
 import {
   K8sGroupVersionKind,
-  K8sResourceKind,
+  K8sResourceCommon,
   Selector,
   getGroupVersionKindForModel,
   useFlag,
-  useK8sWatchResource
+  useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { differenceBy, uniqBy } from 'lodash-es';
 import * as React from 'react';
@@ -22,8 +22,6 @@ import {
 import { ApprovalTaskKind, PipelineRunKind, TaskRunKind } from '../../types';
 import { useDeepCompareMemoize } from '../utils/common-utils';
 import { EQ } from '../utils/tekton-results';
-import { useMultiClusterProxyService } from './useMultiClusterProxyService';
-import { useMultiClusterTaskRuns } from './useMultiClusterTaskRuns';
 import {
   GetNextPage,
   useTRPipelineRuns,
@@ -41,53 +39,13 @@ export const getTaskRunsOfPipelineRun = (
   );
 };
 
-export const useTaskRunsK8s = (
-  namespace: string,
-  pipelineRunName?: string,
-): [TaskRunKind[], boolean, unknown] => {
-  const taskRunResource = pipelineRunName
-    ? {
-        groupVersionKind: getGroupVersionKindForModel(TaskRunModel),
-        namespace,
-        selector: {
-          matchLabels: {
-            [TektonResourceLabel.pipelinerun]: pipelineRunName,
-          },
-        },
-        isList: true,
-      }
-    : {
-        groupVersionKind: getGroupVersionKindForModel(TaskRunModel),
-        namespace,
-        isList: true,
-      };
-  return useK8sWatchResource<TaskRunKind[]>(taskRunResource);
-};
-
-export type UseTaskRunsOptions = {
-  taskName?: string;
-  cacheKey?: string;
-  pipelineRunUid?: string;
-  pipelineRunFinished?: boolean;
-  pipelineRunManagedBy?: string;
-};
-
 export const useTaskRuns = (
   namespace: string,
   pipelineRunName?: string,
-  options?: UseTaskRunsOptions,
-): [TaskRunKind[], boolean, unknown, GetNextPage, boolean, boolean] => {
-  const { taskName, cacheKey, pipelineRunUid, pipelineRunFinished, pipelineRunManagedBy } =
-    options || {};
+  taskName?: string,
+  cacheKey?: string,
+): [TaskRunKind[], boolean, unknown, GetNextPage] => {
   const selector: Selector = React.useMemo(() => {
-    if (pipelineRunName && pipelineRunUid) {
-      return {
-        matchLabels: {
-          [TektonResourceLabel.pipelinerun]: pipelineRunName,
-          [TektonResourceLabel.pipelineRunUid]: pipelineRunUid,
-        },
-      };
-    }
     if (pipelineRunName) {
       return {
         matchLabels: { [TektonResourceLabel.pipelinerun]: pipelineRunName },
@@ -97,22 +55,13 @@ export const useTaskRuns = (
       return { matchLabels: { [TektonResourceLabel.pipelineTask]: taskName } };
     }
     return undefined;
-  }, [taskName, pipelineRunName, pipelineRunUid]);
-  const [
-    taskRuns,
-    loaded,
-    error,
-    getNextPage,
-    pendingAdmission,
-    proxyUnavailable,
-  ] = useTaskRuns2(
+  }, [taskName, pipelineRunName]);
+  const [taskRuns, loaded, error, getNextPage] = useTaskRuns2(
     namespace,
     selector && {
       selector,
     },
     cacheKey,
-    pipelineRunFinished,
-    pipelineRunManagedBy,
   );
 
   const sortedTaskRuns = React.useMemo(
@@ -133,22 +82,8 @@ export const useTaskRuns = (
     [taskRuns],
   );
   return React.useMemo(
-    () => [
-      sortedTaskRuns,
-      loaded,
-      error,
-      getNextPage,
-      pendingAdmission,
-      proxyUnavailable,
-    ],
-    [
-      sortedTaskRuns,
-      loaded,
-      error,
-      getNextPage,
-      pendingAdmission,
-      proxyUnavailable,
-    ],
+    () => [sortedTaskRuns, loaded, error, getNextPage],
+    [sortedTaskRuns, loaded, error, getNextPage],
   );
 };
 
@@ -159,16 +94,12 @@ export const useTaskRuns2 = (
     limit?: number;
   },
   cacheKey?: string,
-  pipelineRunFinished?: boolean,
-  pipelineRunManagedBy?: string,
-): [TaskRunKind[], boolean, unknown, GetNextPage, boolean, boolean] =>
+): [TaskRunKind[], boolean, unknown, GetNextPage] =>
   useRuns<TaskRunKind>(
     getGroupVersionKindForModel(TaskRunModel),
     namespace,
     options,
     cacheKey,
-    pipelineRunFinished,
-    pipelineRunManagedBy,
   );
 
 export const useApprovalTasks = (
@@ -209,13 +140,11 @@ export const usePipelineRuns = (
     selector?: Selector;
     limit?: number;
   },
-  cacheKey?: string,
-): [PipelineRunKind[], boolean, unknown, GetNextPage, boolean, boolean] =>
+): [PipelineRunKind[], boolean, unknown, GetNextPage] =>
   useRuns<PipelineRunKind>(
     getGroupVersionKindForModel(PipelineRunModel),
     namespace,
     options,
-    cacheKey,
   );
 
 export const usePipelineRun = (
@@ -239,7 +168,7 @@ export const usePipelineRun = (
   );
 };
 
-export const useRuns = <Kind extends K8sResourceKind>(
+export const useRuns = <Kind extends K8sResourceCommon>(
   groupVersionKind: K8sGroupVersionKind,
   namespace: string,
   options?: {
@@ -248,85 +177,35 @@ export const useRuns = <Kind extends K8sResourceKind>(
     name?: string;
   },
   cacheKey?: string,
-  pipelineRunFinished?: boolean,
-  pipelineRunManagedBy?: string,
-): [Kind[], boolean, unknown, GetNextPage, boolean, boolean] => {
+): [Kind[], boolean, unknown, GetNextPage] => {
   const etcdRunsRef = React.useRef<Kind[]>([]);
   const optionsMemo = useDeepCompareMemoize(options);
   const isTektonResultEnabled = useFlag(FLAG_PIPELINE_TEKTON_RESULT_INSTALLED);
   const isList = !optionsMemo?.name;
   const limit = optionsMemo?.limit;
-
-  const isPipelineRun =
-    groupVersionKind?.kind ===
-    getGroupVersionKindForModel(PipelineRunModel)?.kind;
-
-  // Hub cluster detection
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRunManagedBy });
-  const isTaskRunQuery =
-    groupVersionKind?.kind === getGroupVersionKindForModel(TaskRunModel)?.kind;
-
-  // Extract pipelineRunName from selector for multi-cluster API
-  const pipelineRunName =
-    optionsMemo?.selector?.matchLabels?.[TektonResourceLabel.pipelinerun];
-
-  // Use multi-cluster hook for hub clusters fetching TaskRuns
-  const shouldUseMultiCluster = isResourceManagedByKueue && isTaskRunQuery && !!pipelineRunName;
-  const [
-    mcTaskRuns,
-    mcLoaded,
-    mcError,
-    mcPendingAdmission,
-    mcProxyUnavailable,
-  ] = useMultiClusterTaskRuns<Kind>(
-    shouldUseMultiCluster ? namespace : null,
-    shouldUseMultiCluster ? pipelineRunName : null,
-    isResourceManagedByKueue,
-    pipelineRunFinished,
-  );
-
   // do not include the limit when querying etcd because result order is not sorted
   const watchOptions = React.useMemo(() => {
     // reset cached runs as the options have changed
     etcdRunsRef.current = [];
-    return shouldUseMultiCluster
-      ? null
-      : {
-          groupVersionKind,
-          namespace: namespace && namespace !== '-' ? namespace : undefined,
-          isList,
-          selector: optionsMemo?.selector,
-          name: optionsMemo?.name,
-        };
-  }, [groupVersionKind, namespace, optionsMemo, isList, shouldUseMultiCluster]);
+    return {
+      groupVersionKind,
+      namespace: namespace && namespace !== '-' ? namespace : undefined,
+      isList,
+      selector: optionsMemo?.selector,
+      name: optionsMemo?.name,
+    };
+  }, [groupVersionKind, namespace, optionsMemo, isList]);
   const [resources, loaded, error] = useK8sWatchResource(watchOptions);
 
-  // Use multi-cluster results for hub TaskRuns, otherwise use k8s results
+  // if a pipeline run was removed from etcd, we want to still include it in the return value without re-querying tekton-results
   const etcdRuns = React.useMemo(() => {
-    if (shouldUseMultiCluster) {
-      if (!mcLoaded || mcError) return [];
-      return mcTaskRuns;
-    }
-
     if (!loaded || error) {
       return [];
     }
     const resourcesArray = (isList ? resources : [resources]) as Kind[];
 
     return resourcesArray;
-  }, [
-    shouldUseMultiCluster,
-    mcLoaded,
-    mcError,
-    mcTaskRuns,
-    isList,
-    resources,
-    loaded,
-    error,
-  ]);
-
-  const effectiveLoaded = shouldUseMultiCluster ? mcLoaded : loaded;
-  const effectiveError = shouldUseMultiCluster ? mcError : error;
+  }, [isList, resources, loaded, error]);
 
   const runs = React.useMemo(() => {
     if (!etcdRuns) {
@@ -346,7 +225,7 @@ export const useRuns = <Kind extends K8sResourceKind>(
     value.sort((a, b) =>
       b.metadata.creationTimestamp.localeCompare(a.metadata.creationTimestamp),
     );
-    if (limit && limit < value?.length) {
+    if (limit && limit < value.length) {
       value = value.slice(0, limit);
     }
     return value;
@@ -360,8 +239,7 @@ export const useRuns = <Kind extends K8sResourceKind>(
     isTektonResultEnabled &&
     (!limit ||
       (namespace &&
-        ((runs && effectiveLoaded && optionsMemo.limit > runs?.length) ||
-          effectiveError)));
+        ((runs && loaded && optionsMemo.limit > runs.length) || error)));
 
   const trOptions: typeof optionsMemo = React.useMemo(() => {
     if (optionsMemo?.name) {
@@ -377,72 +255,35 @@ export const useRuns = <Kind extends K8sResourceKind>(
   // tekton-results includes items in etcd, therefore options must use the same limit
   // these duplicates will later be de-duped
 
-  const trNamespace = isTektonResultEnabled && queryTr ? namespace : null;
-
-  const [trPRResources, trPRLoaded, trPRError, trPRGetNextPage] =
-    useTRPipelineRuns(
-      isPipelineRun ? trNamespace : null,
-      isPipelineRun ? trOptions : undefined,
-      isPipelineRun ? cacheKey : undefined,
-    );
-
-  const [trTRResources, trTRLoaded, trTRError, trTRGetNextPage] = useTRTaskRuns(
-    !isPipelineRun ? trNamespace : null,
-    !isPipelineRun ? trOptions : undefined,
-    !isPipelineRun ? cacheKey : undefined,
-  );
-
-  const trResources = (isPipelineRun
-    ? trPRResources
-    : trTRResources) as unknown as Kind[];
-  const trLoaded = isPipelineRun ? trPRLoaded : trTRLoaded;
-  const trError = isPipelineRun ? trPRError : trTRError;
-  const trGetNextPage = isPipelineRun ? trPRGetNextPage : trTRGetNextPage;
+  const [trResources, trLoaded, trError, trGetNextPage] = isTektonResultEnabled
+    ? ((groupVersionKind?.kind ===
+        getGroupVersionKindForModel(PipelineRunModel)?.kind
+        ? useTRPipelineRuns
+        : useTRTaskRuns)(queryTr ? namespace : null, trOptions, cacheKey) as [
+        [],
+        boolean,
+        unknown,
+        GetNextPage,
+      ])
+    : [[], true, undefined, undefined];
 
   return React.useMemo(() => {
-    // dedupe PLR by name since UIDs differ between hub and spoke clusters; for other cases(TR) dedupe by UID
     const rResources =
       runs && trResources
-        ? !isTaskRunQuery
-          ? uniqBy([...runs, ...trResources], (r) => r.metadata.name)
-          : uniqBy([...runs, ...trResources], (r) => r.metadata.uid)
+        ? uniqBy([...runs, ...trResources], (r) => r.metadata.uid)
         : runs || trResources;
-
-    /* Refactoring the nesting as it is causing cognitive damage */
-    let resolvedError: unknown = undefined;
-
-    if (namespace) {
-      if (queryTr) {
-        if (isList) {
-          resolvedError = trError && effectiveError;
-        } else {
-          // when searching by name, return an error if we have no result
-          if (trError && trLoaded && !trResources?.length) {
-            resolvedError = effectiveError;
-          }
-        }
-      } else {
-        resolvedError = effectiveError;
-      }
-    } else if (effectiveError) {
-      resolvedError = effectiveError;
-    }
-
-    const resolvedLoaded = !!(
-      rResources?.[0] ||
-      (effectiveLoaded && (trLoaded || trError))
-    );
-
-    const pendingAdmission = shouldUseMultiCluster ? mcPendingAdmission : false;
-    const proxyUnavailable = shouldUseMultiCluster ? mcProxyUnavailable : false;
-
     return [
       rResources,
-      resolvedLoaded,
-      resolvedError,
+      !!rResources?.[0] || (loaded && trLoaded),
+      namespace
+        ? queryTr
+          ? isList
+            ? trError && error
+            : // when searching by name, return an error if we have no result
+              trError && (trLoaded && !trResources.length ? error : undefined)
+          : error
+        : undefined,
       trGetNextPage,
-      pendingAdmission,
-      proxyUnavailable,
     ];
   }, [
     runs,
@@ -452,14 +293,8 @@ export const useRuns = <Kind extends K8sResourceKind>(
     queryTr,
     isList,
     trError,
-    effectiveError,
-    effectiveLoaded,
+    error,
     trGetNextPage,
-    shouldUseMultiCluster,
-    mcPendingAdmission,
-    mcProxyUnavailable,
-    isResourceManagedByKueue,
-    pipelineRunFinished,
   ]);
 };
 

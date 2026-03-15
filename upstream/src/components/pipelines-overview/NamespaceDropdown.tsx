@@ -11,13 +11,9 @@ import { alphanumericCompare } from './utils';
 import { useTranslation } from 'react-i18next';
 
 import './PipelinesOverview.scss';
-import {
-  useFlag,
-  useK8sWatchResource,
-} from '@openshift-console/dynamic-plugin-sdk';
+import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { Project } from '../../types/openshift';
 import { ALL_NAMESPACES_KEY } from '../../consts';
-import { FLAGS } from '../../types';
 
 interface NameSpaceDropdownProps {
   selected: string;
@@ -30,7 +26,6 @@ const NameSpaceDropdown: React.FC<NameSpaceDropdownProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [isOpen, setValue] = React.useState(false);
-  const canListNS = useFlag(FLAGS.CAN_LIST_NS);
   const toggleIsOpen = React.useCallback(() => setValue((v) => !v), []);
   const setClosed = React.useCallback(() => setValue(false), []);
 
@@ -58,9 +53,8 @@ const NameSpaceDropdown: React.FC<NameSpaceDropdownProps> = ({
       items.push({ title: selected, key: selected }); // Add current namespace if it isn't included
     }
     items.sort((a, b) => alphanumericCompare(a.title, b.title));
-    if (canListNS) {
-      items.unshift({ title: allNamespacesTitle, key: ALL_NAMESPACES_KEY });
-    }
+
+    items.unshift({ title: allNamespacesTitle, key: ALL_NAMESPACES_KEY });
     return items;
   }, [projects, projectsLoaded]);
 

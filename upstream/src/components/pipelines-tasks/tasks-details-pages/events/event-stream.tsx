@@ -18,8 +18,6 @@ const timeout = { enter: 150 };
 
 const measurementCache = new CellMeasurerCache({
   fixedWidth: true,
-  defaultHeight: 120,
-  minHeight: 120,
 });
 
 class SysEvent extends React.Component<SysEventProps> {

@@ -1,6 +1,6 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
-import classNames from 'classnames';
+import * as classNames from 'classnames';
 import * as PropTypes from 'prop-types';
 import { useTranslation, withTranslation } from 'react-i18next';
 import { Divider } from '@patternfly/react-core';
@@ -406,7 +406,6 @@ class Dropdown_ extends DropdownMixin {
       menuClassName,
       storageKey,
       dropDownClassName,
-      dropDownContentClassName,
       titlePrefix,
       describedBy,
       disabled,
@@ -505,12 +504,7 @@ class Dropdown_ extends DropdownMixin {
               disabled={disabled}
               data-test={this.props.dataTest}
             >
-              <div
-                className={classNames(
-                  'pf-v5-c-dropdown__content-wrap',
-                  dropDownContentClassName,
-                )}
-              >
+              <div className="pf-v5-c-dropdown__content-wrap">
                 <span className="pf-v5-c-dropdown__toggle-text">
                   {titlePrefix && `${titlePrefix}: `}
                   {title}
@@ -633,7 +627,6 @@ Dropdown.propTypes = {
   canFavorite: PropTypes.bool,
   className: PropTypes.string,
   dropDownClassName: PropTypes.string,
-  dropDownContentClassName: PropTypes.string,
   enableBookmarks: PropTypes.bool,
   headerBefore: PropTypes.objectOf(PropTypes.string),
   items: PropTypes.object.isRequired,

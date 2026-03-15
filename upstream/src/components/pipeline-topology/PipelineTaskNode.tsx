@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@patternfly/react-core';
 import {
   DEFAULT_LAYER,
@@ -19,7 +18,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom-v5-compat';
 import { NodeType } from './const';
-import { PipelineRunModel, TaskModel } from '../../models';
+import { ClusterTaskModel, PipelineRunModel, TaskModel } from '../../models';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { ComputedStatus, TaskKind } from '../../types';
@@ -30,7 +29,6 @@ import {
 } from '../pipelines-details/pipeline-step-utils';
 import { PipelineVisualizationStepList } from '../pipelines-details/PipelineVisualizationStepList';
 import { resourcePathFromModel } from '../utils/utils';
-import { getTooltipContent } from './utils';
 import './PipelineTaskNode.scss';
 
 type PipelineTaskNodeProps = {
@@ -44,25 +42,16 @@ const PipelineTaskNode: React.FunctionComponent<PipelineTaskNodeProps> = ({
   contextMenuOpen,
   ...rest
 }) => {
-  const { t } = useTranslation('plugin__pipelines-console-plugin');
   const data = element.getData();
   const [hover, hoverRef] = useHover();
   const taskRef = React.useRef();
   const detailsLevel = useDetailsLevel();
   const isFinallyTask = element.getType() === NodeType.FINALLY_NODE;
   let resources;
-  if (data.task?.taskRef?.resolver === 'cluster') {
-    const taskName = data.task.taskRef?.params?.find(
-      (param) => param.name === 'name',
-    )?.value;
-    const taskNamespace = data.task.taskRef?.params?.find(
-      (param) => param.name === 'namespace',
-    )?.value;
-
+  if (data.task?.taskRef?.kind === ClusterTaskModel.kind) {
     resources = {
-      kind: getReferenceForModel(TaskModel),
-      name: taskName,
-      namespace: taskNamespace || data.pipeline.metadata.namespace,
+      kind: getReferenceForModel(ClusterTaskModel),
+      name: data.task.taskRef.name,
       prop: 'task',
     };
   } else if (data.task?.taskRef) {
@@ -135,7 +124,6 @@ const PipelineTaskNode: React.FunctionComponent<PipelineTaskNodeProps> = ({
   }, [data]);
 
   const hasTaskIcon = !!(data.taskIconClass || data.taskIcon);
-  const tooltipContent = getTooltipContent(data.task?.status?.reason, t);
   const whenDecorator = data.whenStatus ? (
     <WhenDecorator
       element={element}
@@ -145,7 +133,6 @@ const PipelineTaskNode: React.FunctionComponent<PipelineTaskNodeProps> = ({
           ? DEFAULT_WHEN_OFFSET + (element.getBounds().height - 4) * 0.75
           : DEFAULT_WHEN_OFFSET
       }
-      toolTip={tooltipContent}
     />
   ) : null;
 
@@ -202,7 +189,8 @@ const PipelineTaskNode: React.FunctionComponent<PipelineTaskNodeProps> = ({
         ref={hoverRef}
       >
         <Tooltip
-          enableFlip={true}
+          position="bottom"
+          enableFlip={false}
           triggerRef={taskRef}
           content={
             <PipelineVisualizationStepList

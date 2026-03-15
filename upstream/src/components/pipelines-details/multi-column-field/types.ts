@@ -6,7 +6,7 @@ import {
 
 export interface FieldProps {
   name: string;
-  label?: React.ReactNode | string;
+  label?: React.ReactNode;
   helpText?: React.ReactNode;
   helpTextInvalid?: React.ReactNode;
   required?: boolean;

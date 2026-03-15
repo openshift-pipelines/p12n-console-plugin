@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import './ApprovalRow.scss';
 import {
   ListPageBody,
+  ListPageFilter,
   RowFilter,
   VirtualizedTable,
   useListPageFilter,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { ApprovalTaskKind } from '../../types';
+import { ApprovalTaskKind } from 'src/types';
 import {
   getApprovalStatus,
   getApprovalStatusInfo,
@@ -18,7 +19,6 @@ import { useApprovalTasks, usePipelineRuns } from '../hooks/useTaskRuns';
 import { useParams } from 'react-router-dom-v5-compat';
 import useApprovalsColumns from './useApprovalsColumns';
 import ApprovalRow from './ApprovalRow';
-import { ListPageFilter } from '../list-pages/ListPageFilter';
 
 type ApprovalTasksListProps = {
   namespace: string;
@@ -27,14 +27,7 @@ type ApprovalTasksListProps = {
 
 const pipelineApprovalFilterReducer = (obj: ApprovalTaskKind, pipelineRuns) => {
   const pipelineRun = getPipelineRunOfApprovalTask(pipelineRuns, obj);
-  const status = getApprovalStatus(obj, pipelineRun);
-  if (
-    status === ApprovalStatus.PartiallyApproved ||
-    status === ApprovalStatus.AlmostApproved
-  ) {
-    return ApprovalStatus.RequestSent;
-  }
-  return status || ApprovalStatus.Unknown;
+  return getApprovalStatus(obj, pipelineRun) || ApprovalStatus.Unknown;
 };
 
 const ApprovalTasksList: React.FC<ApprovalTasksListProps> = ({
@@ -110,7 +103,10 @@ const ApprovalTasksList: React.FC<ApprovalTasksListProps> = ({
         />
         <VirtualizedTable<ApprovalTaskKind>
           EmptyMsg={() => (
-            <div className="cp-text-align-center" id="no-resource-msg">
+            <div
+              className="pf-u-text-align-center virtualized-table-empty-msg"
+              id="no-templates-msg"
+            >
               {t('No ApprovalTasks found')}
             </div>
           )}

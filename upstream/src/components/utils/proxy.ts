@@ -1,18 +1,15 @@
+import { safeLoad } from 'js-yaml';
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
-import { load } from 'js-yaml';
 
 export const API_PROXY_URL = '/api/dev-console/proxy/internet';
 
-export type ProxyRequest = {
-  allowAuthHeader?: boolean;
+type ProxyRequest = {
   allowInsecure?: boolean;
   method: string;
   url: string;
   headers?: Record<string, string[]>;
   queryparams?: Record<string, string[]>;
   body?: string;
-  signal?: AbortSignal;
-  timeout?: number;
 };
 
 export type ProxyResponse = {
@@ -43,12 +40,9 @@ export const convertHeaders = (headers): Record<string, string[]> => {
 export const consoleProxyFetch = async (
   proxyRequest: ProxyRequest,
 ): Promise<ProxyResponse> => {
-  const { signal, timeout = 60000, ...requestData } = proxyRequest;
   const proxyResponse: ProxyResponse = await consoleFetchJSON.post(
     API_PROXY_URL,
-    requestData,
-    { signal },
-    timeout,
+    proxyRequest,
   );
   if (!proxyResponse.statusCode) {
     throw new Error('Unexpected proxy response: Status code is missing!');
@@ -65,6 +59,6 @@ export const consoleProxyFetchJSON = <T>(
   return consoleProxyFetch(proxyRequest).then((response) => {
     return isJSONString(response.body)
       ? JSON.parse(response.body)
-      : load(response.body);
+      : safeLoad(response.body);
   });
 };

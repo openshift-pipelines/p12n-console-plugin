@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { TFunction, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
 import { SortByDirection, sortable } from '@patternfly/react-table';
 import {
   K8sResourceCommon,
   ListPageBody,
   ListPageCreateLink,
+  ListPageFilter,
+  RowFilter,
   TableColumn,
   VirtualizedTable,
   getGroupVersionKindForModel,
@@ -15,14 +17,13 @@ import {
 import { useTaskRuns } from '../hooks/useTaskRuns';
 import TaskRunsRow from './TaskRunsRow';
 import { TaskRunModel } from '../../models';
+import {
+  pipelineRunFilterReducer,
+  pipelineRunStatusFilter,
+} from '../utils/pipeline-filter-reducer';
 import { ALL_NAMESPACES_KEY, TektonResourceLabel } from '../../consts';
-import { ComputedStatus, PipelineRunKind } from '../../types';
-import { pipelineRunFilterReducer } from '../utils/pipeline-filter-reducer';
 import { getReferenceForModel } from '../pipelines-overview/utils';
-import { useTaskRunsFilters } from './useTaskRunsFilters';
-import { useLoadMoreOnScroll } from '../utils/tekton-results';
-import { ListPageFilter } from '../list-pages/ListPageFilter';
-import { sortPipelineAndTaskRunsByDuration } from '../pipelines-details/pipeline-step-utils';
+import { ListFilterId, ListFilterLabels } from '../utils/pipeline-utils';
 
 interface TaskRunsListPageProps {
   showTitle?: boolean;
@@ -33,6 +34,35 @@ interface TaskRunsListPageProps {
 }
 
 const taskRunModelRef = getReferenceForModel(TaskRunModel);
+
+export const runFilters = (t: TFunction): RowFilter[] => {
+  return [
+    {
+      filterGroupName: t('Status'),
+      type: 'pipelinerun-status',
+      reducer: pipelineRunFilterReducer,
+      items: [
+        {
+          id: ListFilterId.Succeeded,
+          title: ListFilterLabels[ListFilterId.Succeeded],
+        },
+        {
+          id: ListFilterId.Running,
+          title: ListFilterLabels[ListFilterId.Running],
+        },
+        {
+          id: ListFilterId.Failed,
+          title: ListFilterLabels[ListFilterId.Failed],
+        },
+        {
+          id: ListFilterId.Cancelled,
+          title: ListFilterLabels[ListFilterId.Cancelled],
+        },
+      ],
+      filter: pipelineRunStatusFilter,
+    },
+  ];
+};
 
 const useTaskColumns = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -82,7 +112,7 @@ const useTaskColumns = () => {
     },
     {
       id: 'duration',
-      sort: sortPipelineAndTaskRunsByDuration,
+      sort: 'status.completionTime',
       title: t('Duration'),
       transforms: [sortable],
       additional: true,
@@ -111,35 +141,17 @@ const TaskRunsList: React.FC<TaskRunsListPageProps> = ({
   ...props
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
   const [columns, activeColumns] = useTaskColumns();
   const params = useParams();
   const { ns: namespace } = params;
   const ns = namespace === ALL_NAMESPACES_KEY ? '-' : namespace;
   const sortColumnIndex = !namespace ? 6 : 5;
   const parentName = props?.obj?.metadata?.name;
-  const parentUid = props?.obj?.metadata?.uid;
-  const pipelineRun = props?.obj as PipelineRunKind;
-  const plrStatus = pipelineRunFilterReducer(pipelineRun);
-  const pipelineRunFinished =
-    plrStatus !== ComputedStatus.Running &&
-    plrStatus !== ComputedStatus.Pending &&
-    plrStatus !== ComputedStatus.Cancelling;
-  const [taskRuns, loaded, loadError, nextPageToken] = useTaskRuns(
-    ns,
-    parentName,
-    { pipelineRunUid: parentUid, 
-      pipelineRunFinished,
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy 
-    },
-  );
+  const [taskRuns, loaded, loadError] = useTaskRuns(ns, parentName);
   const [staticData, filteredData, onFilterChange] = useListPageFilter(
     taskRuns,
-    useTaskRunsFilters(),
+    runFilters(t),
   );
-
-  useLoadMoreOnScroll(loadMoreRef, nextPageToken, loaded);
-
   return (
     <>
       <ListPageBody>
@@ -172,7 +184,7 @@ const TaskRunsList: React.FC<TaskRunsListPageProps> = ({
             selectedColumns: new Set(activeColumns?.map((col) => col?.id)),
             type: t('TaskRuns'),
           }}
-          rowFilters={useTaskRunsFilters()}
+          rowFilters={runFilters(t)}
           hideColumnManagement={hideColumnManagement}
           hideLabelFilter={hideNameLabelFilters}
           hideNameLabelFilters={hideNameLabelFilters}
@@ -188,14 +200,15 @@ const TaskRunsList: React.FC<TaskRunsListPageProps> = ({
           Row={TaskRunsRow}
           unfilteredData={staticData}
           NoDataEmptyMsg={() => (
-            <div className="cp-text-align-center" id="no-resource-msg">
-              {t('No TaskRuns found')}
+            <div className="cos-status-box">
+              <div className="pf-v5-u-text-align-center">
+                {t('No TaskRuns found')}
+              </div>
             </div>
           )}
           sortColumnIndex={sortColumnIndex}
           sortDirection={SortByDirection.desc}
         />
-        <div ref={loadMoreRef}></div>
       </ListPageBody>
     </>
   );

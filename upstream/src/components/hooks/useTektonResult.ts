@@ -1,4 +1,5 @@
 import {
+  getGroupVersionKindForModel,
   K8sResourceCommon,
   Selector,
   useFlag,
@@ -11,19 +12,16 @@ import {
   RepositoryLabels,
   TektonResourceLabel,
 } from '../../consts';
-import {
-  FLAGS,
-  PipelineRunKind,
-  RecordsList,
-  TaskRunKind,
-  TektonResultsOptions,
-} from '../../types';
+import { PipelineRunModel } from '../../models';
+import { PipelineRunKind, TaskRunKind } from '../../types';
 import {
   getPipelineRuns,
   getTaskRunLog,
   getTaskRuns,
+  RecordsList,
+  TektonResultsOptions,
 } from '../utils/tekton-results';
-import { usePipelineRuns, useTaskRuns } from './useTaskRuns';
+import { useRuns, useTaskRuns } from './useTaskRuns';
 
 export type GetNextPage = () => void | undefined;
 
@@ -33,13 +31,11 @@ const useTRRuns = <Kind extends K8sResourceCommon>(
     options?: TektonResultsOptions,
     nextPageToken?: string,
     cacheKey?: string,
-    isDevConsoleProxyAvailable?: boolean,
   ) => Promise<[Kind[], RecordsList, boolean?]>,
   namespace: string,
   options?: TektonResultsOptions,
   cacheKey?: string,
 ): [Kind[], boolean, unknown, GetNextPage] => {
-  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   const [nextPageToken, setNextPageToken] = React.useState<string>(null);
   const [localCacheKey, setLocalCacheKey] = React.useState(cacheKey);
 
@@ -67,7 +63,6 @@ const useTRRuns = <Kind extends K8sResourceCommon>(
           options,
           nextPageToken,
           localCacheKey,
-          isDevConsoleProxyAvailable,
         );
         if (!disposed) {
           const token = tkPipelineRuns[1].nextPageToken;
@@ -146,7 +141,7 @@ export const useGetPipelineRuns = (
     };
   }
 
-  const [pipelineRuns, loaded, error, getNextPage] = usePipelineRuns(
+  const [pipelineRuns, loaded, error, getNextPage] = usePipelineRuns2(
     ns,
     selector && {
       selector,
@@ -158,6 +153,21 @@ export const useGetPipelineRuns = (
     [pipelineRuns, loaded, error, getNextPage],
   );
 };
+
+export const usePipelineRuns2 = (
+  namespace: string,
+  options?: {
+    selector?: Selector;
+    limit?: number;
+  },
+  cacheKey?: string,
+): [PipelineRunKind[], boolean, unknown, GetNextPage] =>
+  useRuns<PipelineRunKind>(
+    getGroupVersionKindForModel(PipelineRunModel),
+    namespace,
+    options,
+    cacheKey,
+  );
 
 export const useGetTaskRuns = (
   ns: string,
@@ -206,24 +216,18 @@ export const useGetTaskRuns = (
 export const useTRTaskRunLog = (
   namespace: string,
   taskRunName: string,
-  taskRunPath: string,
 ): [string, boolean, unknown] => {
   const [result, setResult] = React.useState<[string, boolean, unknown]>([
     null,
     false,
     undefined,
   ]);
-  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
-
   React.useEffect(() => {
     let disposed = false;
     if (namespace && taskRunName) {
       (async () => {
         try {
-          const log = await getTaskRunLog(
-            taskRunPath,
-            isDevConsoleProxyAvailable,
-          );
+          const log = await getTaskRunLog(namespace, taskRunName);
           if (!disposed) {
             setResult([log, true, undefined]);
           }

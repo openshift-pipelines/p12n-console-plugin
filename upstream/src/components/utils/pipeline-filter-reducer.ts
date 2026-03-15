@@ -20,25 +20,16 @@ export enum SucceedConditionReason {
 export const pipelineRunStatus = (pipelineRun): ComputedStatus => {
   const conditions = _.get(pipelineRun, ['status', 'conditions'], []);
   if (conditions.length === 0) return null;
-  const cancelledReasons = [
-    'Cancelled',
-    'CancelledRunningFinally',
-    'StoppedRunningFinally',
-  ];
+
   const succeedCondition = conditions.find((c) => c.type === 'Succeeded');
-  const cancelledCondition = conditions.find((c) =>
-    cancelledReasons.includes(c.reason),
-  );
-  const cancelledStatus = conditions.find((c) => c.status === 'Unknown');
+  const cancelledCondition = conditions.find((c) => c.reason === 'Cancelled');
 
   if (
     [
       SucceedConditionReason.PipelineRunStopped,
       SucceedConditionReason.PipelineRunCancelled,
-      SucceedConditionReason.Cancelled,
     ].includes(pipelineRun.spec?.status) &&
-    cancelledCondition &&
-    cancelledStatus
+    !cancelledCondition
   ) {
     return ComputedStatus.Cancelling;
   }
@@ -153,40 +144,6 @@ export const taskRunFilterTitleReducer = (taskRun): string => {
 export const pipelineRunFilterReducer = (pipelineRun): ComputedStatus => {
   const status = pipelineRunStatus(pipelineRun);
   return status || ComputedStatus.Other;
-};
-
-export const isPipelineRunLoadedFromTektonResults = (pipelineRun): boolean => {
-  return (
-    pipelineRun?.metadata?.annotations?.['resource.deleted.in.k8s'] &&
-    pipelineRun?.metadata?.annotations?.['resource.loaded.from.tektonResults']
-  );
-};
-
-export const pipelineRunDataSourceFilterReducer = (pipelineRun) => {
-  if (isPipelineRunLoadedFromTektonResults(pipelineRun)) {
-    return 'archived-data';
-  } else {
-    return 'cluster-data';
-  }
-};
-
-export const pipelineRunDataSourceFilter = (phases, pipelineRun) => {
-  if (!phases || !phases.selected || !phases.selected.length) {
-    return true;
-  }
-  if (
-    phases.selected.includes('cluster-data') &&
-    !phases.selected.includes('archived-data')
-  ) {
-    return !isPipelineRunLoadedFromTektonResults(pipelineRun);
-  }
-  if (
-    !phases.selected.includes('cluster-data') &&
-    phases.selected.includes('archived-data')
-  ) {
-    return isPipelineRunLoadedFromTektonResults(pipelineRun);
-  }
-  return true;
 };
 
 export const pipelineRunStatusFilter = (phases, pipeline) => {

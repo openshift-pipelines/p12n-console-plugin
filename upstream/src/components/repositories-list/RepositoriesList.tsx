@@ -1,5 +1,6 @@
 import {
   ListPageBody,
+  ListPageFilter,
   VirtualizedTable,
   getGroupVersionKindForModel,
   useK8sWatchResource,
@@ -13,7 +14,6 @@ import RepositoriesRow from './RepositoriesRow';
 import { useGetTaskRuns } from '../hooks/useTektonResult';
 import { useParams } from 'react-router-dom-v5-compat';
 import { useTranslation } from 'react-i18next';
-import { ListPageFilter } from '../list-pages/ListPageFilter';
 
 type RepositoriesListProps = {
   namespace?: string;
@@ -57,7 +57,10 @@ const RepositoriesList: React.FC<RepositoriesListProps> = ({
       />
       <VirtualizedTable
         EmptyMsg={() => (
-          <div className="cp-text-align-center" id="no-resource-msg">
+          <div
+            className="pf-u-text-align-center virtualized-table-empty-msg"
+            id="no-templates-msg"
+          >
             {t('No Repositories found')}
           </div>
         )}

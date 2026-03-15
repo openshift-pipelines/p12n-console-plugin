@@ -5,7 +5,6 @@ type ErrorDetails = {
 export type ErrorDetailsWithLogName = ErrorDetails & {
   containerName: string;
   podName: string;
-  staticMessage?: string;
 };
 export type ErrorDetailsWithStaticLog = ErrorDetails & {
   staticMessage: string;

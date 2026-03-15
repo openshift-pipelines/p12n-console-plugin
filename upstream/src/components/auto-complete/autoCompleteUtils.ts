@@ -1,6 +1,6 @@
 import { getAPIVersionForModel } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
-import { TaskModel } from '../../models';
+import { ClusterTaskModel, TaskModel } from '../../models';
 import {
   PipelineBuilderTaskResources,
   PipelineTask,
@@ -23,35 +23,24 @@ export const findTask = (
   resourceTasks: PipelineBuilderTaskResources,
   task: PipelineTask,
 ): TaskKind => {
-  const getTaskName = (task: PipelineTask): string | null => {
-    if (!task?.taskRef) return null;
-
-    const { taskRef } = task;
-
-    if (taskRef.resolver === 'cluster') {
-      const nameParam = taskRef.params?.find((param) => param.name === 'name');
-      return nameParam ? nameParam.value : null;
-    }
-    return taskRef.name;
-  };
   if (task?.taskRef) {
     if (
       !resourceTasks?.tasksLoaded ||
-      !resourceTasks.clusterResolverTasks ||
+      !resourceTasks.clusterTasks ||
       !resourceTasks.namespacedTasks
     ) {
       return null;
     }
-
-    const taskName = getTaskName(task);
-
+    const {
+      taskRef: { kind, name },
+    } = task;
     const matchingName = (taskResource: TaskKind) =>
-      taskResource.metadata.name === taskName;
+      taskResource.metadata.name === name;
 
-    return (
-      resourceTasks.namespacedTasks.find(matchingName) ||
-      resourceTasks.clusterResolverTasks.find(matchingName)
-    );
+    if (kind === ClusterTaskModel.kind) {
+      return resourceTasks.clusterTasks.find(matchingName);
+    }
+    return resourceTasks.namespacedTasks.find(matchingName);
   }
 
   if (task?.taskSpec) {

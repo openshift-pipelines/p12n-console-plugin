@@ -17,31 +17,22 @@ export const RequestSizeInput: React.FC<RequestSizeInputProps> = ({
   placeholder,
   required,
   testID,
-  allowDecimalValue,
 }) => {
-  const parsedRequestSizeValue = allowDecimalValue
-    ? defaultRequestSizeValue
-    : parseInt(defaultRequestSizeValue as string, 10);
+  const parsedRequestSizeValue = parseInt(defaultRequestSizeValue, 10);
   const defaultValue = Number.isFinite(parsedRequestSizeValue)
     ? parsedRequestSizeValue
     : null;
   const [unit, setUnit] = React.useState<string>(defaultRequestSizeUnit);
-  const [value, setValue] = React.useState<number | string>(defaultValue);
+  const [value, setValue] = React.useState<number>(defaultValue);
 
   const onValueChange: React.ReactEventHandler<HTMLInputElement> = (event) => {
-    setValue(
-      allowDecimalValue
-        ? event.currentTarget.value
-        : parseInt(event.currentTarget.value, 10),
-    );
+    setValue(parseInt(event.currentTarget.value, 10));
     onChange({ value: event.currentTarget.value, unit });
   };
 
   const changeValueBy = (changeBy: number) => {
     // When default defaultRequestSizeValue is not set, value becomes NaN and increment decrement buttons of NumberSpinner don't work.
-    const newValue = Number.isFinite(value)
-      ? Number(value) + Number(changeBy)
-      : 0 + changeBy;
+    const newValue = Number.isFinite(value) ? value + changeBy : 0 + changeBy;
     setValue(newValue);
     onChange({ value: newValue, unit });
   };
@@ -71,7 +62,7 @@ export const RequestSizeInput: React.FC<RequestSizeInputProps> = ({
           id={inputID}
           data-test={testID}
           required={required}
-          value={Number(value)}
+          value={value}
           min={minValue}
           disabled={isInputDisabled}
         />
@@ -101,12 +92,11 @@ export type RequestSizeInputProps = {
   required?: boolean;
   dropdownUnits: any;
   defaultRequestSizeUnit: string;
-  defaultRequestSizeValue: number | string;
+  defaultRequestSizeValue: string;
   describedBy?: string;
   step?: number;
   minValue?: number;
   inputID?: string;
   testID?: string;
   isInputDisabled?: boolean;
-  allowDecimalValue?: boolean;
 };

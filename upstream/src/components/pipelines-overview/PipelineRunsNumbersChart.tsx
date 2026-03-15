@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import classNames from 'classnames';
+import * as classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { DomainPropType, DomainTuple } from 'victory-core';
 import {
@@ -12,8 +12,7 @@ import {
   ChartThemeColor,
   ChartVoronoiContainer,
 } from '@patternfly/react-charts';
-import { Alert, Card, CardBody, CardTitle } from '@patternfly/react-core';
-import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
+import { Card, CardBody, CardTitle } from '@patternfly/react-core';
 import {
   formatDate,
   getDropDownDate,
@@ -22,8 +21,8 @@ import {
   parsePrometheusDuration,
   monthYear,
 } from './dateTime';
-import { getResultsSummary } from '../utils/summary-api';
-import { DataType, FLAGS, SummaryResponse } from '../../types';
+import { DataType } from '../utils/tekton-results';
+import { SummaryResponse, getResultsSummary } from '../utils/summary-api';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { getFilter, useInterval } from './utils';
 import { LoadingInline } from '../Loading';
@@ -77,7 +76,6 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
   width = 530,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   const startTimespan = timespan - parsePrometheusDuration('1d');
   const endDate = new Date(Date.now()).setHours(0, 0, 0, 0);
   const startDate = new Date(Date.now() - startTimespan).setHours(0, 0, 0, 0);
@@ -89,67 +87,34 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
 
   const [data, setData] = React.useState<SummaryResponse>();
   const [loaded, setLoaded] = React.useState(false);
-  const [pipelineRunsChartError, setPipelineRunsChartError] = React.useState<
-    string | undefined
-  >();
-  const abortControllerRef = React.useRef<AbortController>();
 
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  React.useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
   const [tickValues, type] = getXaxisValues(timespan);
   const date = getDropDownDate(timespan).toISOString();
 
   const getSummaryData = (group_by: string) => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-    setData(undefined);
-
     const summaryOpt = {
       summary: 'total',
       data_type: DataType?.PipelineRun,
       filter: getFilter(date, parentName, kind),
       groupBy: group_by,
     };
-    setPipelineRunsChartError(undefined);
-    setLoaded(false);
-    getResultsSummary(
-      namespace,
-      summaryOpt,
-      undefined,
-      isDevConsoleProxyAvailable,
-      abortControllerRef.current.signal,
-      90000,
-    )
+
+    getResultsSummary(namespace, summaryOpt)
       .then((d) => {
         setLoaded(true);
-        setPipelineRunsChartError(undefined);
         setData(d);
       })
       .catch((e) => {
-        if (e.name === 'AbortError') {
-          // Request was cancelled, this is expected behavior
-          return;
-        }
-        setLoaded(true);
-        setPipelineRunsChartError(
-          e.message || t('Failed to load pipeline runs number data'),
-        );
-        setData(undefined);
+        throw e;
       });
   };
 
   React.useEffect(() => {
     setLoaded(false);
-    setPipelineRunsChartError(undefined);
-    setData(undefined);
   }, [namespace, timespan]);
 
   let xTickFormat;
@@ -228,66 +193,52 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
   return (
     <>
       <Card
-        className={classNames({
-          'pipeline-overview__number-of-plr-card':!pipelineRunsChartError,
+        className={classNames('pipeline-overview__number-of-plr-card', {
           'card-border': bordered,
         })}
       >
         <CardTitle className="pipeline-overview__number-of-plr-card__title">
           <span>{t('Number of PipelineRuns')}</span>
         </CardTitle>
-        <CardBody 
-          className={classNames({
-            'pipeline-overview__number-of-plr-card__body':!pipelineRunsChartError,
-          })}
-          >
-          {pipelineRunsChartError ? (
-            <Alert
-              variant="danger"
-              isInline
-              title={t('Unable to load pipeline runs')}
-              className="pf-v5-u-mb-md pf-v5-u-mt-lg"
-            />
-          ) : (
-            <div className="pipeline-overview__number-of-plr-card__bar-chart-div">
-              {loaded ? (
-                <Chart
-                  containerComponent={
-                    <ChartVoronoiContainer
-                      labels={({ datum }) => `${datum.y}`}
-                      constrainToVisibleArea
-                    />
-                  }
-                  scale={{ x: 'time', y: 'linear' }}
-                  domain={domainValue}
-                  domainPadding={{ x: [30, 25] }}
-                  height={145}
-                  width={width}
-                  padding={{
-                    top: 10,
-                    bottom: 55,
-                    left: 50,
-                  }}
-                  themeColor={ChartThemeColor.blue}
-                >
-                  <ChartAxis
-                    tickValues={tickValues}
-                    style={xAxisStyle}
-                    tickFormat={xTickFormat}
-                    label={showLabel ? dayLabel : ''}
+        <CardBody className="pipeline-overview__number-of-plr-card__body">
+          <div className="pipeline-overview__number-of-plr-card__bar-chart-div">
+            {loaded ? (
+              <Chart
+                containerComponent={
+                  <ChartVoronoiContainer
+                    labels={({ datum }) => `${datum.y}`}
+                    constrainToVisibleArea
                   />
-                  <ChartAxis dependentAxis style={yAxisStyle} />
-                  <ChartGroup>
-                    <ChartBar data={chartData} barWidth={18} />
-                  </ChartGroup>
-                </Chart>
-              ) : (
-                <div className="pipeline-overview__number-of-plr-card__loading pf-v5-u-h-100">
-                  <LoadingInline />
-                </div>
-              )}
-            </div>
-          )}
+                }
+                scale={{ x: 'time', y: 'linear' }}
+                domain={domainValue}
+                domainPadding={{ x: [30, 25] }}
+                height={145}
+                width={width}
+                padding={{
+                  top: 10,
+                  bottom: 55,
+                  left: 50,
+                }}
+                themeColor={ChartThemeColor.blue}
+              >
+                <ChartAxis
+                  tickValues={tickValues}
+                  style={xAxisStyle}
+                  tickFormat={xTickFormat}
+                  label={showLabel ? dayLabel : ''}
+                />
+                <ChartAxis dependentAxis style={yAxisStyle} />
+                <ChartGroup>
+                  <ChartBar data={chartData} barWidth={18} />
+                </ChartGroup>
+              </Chart>
+            ) : (
+              <div className="pipeline-overview__number-of-plr-card__loading">
+                <LoadingInline />
+              </div>
+            )}
+          </div>
         </CardBody>
       </Card>
     </>

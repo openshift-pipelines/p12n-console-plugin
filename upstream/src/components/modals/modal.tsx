@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import * as classNames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -36,12 +36,9 @@ export const ModalTitle: React.FC<ModalTitleProps> = ({
   </div>
 );
 
-export const ModalBody: React.FC<ModalBodyProps> = ({
-  children,
-  className = 'modal-body-content',
-}) => (
+export const ModalBody: React.FC<ModalBodyProps> = ({ children }) => (
   <div className="modal-body">
-    <div className={className}>{children}</div>
+    <div className="modal-body-content">{children}</div>
   </div>
 );
 
@@ -50,11 +47,10 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   errorMessage,
   inProgress,
   children,
-  className = 'modal-footer',
 }) => {
   return (
     <ButtonBar
-      className={className}
+      className="modal-footer"
       errorMessage={errorMessage}
       infoMessage={message}
       inProgress={inProgress}

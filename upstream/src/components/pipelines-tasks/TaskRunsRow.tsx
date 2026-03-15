@@ -28,7 +28,7 @@ import {
   RESOURCE_LOADED_FROM_RESULTS_ANNOTATION,
   TektonResourceLabel,
 } from '../../consts';
-import { ComputedStatus, TaskRunKind } from '../../types';
+import { TaskRunKind } from '../../types';
 import { taskRunFilterReducer } from '../utils/pipeline-filter-reducer';
 import TaskRunStatus from './TaskRunStatus';
 import { ResourceLinkWithIcon } from '../utils/resource-link';
@@ -40,7 +40,6 @@ import {
 } from '../utils/common-utils';
 import { getModelReferenceFromTaskKind } from '../utils/pipeline-augment';
 import { pipelineRunDuration } from '../utils/pipeline-utils';
-import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 
 const taskRunsReference = getReferenceForModel(TaskRunModel);
 const pipelineReference = getReferenceForModel(PipelineModel);
@@ -144,21 +143,10 @@ const TaskRunsRow: React.FC<RowProps<TaskRunKind>> = ({
   obj,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const {isResourceManagedByKueue} = useMultiClusterProxyService({ labels: obj?.metadata?.labels });
   return (
     <>
       <TableData activeColumnIDs={activeColumnIDs} id="name">
         <ResourceLinkWithIcon
-          linkTo={
-            !isResourceManagedByKueue
-              ? true
-              : taskRunFilterReducer(obj) == ComputedStatus.Succeeded ||
-                taskRunFilterReducer(obj) == ComputedStatus.Failed ||
-                taskRunFilterReducer(obj) == ComputedStatus.Cancelled ||
-                taskRunFilterReducer(obj) == ComputedStatus.Skipped
-              ? true
-              : false
-          }
           kind={taskRunsReference}
           model={TaskRunModel}
           name={obj.metadata.name}
@@ -197,28 +185,7 @@ const TaskRunsRow: React.FC<RowProps<TaskRunKind>> = ({
         )}
       </TableData>
       <TableData activeColumnIDs={activeColumnIDs} id="task">
-        {obj.spec.taskRef?.resolver === 'cluster' ? (
-          (() => {
-            const taskName = obj.spec.taskRef?.params?.find(
-              (param) => param.name === 'name',
-            )?.value;
-            const taskNamespace = obj.spec.taskRef?.params?.find(
-              (param) => param.name === 'namespace',
-            )?.value;
-            return taskName ? (
-              <ResourceLink
-                kind={getModelReferenceFromTaskKind('Task')}
-                displayName={
-                  obj.metadata.labels[TektonResourceLabel.pipelineTask]
-                }
-                name={taskName}
-                namespace={taskNamespace || obj.metadata.namespace}
-              />
-            ) : (
-              '-'
-            );
-          })()
-        ) : obj.spec.taskRef?.name ? (
+        {obj.spec.taskRef?.name ? (
           <ResourceLink
             kind={getModelReferenceFromTaskKind(obj.spec.taskRef?.kind)}
             displayName={obj.metadata.labels[TektonResourceLabel.pipelineTask]}

@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-topology';
 import * as dagre from 'dagre';
 import * as _ from 'lodash';
-import { TFunction } from 'react-i18next';
+
 import {
   ComputedStatus,
   PipelineKind,
@@ -575,7 +575,7 @@ export const getGraphDataModel = (
       (t) => t.name === task.name,
     );
     const getNodeType = (taskKind: string) => {
-      if (!taskKind || taskKind === 'Task' || taskKind === 'task') {
+      if (!taskKind || taskKind === 'Task' || taskKind === 'ClusterTask') {
         return NodeType.TASK_NODE;
       }
       if (taskKind === 'ApprovalTask') {
@@ -584,13 +584,8 @@ export const getGraphDataModel = (
       return NodeType.CUSTOM_TASK_NODE;
     };
 
-    const taskKind =
-      task?.taskRef?.resolver === 'cluster'
-        ? task?.taskRef?.params?.find((param) => param.name === 'kind')?.value
-        : task?.taskRef?.kind;
-
     nodes.push(
-      createPipelineTaskNode(getNodeType(taskKind), {
+      createPipelineTaskNode(getNodeType(task?.taskRef?.kind), {
         id: vertex.name,
         label: vertex.name,
         width:
@@ -737,19 +732,4 @@ export const getWhenExpressionDiamondState = (
       tooltipContent = t('When expression');
   }
   return { tooltipContent, diamondColor };
-};
-
-export const getTooltipContent = (
-  statusReason: ComputedStatus,
-  t: TFunction,
-): string => {
-  switch (statusReason) {
-    case ComputedStatus.Succeeded:
-    case ComputedStatus.Failed:
-      return t('When expression was met');
-    case ComputedStatus.Skipped:
-      return t('When expression was not met');
-    default:
-      return t('When expression');
-  }
 };

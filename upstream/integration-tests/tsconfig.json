@@ -1,27 +1,9 @@
 {
-  // "extends": "../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "noEmit": false,
-    "module": "commonjs",
-    "lib": ["es6", "dom", "es2017"],
-    "strict": true,
+    "noEmit": true,
     "types": ["cypress", "node"],
-    "isolatedModules": false,
-    "baseUrl": ".",
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "preserveValueImports": false,
-    "strictPropertyInitialization": false
+    "isolatedModules": false
   },
-  "include": [
-    "../node_modules/cypress",
-    "./**/*.ts",
-    "cypress/support/commands/index.ts"
-  ],
-  "paths": {
-    "pages/*": ["support/pages/*"],
-    "page-objects/*": ["support/page-objects/*"],
-    "constants/*": ["support/constants/*"]
-  }
+  "include": ["../node_modules/cypress", "./**/*.ts"]
 }
