@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-topology';
 import * as dagre from 'dagre';
 import * as _ from 'lodash';
-import { TFunction } from 'react-i18next';
+import { TFunction } from 'i18next';
 import {
   ComputedStatus,
   PipelineKind,
@@ -719,9 +719,11 @@ export const getWhenExpressionDiamondState = (
       diamondColor = getRunStatusColor(status, t).pftoken.value;
     }
   } else if (!isFinallyTask) {
-    diamondColor = 'var(--pf-v5-global--BackgroundColor--200)';
+    diamondColor =
+      'var(--pf-t--global--background--color--secondary--default)';
   } else {
-    diamondColor = 'var(--pf-v5-global--BackgroundColor--light-100)';
+    diamondColor =
+      'var(--pf-t--global--background--color--primary--default)';
   }
 
   let tooltipContent: string;

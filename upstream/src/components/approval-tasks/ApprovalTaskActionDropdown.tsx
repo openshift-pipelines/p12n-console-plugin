@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC, Ref } from 'react';
+import { useState, useEffect } from 'react';
 import { ApprovalTaskKind, PipelineRunKind } from '../../types';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
 import {
@@ -14,7 +15,7 @@ import { KEBAB_BUTTON_ID } from '../../consts';
 import { useTranslation } from 'react-i18next';
 import {
   useAccessReview,
-  useModal,
+  useOverlay,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { ApprovalTaskModel } from '../../models';
 import { approvalModal } from './modal';
@@ -27,20 +28,20 @@ type ApprovalTaskActionDropdownProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
+const ApprovalTaskActionDropdown: FC<ApprovalTaskActionDropdownProps> = ({
   approvalTask,
   pipelineRun,
 }) => {
   const { currentUser, updateUserInfo } = useActiveUserWithUpdate();
-  const launchModal = useModal();
+  const launchOverlay = useOverlay();
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const {
     metadata: { name, namespace },
     status: { state },
     spec: { approvers },
   } = approvalTask;
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [isAuthorized, setIsAuthorized] = React.useState<boolean | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const onToggle = () => {
     setIsOpen(!isOpen);
   };
@@ -48,7 +49,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     setIsOpen(false);
   };
   const approveAction = () => {
-    launchModal(approvalModal, {
+    launchOverlay(approvalModal, {
       resource: approvalTask,
       pipelineRunName: pipelineRun?.metadata?.name,
       userName: currentUser?.username,
@@ -58,7 +59,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
   };
 
   const rejectAction = () => {
-    launchModal(approvalModal, {
+    launchOverlay(approvalModal, {
       resource: approvalTask,
       pipelineRunName: pipelineRun?.metadata?.name,
       userName: currentUser?.username,
@@ -76,7 +77,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
   });
 
   // Check group-based authorization
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuthorization = async () => {
       if (currentUser && approvers) {
         try {
@@ -120,7 +121,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
       return (
         (
           <Spinner
-            className="pf-v5-u-mr-xs"
+            className="pf-v6-u-mr-xs"
             size="sm"
             aria-label={t('Checking authorization...')}
           />
@@ -159,7 +160,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
       <Dropdown
         onSelect={onSelect}
         onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        toggle={(toggleRef: Ref<MenuToggleElement>) => (
           <MenuToggle
             ref={toggleRef}
             aria-label="kebab menu"
@@ -183,7 +184,7 @@ const ApprovalTaskActionDropdown: React.FC<ApprovalTaskActionDropdownProps> = ({
     <Dropdown
       onSelect={onSelect}
       onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
-      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+      toggle={(toggleRef: Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}
           aria-label="kebab menu"

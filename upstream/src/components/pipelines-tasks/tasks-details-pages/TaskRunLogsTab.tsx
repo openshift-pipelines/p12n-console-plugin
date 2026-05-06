@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useLocation } from 'react-router-dom-v5-compat';
+import type { FC } from 'react';
+import { useLocation } from 'react-router';
 import { taskRunStatus } from '../../utils/pipeline-utils';
 import TaskRunLogs from './TaskRunLogs';
 import { TaskRunKind } from '../../../types';
@@ -8,7 +8,7 @@ export interface TaskRunDetailsProps {
   obj: TaskRunKind;
 }
 
-const TaskRunLogsTab: React.FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
+const TaskRunLogsTab: FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
   const status = taskRunStatus(taskRun);
   const location = useLocation();
   const params = new URLSearchParams(location.search);

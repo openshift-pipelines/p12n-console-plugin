@@ -1,13 +1,14 @@
 import {
   GroupVersionKind,
   K8sKind,
+  ObjectMetadata,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { chart_color_black_400 as skippedColor } from '@patternfly/react-tokens/dist/js/chart_color_black_400';
 import { chart_color_black_500 as cancelledColor } from '@patternfly/react-tokens/dist/js/chart_color_black_500';
 import { chart_color_blue_100 as pendingColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_100';
 import { chart_color_blue_300 as runningColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_300';
 import { chart_color_green_400 as successColor } from '@patternfly/react-tokens/dist/js/chart_color_green_400';
-import { global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
+import { t_chart_global_danger_color_100 as failureColor } from "@patternfly/react-tokens/dist/js/t_chart_global_danger_color_100";
 import { TektonResourceLabel } from '../../consts';
 import {
   ClusterTriggerBindingModel,
@@ -31,13 +32,8 @@ import {
   pipelineRunFilterReducer,
 } from './pipeline-filter-reducer';
 
-interface Metadata {
-  name: string;
-  namespace?: string;
-}
-
 export interface PropPipelineData {
-  metadata: Metadata;
+  metadata: ObjectMetadata;
   latestRun?: PipelineRunKind;
 }
 

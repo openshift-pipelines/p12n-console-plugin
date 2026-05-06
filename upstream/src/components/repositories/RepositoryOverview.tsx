@@ -1,7 +1,7 @@
 import {
   Alert,
   AlertVariant,
-  Text,
+  Content,
   Title,
   TitleSizes,
   FormGroup,
@@ -12,7 +12,6 @@ import {
 import { useFormikContext } from 'formik';
 import { useTranslation, Trans } from 'react-i18next';
 
-import React from 'react';
 import { RepositoryFormValues } from './types';
 import { ExternalLink } from '../utils/link';
 import { GitProvider } from '../utils/repository-utils';
@@ -54,7 +53,7 @@ const RepositoryOverview = () => {
         </Title>
       </FormGroup>
       <FormGroup fieldId="instructions">
-        <Text>
+        <Content component="p">
           <Trans t={t} ns="plugin__pipelines-console-plugin">
             Copy this code to <code className="co-code">.tekton</code> directory
             in your <a href={values.gitUrl}>Git repository</a>.{' '}
@@ -63,26 +62,26 @@ const RepositoryOverview = () => {
               href="https://pipelinesascode.com/docs/guide/authoringprs/"
             />
           </Trans>
-        </Text>
-        <Text>
+        </Content>
+        <Content component="p">
           <Trans t={t} ns="plugin__pipelines-console-plugin">
             You can now add PipelineRuns to the{' '}
             <code className="co-code">.tekton</code> directory in your{' '}
             <a href={values.gitUrl}>Git repository</a> and execute them on Git
             events.
           </Trans>
-        </Text>
+        </Content>
       </FormGroup>
       <FormGroup fieldId="step-1">
         <Title headingLevel="h4" size={TitleSizes.md}>
           {t('Step 1')}
         </Title>
         <Trans t={t} ns="plugin__pipelines-console-plugin">
-          <Text>
+          <Content component="p">
             In your repository, create the{' '}
             <code className="co-code">.tekton</code> directory to store you
             pipeline.
-          </Text>
+          </Content>
         </Trans>
       </FormGroup>
       <FormGroup fieldId="step-2">
@@ -90,12 +89,12 @@ const RepositoryOverview = () => {
           {t('Step 2')}
         </Title>
         <Trans t={t} ns="plugin__pipelines-console-plugin">
-          <Text>
+          <Content component="p">
             In the <code className="co-code">.tekton</code> directory, create a
             new file called
             <code className="co-code">push.yaml</code> and add the following
             code:
-          </Text>
+          </Content>
         </Trans>
         <ClipboardCopy
           isCode
@@ -111,9 +110,9 @@ const RepositoryOverview = () => {
         <Title headingLevel="h4" size={TitleSizes.md}>
           {t('Step 3')}
         </Title>
-        <Text>
+        <Content component="p">
           {t('Commit these changes and push them to your Git repository.')}
-        </Text>
+        </Content>
       </FormGroup>
       {!(
         values.gitProvider === GitProvider.GITHUB &&
@@ -126,12 +125,12 @@ const RepositoryOverview = () => {
             <Title headingLevel="h4" size={TitleSizes.md}>
               {t('Step 4')}
             </Title>
-            <Text>
+            <Content component="p">
               <Trans t={t} ns="plugin__pipelines-console-plugin">
                 Webhook URL to configure the webhook in your Git repository:
               </Trans>
-            </Text>
-            <Text>
+            </Content>
+            <Content component="p">
               <ClipboardCopy
                 isReadOnly
                 hoverTip={t('Copy to clipboard')}
@@ -140,11 +139,11 @@ const RepositoryOverview = () => {
               >
                 {values.webhook.url}
               </ClipboardCopy>
-            </Text>
+            </Content>
           </FormGroup>
         )}
       <FormGroup fieldId="step-5">
-        <Text>
+        <Content component="p">
           <Trans t={t} ns="plugin__pipelines-console-plugin">
             You can install Tekton CLI from{' '}
             <ExternalLink
@@ -154,7 +153,7 @@ const RepositoryOverview = () => {
             page and generate example pipelineruns using the{' '}
             <code className="co-code">tkn pac generate</code>
           </Trans>
-        </Text>
+        </Content>
         <br />
         <Trans t={t} ns="plugin__pipelines-console-plugin">
           Your Git repository is now configured to run{' '}

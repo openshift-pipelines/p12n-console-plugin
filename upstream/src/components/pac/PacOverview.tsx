@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Alert,
   AlertActionCloseButton,
@@ -6,8 +7,8 @@ import {
   Hint,
   HintBody,
   PageSection,
-  Text,
-  TextVariants,
+  Content,
+  ContentVariants,
 } from '@patternfly/react-core';
 import { Trans, useTranslation } from 'react-i18next';
 import { PageBody } from '../pipeline-builder/form-utils';
@@ -31,7 +32,7 @@ type PacOverviewProps = {
   showSuccessAlert?: boolean;
 };
 
-const PacOverview: React.FC<PacOverviewProps> = ({
+const PacOverview: FC<PacOverviewProps> = ({
   namespace,
   secret,
   loadError,
@@ -39,9 +40,9 @@ const PacOverview: React.FC<PacOverviewProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [alertVisible, setAlertVisible] =
-    React.useState<boolean>(showSuccessAlert);
+    useState<boolean>(showSuccessAlert);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setAlertVisible(showSuccessAlert);
   }, [showSuccessAlert]);
 
@@ -60,6 +61,7 @@ const PacOverview: React.FC<PacOverviewProps> = ({
       <>
         <NamespaceBar isDisabled={true} />
         <PageSection
+          hasBodyWrapper={false}
           type="breadcrumb"
           className="co-m-nav-title--detail pipelines-console-plugin__background-transparent"
         >
@@ -89,6 +91,7 @@ const PacOverview: React.FC<PacOverviewProps> = ({
     <>
       <NamespaceBar isDisabled={true} />
       <PageSection
+        hasBodyWrapper={false}
         type="breadcrumb"
         className="co-m-nav-title--detail pipelines-console-plugin__background-transparent"
       >
@@ -143,9 +146,9 @@ const PacOverview: React.FC<PacOverviewProps> = ({
           <FormGroup fieldId="app-overview">
             {annotations?.appName && (
               <FormGroup label={t('App Name')} fieldId="app-name">
-                <Text component={TextVariants.small}>
+                <Content component={ContentVariants.small}>
                   {annotations.appName}
-                </Text>
+                </Content>
               </FormGroup>
             )}
             <br />

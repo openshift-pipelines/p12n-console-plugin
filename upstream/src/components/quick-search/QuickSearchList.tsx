@@ -1,4 +1,5 @@
-import * as React from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import type { FC, KeyboardEvent, MouseEvent, SyntheticEvent } from 'react';
 import {
   DataList,
   DataListItem,
@@ -8,13 +9,13 @@ import {
   Split,
   SplitItem,
   Label,
-  TextContent,
-  Text,
-  TextVariants,
+  Content,
+  ContentVariants,
+  Bullseye,
 } from '@patternfly/react-core';
 import cx from 'classnames';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { CatalogItem } from '@openshift-console/dynamic-plugin-sdk';
 import { CatalogLinkData } from './utils/quick-search-types';
 import { handleCta } from './utils/quick-search-utils';
@@ -22,7 +23,7 @@ import { getIconProps } from '../catalog/catalog-utils';
 import { CatalogType } from '../catalog/types';
 
 import './QuickSearchList.scss';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 
 interface QuickSearchListProps {
   listItems: CatalogItem[];
@@ -33,14 +34,14 @@ interface QuickSearchListProps {
   namespace: string;
   limitItemCount?: number;
   onSelectListItem: (
-    event: React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>,
+    event: MouseEvent<Element> | KeyboardEvent<Element>,
     itemId: string,
   ) => void;
   onListChange?: (items: number) => void;
   closeModal: () => void;
 }
 
-const QuickSearchList: React.FC<QuickSearchListProps> = ({
+const QuickSearchList: FC<QuickSearchListProps> = ({
   listItems,
   catalogItemTypes,
   viewAll,
@@ -51,8 +52,8 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
   onListChange,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const history = useHistory();
-  const [itemsCount, setItemsCount] = React.useState<number>(
+  const navigate = useNavigate();
+  const [itemsCount, setItemsCount] = useState<number>(
     limitItemCount || listItems.length,
   );
   const listHeight =
@@ -70,7 +71,7 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
       />
     );
   };
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (selectedItemId) {
       const element = document.getElementById(selectedItemId);
       if (element) {
@@ -79,7 +80,7 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
     }
   }, [selectedItemId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (listHeight > 0 && limitItemCount > 0) {
       const rowHeight =
         document.querySelector('.ocs-quick-search-list__item')?.clientHeight ||
@@ -116,8 +117,8 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
                 'ocs-quick-search-list__item--highlight':
                   item.uid === selectedItemId,
               })}
-              onDoubleClick={(e: React.SyntheticEvent) => {
-                handleCta(e, item, closeModal, history);
+              onDoubleClick={(e: SyntheticEvent) => {
+                handleCta(e, item, closeModal, navigate);
               }}
             >
               <DataListItemRow className="ocs-quick-search-list__item-row">
@@ -125,12 +126,12 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
                   className="ocs-quick-search-list__item-content"
                   dataListCells={[
                     <DataListCell isIcon key={`${item.uid}-icon`}>
-                      <div className="ocs-quick-search-list__item-icon">
+                      <Bullseye className="ocs-quick-search-list__item-icon">
                         {item.icon?.node ?? getIcon(item)}
-                      </div>
+                      </Bullseye>
                     </DataListCell>,
                     <DataListCell
-                      style={{ paddingTop: 'var(--pf-v5-global--spacer--sm)' }}
+                      style={{ paddingTop: 'var(--pf-t--global--spacer--sm)' }}
                       width={2}
                       wrapModifier="truncate"
                       key={`${item.uid}-name`}
@@ -155,13 +156,13 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
                           </Split>
                         </SplitItem>
                         <SplitItem>
-                          <TextContent
+                          <Content
                             data-test={`item-name-${item.name}-${item.provider}-secondary-label`}
                           >
-                            <Text component={TextVariants.small}>
+                            <Content component={ContentVariants.small}>
                               {item.provider}
-                            </Text>
-                          </TextContent>
+                            </Content>
+                          </Content>
                         </SplitItem>
                       </Split>
                     </DataListCell>,
@@ -180,7 +181,7 @@ const QuickSearchList: React.FC<QuickSearchListProps> = ({
               id={catalogLink.catalogType}
               to={catalogLink.to}
               key={catalogLink.catalogType}
-              style={{ fontSize: 'var(--pf-v5-global--FontSize--sm)' }}
+              style={{ fontSize: 'var(--pf-t--global--font--size--sm)' }}
             >
               {catalogLink.label}
             </Link>

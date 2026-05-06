@@ -1,22 +1,26 @@
-import * as React from 'react';
+import type { ReactNode, FC, MouseEvent, Ref } from 'react';
+import { useState } from 'react';
 import {
   FormGroup,
   FormHelperText,
   HelperText,
   HelperTextItem,
+  Select,
+  SelectOption,
+  SelectList,
+  MenuToggle,
+  MenuToggleElement,
 } from '@patternfly/react-core';
-import cx from 'classnames';
 import { useField, useFormikContext, FormikValues } from 'formik';
 import { FieldProps } from '../pipelines-details/multi-column-field/types';
 import { getFieldId } from '../pipelines-details/multi-column-field/utils';
 import { useFormikValidationFix } from '../pipelines-details/multi-column-field/formik-validation-fix';
-import { Dropdown } from './dropdown';
 import { RedExclamationCircleIcon } from '@openshift-console/dynamic-plugin-sdk';
 
 export interface DropdownFieldProps extends FieldProps {
   items?: object;
   selectedKey?: string;
-  title?: React.ReactNode;
+  title?: ReactNode;
   fullWidth?: boolean;
   disabled?: boolean;
   autocompleteFilter?: (text: string, item: object, key?: string) => boolean;
@@ -24,7 +28,7 @@ export interface DropdownFieldProps extends FieldProps {
   placeholder?: string;
 }
 
-const DropdownField: React.FC<DropdownFieldProps> = ({
+const DropdownField: FC<DropdownFieldProps> = ({
   label,
   helpText,
   required,
@@ -35,24 +39,57 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   const fieldId = getFieldId(props.name, 'dropdown');
   const isValid = !(touched && error);
   const errorMessage = !isValid ? error : '';
+  const [isOpen, setIsOpen] = useState(false);
 
   useFormikValidationFix(field.value);
 
+  const onSelect = (
+    _event: MouseEvent | undefined,
+    value: string | number | undefined,
+  ) => {
+    const stringValue = String(value);
+    props.onChange && props.onChange(stringValue);
+    setFieldValue(props.name, stringValue, false);
+    setFieldTouched(props.name, true, false);
+    setIsOpen(false);
+  };
+
+  const toggle = (toggleRef: Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={() => setIsOpen(!isOpen)}
+      isExpanded={isOpen}
+      isDisabled={props.disabled}
+      isFullWidth={props.fullWidth}
+      aria-describedby={helpText ? `${fieldId}-helper` : undefined}
+    >
+      {props.items?.[field.value] ||
+        props.title ||
+        props.placeholder ||
+        'Select...'}
+    </MenuToggle>
+  );
+
   return (
     <FormGroup fieldId={fieldId} label={label} isRequired={required}>
-      <Dropdown
-        {...props}
+      <Select
         id={fieldId}
-        selectedKey={field.value}
-        dropDownClassName={cx({ 'dropdown--full-width': props.fullWidth })}
-        aria-describedby={helpText ? `${fieldId}-helper` : undefined}
-        onChange={(value: string) => {
-          props.onChange && props.onChange(value);
-          // Validation is automatically done by the useFormikValidationFix above
-          setFieldValue(props.name, value, false);
-          setFieldTouched(props.name, true, false);
-        }}
-      />
+        isOpen={isOpen}
+        selected={field.value}
+        onSelect={onSelect}
+        onOpenChange={setIsOpen}
+        toggle={toggle}
+        shouldFocusToggleOnSelect
+      >
+        <SelectList>
+          {props.items &&
+            Object.keys(props.items).map((key) => (
+              <SelectOption key={key} value={key}>
+                {props.items[key]}
+              </SelectOption>
+            ))}
+        </SelectList>
+      </Select>
 
       <FormHelperText>
         <HelperText>
