@@ -1,8 +1,10 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   Drawer,
   DrawerContent,
   DrawerContentBody,
+  DrawerPanelContent,
   PageSection,
 } from '@patternfly/react-core';
 import { FormikProps } from 'formik';
@@ -42,21 +44,20 @@ import FormFooter from '../pipelines-details/multi-column-field/FormFooter';
 import { FlexForm, FormBody } from './form-utils';
 import SyncedEditorField from './SyncedEditorField';
 import PipelineQuickSearch from '../task-quicksearch/PipelineQuickSearch';
-import { useModal } from '@openshift-console/dynamic-plugin-sdk';
+import { useOverlay } from '@openshift-console/dynamic-plugin-sdk';
 
 type PipelineBuilderFormProps = FormikProps<PipelineBuilderFormikValues> & {
   existingPipeline: PipelineKind;
   namespace: string;
 };
 
-const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
+const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const launchModal = useModal();
-  const [selectedTask, setSelectedTask] =
-    React.useState<SelectedBuilderTask>(null);
-  const selectedTaskRef = React.useRef<SelectedBuilderTask>(null);
+  const launchOverlay = useOverlay();
+  const [selectedTask, setSelectedTask] = useState<SelectedBuilderTask>(null);
+  const selectedTaskRef = useRef<SelectedBuilderTask>(null);
   selectedTaskRef.current = selectedTask;
-  const contentRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const {
     existingPipeline,
@@ -74,9 +75,9 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
   useFormikFetchAndSaveTasks(namespace, validateForm);
   useExplicitPipelineTaskTouch();
 
-  const statusRef = React.useRef(status);
-  const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
-  const savedCallback = React.useRef(() => {});
+  const statusRef = useRef(status);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const savedCallback = useRef(() => {});
 
   statusRef.current = status;
 
@@ -134,7 +135,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
     updateTasks(applyChange(updatedTaskGroup, op, namespace));
   };
 
-  const closeSidebarAndHandleReset = React.useCallback(() => {
+  const closeSidebarAndHandleReset = useCallback(() => {
     resetSelectedTask();
     handleReset();
   }, [handleReset]);
@@ -162,7 +163,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
     />
   );
 
-  const closeRef = React.useCallback(() => {
+  const closeRef = useCallback(() => {
     if (!!contentRef.current && !!selectedTask) {
       const currentSelection: SelectedBuilderTask = selectedTaskRef.current;
       setTimeout(() => {
@@ -178,7 +179,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
     }
   }, [selectedTask]);
 
-  const handleRemoveTask = React.useCallback(
+  const handleRemoveTask = useCallback(
     async (taskName: string) => {
       setSelectedTask(null);
       updateTasks(
@@ -197,39 +198,45 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
       <DrawerContent
         panelContent={
           selectedTask ? (
-            <TaskSidebar
-              // Intentional remount when selection changes
-              key={selectedTask?.taskIndex}
-              onClose={() => setSelectedTask(null)}
-              resourceList={formData.resources || []}
-              workspaceList={formData.workspaces || []}
-              errorMap={status?.tasks || {}}
-              onRenameTask={(data: UpdateOperationRenameTaskData) => {
-                updateTasks(
-                  applyChange(
-                    taskGroup,
-                    {
-                      type: UpdateOperationType.RENAME_TASK,
-                      data,
-                    },
-                    namespace,
-                  ),
-                );
-              }}
-              onRemoveTask={(taskName: string) => {
-                launchModal(RemoveTaskModal, {
-                  taskName,
-                  onRemove: () => handleRemoveTask(taskName),
-                });
-              }}
-              selectedData={selectedTask}
-            />
+            <DrawerPanelContent>
+              <TaskSidebar
+                // Intentional remount when selection changes
+                key={
+                  selectedTask?.resource?.metadata?.name +
+                  selectedTask?.taskIndex +
+                  String(selectedTask?.isFinallyTask)
+                }
+                onClose={() => setSelectedTask(null)}
+                resourceList={formData.resources || []}
+                workspaceList={formData.workspaces || []}
+                errorMap={status?.tasks || {}}
+                onRenameTask={(data: UpdateOperationRenameTaskData) => {
+                  updateTasks(
+                    applyChange(
+                      taskGroup,
+                      {
+                        type: UpdateOperationType.RENAME_TASK,
+                        data,
+                      },
+                      namespace,
+                    ),
+                  );
+                }}
+                onRemoveTask={(taskName: string) => {
+                  launchOverlay(RemoveTaskModal, {
+                    taskName,
+                    onRemove: () => handleRemoveTask(taskName),
+                  });
+                }}
+                selectedData={selectedTask}
+              />
+            </DrawerPanelContent>
           ) : null
         }
       >
         <DrawerContentBody onClick={closeRef}>
           <div
-            className="opp-pipeline-builder ocs-quick-search-modal__no-backdrop"
+            className="opp-pipeline-builder pipelines-ocs-quick-search-modal__no-backdrop"
             ref={contentRef}
           >
             <PipelineBuilderHeader />
@@ -237,7 +244,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
               className="opp-pipeline-builder-form"
               onSubmit={handleSubmit}
             >
-              <PageSection isFilled variant="light">
+              <PageSection hasBodyWrapper={false} isFilled>
                 <FormBody
                   flexLayout
                   disablePaneBody

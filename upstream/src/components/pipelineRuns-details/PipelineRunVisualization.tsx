@@ -1,10 +1,10 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Alert } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { usePipelineFromPipelineRun } from '../hooks/usePipelineFromPipelineRun';
 import { useTaskRuns } from '../hooks/useTaskRuns';
 import { ComputedStatus, PipelineKind, PipelineRunKind } from '../../types';
-import { LoadingInline } from '../Loading';
+import { LoadingBox } from '../status/status-box';
 import PipelineVisualization from '../pipelines-details/PipelineVisualization';
 import { pipelineRunFilterReducer } from '../utils/pipeline-filter-reducer';
 import './PipelineRunVisualization.scss';
@@ -13,7 +13,7 @@ type PipelineRunVisualizationProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const PipelineRunVisualization: React.FC<PipelineRunVisualizationProps> = ({
+const PipelineRunVisualization: FC<PipelineRunVisualizationProps> = ({
   pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -23,16 +23,24 @@ const PipelineRunVisualization: React.FC<PipelineRunVisualizationProps> = ({
     plrStatus !== ComputedStatus.Running &&
     plrStatus !== ComputedStatus.Pending &&
     plrStatus !== ComputedStatus.Cancelling;
-  const [taskRuns, taskRunsLoaded, , , pendingAdmission, proxyUnavailable] =
-    useTaskRuns(pipelineRun?.metadata?.namespace, pipelineRun?.metadata?.name, {
-      pipelineRunFinished,
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy 
-    });
+  const [taskRuns, k8sLoaded, trLoaded, , pendingAdmission, proxyUnavailable] =
+    useTaskRuns(
+      pipelineRun?.metadata?.namespace,
+      pipelineRun?.metadata?.name,
+      undefined,
+      undefined,
+      {
+        pipelineRunFinished,
+        pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
+      },
+    );
+  /* this needs decoupling */
+  const taskRunsLoaded = k8sLoaded || trLoaded;
   const pipeline: PipelineKind = usePipelineFromPipelineRun(pipelineRun);
-  if (!pipeline) {
+  if (!pipeline || !taskRunsLoaded) {
     return (
       <div className="pipeline-plr-loader">
-        <LoadingInline />
+        <LoadingBox />
       </div>
     );
   }

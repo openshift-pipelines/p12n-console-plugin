@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import {
   ClipboardCopy,
   DescriptionList,
@@ -7,7 +7,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { getPLRLogSnippet } from '../logs/pipelineRunLogSnippet';
 import RunDetailsErrorLog from '../logs/RunDetailsErrorLog';
 import { getReferenceForModel } from '../pipelines-overview/utils';
@@ -40,24 +40,30 @@ export type PipelineRunCustomDetailsProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
+const PipelineRunCustomDetails: FC<PipelineRunCustomDetailsProps> = ({
   pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
+  const { isResourceManagedByKueue } = useMultiClusterProxyService({
+    managedBy: pipelineRun?.spec?.managedBy,
+  });
   const plrStatus = pipelineRunFilterReducer(pipelineRun);
   const pipelineRunFinished =
     plrStatus !== ComputedStatus.Running &&
     plrStatus !== ComputedStatus.Pending &&
     plrStatus !== ComputedStatus.Cancelling;
-  const [taskRuns, taskRunsLoaded] = useTaskRuns(
+  const [taskRuns, k8sLoaded, trLoaded] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
-    { 
+    undefined,
+    undefined,
+    {
       pipelineRunFinished,
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy
+      pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
     },
   );
+  /* this needs decoupling */
+  const taskRunsLoaded = k8sLoaded && trLoaded;
 
   const sbomTaskRun = taskRunsLoaded ? getSbomTaskRun(taskRuns) : null;
   const buildImage = getImageUrl(pipelineRun);

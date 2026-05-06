@@ -1,7 +1,8 @@
-import * as React from 'react';
+import type { FC, ReactNode, ReactElement } from 'react';
+import { useState, useEffect } from 'react';
 import cx from 'classnames';
 import {
-  Text,
+  Content,
   TextInputTypes,
   FormGroup,
   ClipboardCopy,
@@ -46,7 +47,7 @@ type WebhoookSectionProps = {
   formContextField?: string;
 };
 
-const WebhookSection: React.FC<WebhoookSectionProps> = ({
+const WebhookSection: FC<WebhoookSectionProps> = ({
   pac,
   formContextField,
 }) => {
@@ -55,11 +56,11 @@ const WebhookSection: React.FC<WebhoookSectionProps> = ({
     useFormikContext<FormikValues>();
   const fieldPrefix = formContextField ? `${formContextField}.` : '';
   const { gitProvider, webhook } = _.get(values, formContextField) || values;
-  const [controllerUrl, setControllerUrl] = React.useState('');
-  const [webhookSecret, setWebhookSecret] = React.useState('');
+  const [controllerUrl, setControllerUrl] = useState('');
+  const [webhookSecret, setWebhookSecret] = useState('');
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
-  React.useEffect(() => {
+  useEffect(() => {
     const ctlUrl = pac?.data?.['controller-url'];
     if (ctlUrl) {
       setControllerUrl(ctlUrl);
@@ -94,8 +95,8 @@ const WebhookSection: React.FC<WebhoookSectionProps> = ({
     }
   };
 
-  const HelpText = (): React.ReactElement => {
-    let helpText: React.ReactNode;
+  const HelpText = (): ReactElement => {
+    let helpText: ReactNode;
     switch (gitProvider) {
       case GitProvider.GITHUB:
         helpText = (
@@ -217,7 +218,7 @@ const WebhookSection: React.FC<WebhoookSectionProps> = ({
                 )}
                 name={`${fieldPrefix}webhook.secretRef`}
                 id={`${fieldPrefix}webhook.secretRef`}
-                selectedKey={`${fieldPrefix}webhook.secretRef`}
+                selectedKey={webhook?.secretRef}
                 resources={[
                   {
                     kind: SecretModel.kind,
@@ -328,9 +329,9 @@ const WebhookSection: React.FC<WebhoookSectionProps> = ({
               label={t('Events triggering the webhook: ')}
               fieldId="repo-permissions"
             >
-              <Text>
+              <Content component="p">
                 <PermissionsSection formContextField={formContextField} />
-              </Text>
+              </Content>
             </FormGroup>
           </ExpandableSection>
 

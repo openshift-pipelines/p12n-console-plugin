@@ -1,20 +1,16 @@
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom-v5-compat';
-import { SortByDirection } from '@patternfly/react-table';
-import {
-  ListPageBody,
-  VirtualizedTable,
-  useListPageFilter,
-} from '@openshift-console/dynamic-plugin-sdk';
+import type { FC } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { useParams, useSearchParams } from 'react-router';
+import { ListPageBody } from '@openshift-console/dynamic-plugin-sdk';
 import usePipelineRunsColumns from './usePipelineRunsColumns';
-import { usePipelineRunsFilters } from './usePipelineRunsFilters';
 import { PipelineRunKind } from '../../types';
 import { useGetPipelineRuns } from '../hooks/useTektonResult';
-import PipelineRunsRow from './PipelineRunsRow';
-import { useLoadMoreOnScroll } from '../utils/tekton-results';
+import { getPipelineRunsListDataViewRows } from './PipelineRunsRow';
 import { useGetActiveUser } from '../hooks/hooks';
-import { ListPageFilter } from '../list-pages/ListPageFilter';
+import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
+import { useTranslation } from 'react-i18next';
+import { useDataViewFilter } from '../hooks/useDataViewFilter';
+import { DataViewFilterToolbar } from '../common/DataViewFilterToolbar';
 
 import './PipelineRunsList.scss';
 
@@ -26,7 +22,7 @@ type PipelineRunsListProps = {
   PLRsForKind?: string;
 };
 
-const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
+const PipelineRunsList: FC<PipelineRunsListProps> = ({
   namespace,
   hideTextFilter,
   repositoryPLRs,
@@ -34,68 +30,75 @@ const PipelineRunsList: React.FC<PipelineRunsListProps> = ({
   PLRsForKind,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { ns } = useParams();
   const currentUser = useGetActiveUser();
   namespace = namespace || ns;
   const columns = usePipelineRunsColumns(namespace, repositoryPLRs);
-  const filters = usePipelineRunsFilters();
-  const sortColumnIndex = repositoryPLRs
-    ? !namespace
-      ? 6
-      : 5
-    : !namespace
-    ? 5
-    : 4;
 
-  const [
-    pipelineRuns,
-    pipelineRunsLoaded,
-    pipelineRunsLoadError,
-    nextPageToken,
-  ] = useGetPipelineRuns(namespace, { name: PLRsForName, kind: PLRsForKind });
-  const [data, filteredData, onFilterChange] = useListPageFilter(
-    pipelineRuns,
-    filters,
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (!searchParams.has('sortBy')) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('sortBy', t('Started'));
+        next.set('orderBy', 'desc');
+        return next;
+      });
+    }
+  }, []);
 
-  useLoadMoreOnScroll(loadMoreRef, nextPageToken, pipelineRunsLoaded);
+  const [pipelineRuns, k8sLoaded, trLoaded, pipelineRunsLoadError] =
+    useGetPipelineRuns(namespace, { name: PLRsForName, kind: PLRsForKind });
+
+  const {
+    filterValues,
+    onFilterChange,
+    onClearAll,
+    filteredData,
+    updatedCheckboxFilters,
+  } = useDataViewFilter<PipelineRunKind>({
+    data: pipelineRuns || [],
+    options: {
+      resourceType: 'PipelineRun',
+      defaultDataSourceValues: ['cluster-data'],
+    },
+  });
+
+  const loaded = useMemo(() => {
+    const selectedSources = filterValues?.dataSource as string[] | undefined;
+    const bothOrNone =
+      !selectedSources?.length ||
+      (selectedSources.includes('cluster-data') &&
+        selectedSources.includes('archived-data'));
+    if (bothOrNone) return k8sLoaded && trLoaded;
+    if (selectedSources.includes('cluster-data')) return k8sLoaded;
+    return trLoaded;
+  }, [k8sLoaded, trLoaded, filterValues?.dataSource]);
 
   return (
     <ListPageBody>
-      <ListPageFilter
-        columnLayout={{
-          columns: columns?.map(({ id, title }) => ({ id, title })),
-          id: 'pipelineRuns-list',
-          type: 'PipelineRun',
-          selectedColumns: new Set(['name']),
-        }}
-        rowFilters={filters}
-        onFilterChange={onFilterChange}
-        data={data}
-        loaded={pipelineRunsLoaded}
-        hideColumnManagement
-        hideNameLabelFilters={hideTextFilter}
-      />
-      <VirtualizedTable<PipelineRunKind>
-        key={sortColumnIndex}
-        EmptyMsg={() => (
-          <div className="cp-text-align-center" id="no-resource-msg">
-            {t('No PipelineRuns found')}
-          </div>
-        )}
+      {!hideTextFilter && (
+        <DataViewFilterToolbar
+          filterValues={filterValues}
+          onFilterChange={onFilterChange}
+          onClearAll={onClearAll}
+          checkboxFilters={updatedCheckboxFilters}
+        />
+      )}
+      <ConsoleDataView<PipelineRunKind>
+        label={t('PipelineRuns')}
         columns={columns}
         data={filteredData}
-        loaded={pipelineRunsLoaded}
+        loaded={loaded}
         loadError={pipelineRunsLoadError}
-        Row={PipelineRunsRow}
-        unfilteredData={data}
-        rowData={{
+        getDataViewRows={getPipelineRunsListDataViewRows}
+        customRowData={{
           repositoryPLRs,
           currentUser,
         }}
-        sortColumnIndex={sortColumnIndex}
-        sortDirection={SortByDirection.desc}
+        hideColumnManagement
+        hideNameLabelFilters
       />
       <div ref={loadMoreRef}></div>
     </ListPageBody>

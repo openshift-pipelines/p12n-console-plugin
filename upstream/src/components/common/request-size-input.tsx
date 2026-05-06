@@ -1,9 +1,18 @@
-import * as React from 'react';
+import type { FC, FormEvent, MouseEvent, Ref, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NumberSpinner } from './number-spinner';
-import { Dropdown } from './dropdown';
+import {
+  InputGroup,
+  InputGroupItem,
+  NumberInput,
+  Select,
+  SelectOption,
+  SelectList,
+  MenuToggle,
+  MenuToggleElement,
+} from '@patternfly/react-core';
 
-export const RequestSizeInput: React.FC<RequestSizeInputProps> = ({
+export const RequestSizeInput: FC<RequestSizeInputProps> = ({
   children,
   defaultRequestSizeUnit,
   defaultRequestSizeValue,
@@ -19,82 +28,127 @@ export const RequestSizeInput: React.FC<RequestSizeInputProps> = ({
   testID,
   allowDecimalValue,
 }) => {
-  const parsedRequestSizeValue = allowDecimalValue
-    ? defaultRequestSizeValue
-    : parseInt(defaultRequestSizeValue as string, 10);
+  const parsedRequestSizeValue =
+    typeof defaultRequestSizeValue === 'string'
+      ? allowDecimalValue
+        ? parseFloat(defaultRequestSizeValue)
+        : parseInt(defaultRequestSizeValue, 10)
+      : defaultRequestSizeValue;
   const defaultValue = Number.isFinite(parsedRequestSizeValue)
     ? parsedRequestSizeValue
-    : null;
-  const [unit, setUnit] = React.useState<string>(defaultRequestSizeUnit);
-  const [value, setValue] = React.useState<number | string>(defaultValue);
+    : 0;
+  const [unit, setUnit] = useState<string>(defaultRequestSizeUnit);
+  const [value, setValue] = useState<number>(defaultValue);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const onValueChange: React.ReactEventHandler<HTMLInputElement> = (event) => {
-    setValue(
-      allowDecimalValue
-        ? event.currentTarget.value
-        : parseInt(event.currentTarget.value, 10),
-    );
-    onChange({ value: event.currentTarget.value, unit });
+  const onValueChange = (event: FormEvent<HTMLInputElement>) => {
+    const newValue = allowDecimalValue
+      ? parseFloat(event.currentTarget.value)
+      : parseInt(event.currentTarget.value, 10);
+    const validValue = Number.isFinite(newValue) ? newValue : 0;
+    setValue(validValue);
+    onChange({ value: validValue, unit });
   };
 
-  const changeValueBy = (changeBy: number) => {
-    // When default defaultRequestSizeValue is not set, value becomes NaN and increment decrement buttons of NumberSpinner don't work.
-    const newValue = Number.isFinite(value)
-      ? Number(value) + Number(changeBy)
-      : 0 + changeBy;
+  const onMinus = () => {
+    const newValue = Number.isFinite(value) ? value - 1 : -1;
     setValue(newValue);
     onChange({ value: newValue, unit });
   };
 
-  const onUnitChange = (newUnit) => {
-    setUnit(newUnit);
-    onChange({ value, unit: newUnit });
+  const onPlus = () => {
+    const newValue = Number.isFinite(value) ? value + 1 : 1;
+    setValue(newValue);
+    onChange({ value: newValue, unit });
   };
 
-  React.useEffect(() => {
+  const onUnitChange = (
+    _event: MouseEvent | undefined,
+    newUnit: string | number | undefined,
+  ) => {
+    const unitValue = String(newUnit);
+    setUnit(unitValue);
+    setIsOpen(false);
+    onChange({ value, unit: unitValue });
+  };
+
+  useEffect(() => {
     setUnit(defaultRequestSizeUnit);
-    setValue(defaultValue);
+    const numValue =
+      typeof defaultValue === 'number'
+        ? defaultValue
+        : parseFloat(String(defaultValue));
+    setValue(Number.isFinite(numValue) ? numValue : 0);
   }, [defaultRequestSizeUnit, defaultValue]);
 
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const inputName = `${name}Value`;
-  const dropdownName = `${name}Unit`;
+
+  const toggle = (toggleRef: Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={() => setIsOpen(!isOpen)}
+      isExpanded={isOpen}
+      isDisabled={isInputDisabled}
+      aria-label={t('Number of {{sizeUnit}}', {
+        sizeUnit: dropdownUnits[unit],
+      })}
+    >
+      {dropdownUnits[unit]}
+    </MenuToggle>
+  );
+
   return (
     <div>
-      <div className="pf-v5-c-input-group">
-        <NumberSpinner
-          onChange={onValueChange}
-          changeValueBy={changeValueBy}
-          placeholder={placeholder}
-          aria-describedby={describedBy}
-          name={inputName}
-          id={inputID}
-          data-test={testID}
-          required={required}
-          value={Number(value)}
-          min={minValue}
-          disabled={isInputDisabled}
-        />
-        <Dropdown
-          title={dropdownUnits[defaultRequestSizeUnit]}
-          selectedKey={defaultRequestSizeUnit}
-          name={dropdownName}
-          className="request-size-input__unit"
-          items={dropdownUnits}
-          onChange={onUnitChange}
-          disabled={isInputDisabled}
-          required={required}
-          ariaLabel={t('Number of {{sizeUnit}}', {
-            sizeUnit: dropdownUnits[unit],
-          })}
-        />
-      </div>
+      <InputGroup>
+        <InputGroupItem>
+          <NumberInput
+            value={value}
+            min={minValue}
+            onMinus={onMinus}
+            onChange={onValueChange}
+            onPlus={onPlus}
+            inputName={inputName}
+            inputAriaLabel={inputName}
+            minusBtnAriaLabel={t('Decrement')}
+            plusBtnAriaLabel={t('Increment')}
+            id={inputID}
+            isDisabled={isInputDisabled}
+            widthChars={10}
+            inputProps={{
+              'data-test': testID,
+              'aria-describedby': describedBy,
+              placeholder: placeholder,
+              required: required,
+            }}
+          />
+        </InputGroupItem>
+        <InputGroupItem>
+          <Select
+            isOpen={isOpen}
+            selected={unit}
+            onSelect={onUnitChange}
+            onOpenChange={setIsOpen}
+            toggle={toggle}
+            shouldFocusToggleOnSelect
+          >
+            <SelectList>
+              {Object.keys(dropdownUnits).map((key) => (
+                <SelectOption key={key} value={key}>
+                  {dropdownUnits[key]}
+                </SelectOption>
+              ))}
+            </SelectList>
+          </Select>
+        </InputGroupItem>
+      </InputGroup>
       {children}
     </div>
   );
 };
 
 export type RequestSizeInputProps = {
+  children?: ReactNode;
   placeholder?: string;
   name: string;
   onChange: Function;

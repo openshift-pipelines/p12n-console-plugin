@@ -2,6 +2,7 @@
 import {
   consoleFetchJSON,
   k8sGet,
+  K8sGroupVersionKind,
   K8sResourceCommon,
   K8sResourceKind,
   MatchExpression,
@@ -17,7 +18,7 @@ import {
   TEKTON_RESULTS_FETCH_URL,
   TEKTON_RESULTS_TASKRUN_LOGS_URL,
 } from '../../consts';
-import { RouteModel, TektonResultModel } from '../../models';
+import { PipelineRunModel, RouteModel, TektonResultModel } from '../../models';
 import {
   DataType,
   DevConsoleEndpointResponse,
@@ -644,3 +645,37 @@ export const getTRURLHost = async () => {
   });
   return route?.spec.host;
 };
+
+export async function* fetchAllTektonResultsPages<
+  Kind extends K8sResourceCommon,
+>(
+  namespace: string,
+  groupVersionKind: K8sGroupVersionKind,
+  isDevConsoleProxyAvailable: boolean,
+  filter?: string,
+  options?: TektonResultsOptions,
+): AsyncGenerator<Kind[]> {
+  const allRecords: Kind[] = [];
+  let token: string | undefined;
+  let isFirstCall = true;
+  const dataType =
+    groupVersionKind.kind === PipelineRunModel.kind
+      ? DataType.PipelineRun
+      : DataType.TaskRun;
+
+  while (token || isFirstCall) {
+    const [records, list] = await getFilteredRecord<Kind>(
+      namespace,
+      dataType,
+      filter,
+      options,
+      token,
+      undefined,
+      isDevConsoleProxyAvailable,
+    );
+    isFirstCall = false;
+    allRecords.push(...records);
+    yield [...allRecords];
+    token = list.nextPageToken ?? list.next_page_token;
+  }
+}
