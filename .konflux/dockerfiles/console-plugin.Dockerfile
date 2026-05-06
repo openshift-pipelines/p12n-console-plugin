@@ -1,18 +1,27 @@
-ARG BUILDER=registry.redhat.io/ubi9/nodejs-18@sha256:ffbad8210aee178157e7621b5fa43fb85f1ac205246b0d2606bea778549da8c1
-ARG RUNTIME=registry.access.redhat.com/ubi9/ubi-minimal:latest
+ARG BUILDER=registry.redhat.io/ubi9/nodejs-22@sha256:1a36e1ba3c48f48bbfbdc92bf6e2eb3d15f75be8e3e835d8730320ebc3c3dab8
+ARG RUNTIME=registry.access.redhat.com/ubi9/nginx-124@sha256:3b5aaa1774cebd4c52bb58996b5b192b226cb5372215ef23877263384c5e0e49
 
 FROM $BUILDER AS builder-ui
 
 WORKDIR /go/src/github.com/openshift-pipelines/console-plugin
 COPY upstream .
-RUN npm install -g yarn-1.22.22.tgz
-RUN set -e; for f in patches/*.patch; do echo ${f}; [[ -f ${f} ]] || continue; git apply ${f}; done
-COPY .konflux/yarn.lock .
-RUN yarn install --offline --frozen-lockfile --ignore-scripts && \
+#Install Yarn
+RUN if [[ -d /cachi2/output/deps/npm/ ]]; then \
+      npm install -g /cachi2/output/deps/npm/yarnpkg-cli-dist-4.6.0.tgz; \
+      YARN_ENABLE_NETWORK=0; \
+    else \
+      echo "ERROR: Hermetic npm deps not injected"; \
+      exit 1; \
+    fi
+
+# Install dependencies & build
+USER root
+RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
     yarn build
 
+
 FROM $RUNTIME
-ARG VERSION=next
+ARG VERSION=1.23
 
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
@@ -23,7 +32,7 @@ ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
 LABEL \
     com.redhat.component="openshift-pipelines-console-plugin-rhel9-container" \
-    cpe="cpe:/a:redhat:openshift_pipelines:next::el9" \
+    cpe="cpe:/a:redhat:openshift_pipelines:1.23::el9" \
     description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
     io.k8s.description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
     io.k8s.display-name="Red Hat OpenShift Pipelines console-plugin console-plugin" \
@@ -31,4 +40,4 @@ LABEL \
     maintainer="pipelines-extcomm@redhat.com" \
     name="openshift-pipelines/pipelines-console-plugin-rhel9" \
     summary="Red Hat OpenShift Pipelines console-plugin console-plugin" \
-    version="next"
+    version="v1.23.0"
