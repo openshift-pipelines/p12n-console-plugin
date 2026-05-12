@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import PacPage from '../PacPage';
 import {
@@ -6,7 +5,7 @@ import {
   useFlag,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { usePacData } from '../hooks/usePacData';
-import { MemoryRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from 'react-router';
 import { sampleSecretData } from '../../../test-data/pac-data';
 
 // Mocks
@@ -16,8 +15,8 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
   useAccessReview: jest.fn(),
   useFlag: jest.fn(),
 }));
-jest.mock('react-router-dom-v5-compat', () => ({
-  ...jest.requireActual('react-router-dom-v5-compat'),
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
   useParams: () => ({ ns: 'openshift-pipelines' }),
   useLocation: () => ({
     pathname: '/pac/ns/openshift-pipelines',

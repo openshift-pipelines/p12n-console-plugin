@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { ResourceSummary } from '../details-page/details-page';
 import { PipelineRunKind } from '../../types';
 import { useTranslation } from 'react-i18next';
@@ -6,17 +6,26 @@ import { PipelineRunModel } from '../../models';
 import PipelineRunVisualization from './PipelineRunVisualization';
 import PipelineRunCustomDetails from './PipelineRunCustomDetails';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
+import { Loading } from '../Loading';
 
 type PipelineRunDetailsProps = {
   obj: PipelineRunKind;
 };
 
-const PipelineRunDetails: React.FC<PipelineRunDetailsProps> = ({
+const PipelineRunDetails: FC<PipelineRunDetailsProps> = ({
   obj: pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
+  if (!pipelineRun) {
+    return <Loading />;
+  }
+
   return (
-    <PageSection isFilled variant="light">
+    <PageSection
+      key={pipelineRun?.metadata?.uid + pipelineRun?.metadata?.name}
+      hasBodyWrapper={false}
+      isFilled
+    >
       <Title headingLevel="h2">{t('PipelineRun details')}</Title>
       <PipelineRunVisualization pipelineRun={pipelineRun} />
       <Grid hasGutter>

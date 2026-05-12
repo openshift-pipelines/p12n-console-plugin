@@ -6,6 +6,7 @@ import {
   k8sGet,
   k8sUpdate,
 } from '@openshift-console/dynamic-plugin-sdk';
+import { LaunchOverlay } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/OverlayProvider';
 import * as _ from 'lodash';
 import {
   LOG_SOURCE_RESTARTING,
@@ -51,7 +52,7 @@ import {
   TektonParam,
   TriggerTemplateKind,
 } from '../../types';
-import { errorModal } from '../modals/error-modal';
+import { ErrorModalProps, ModalErrorContent } from '../modals/error-modal';
 import {
   formatPrometheusDuration,
   getDuration,
@@ -149,14 +150,17 @@ export const appendPipelineRunStatus = (
       if (
         pipelineRun.spec.status === SucceedConditionReason.PipelineRunCancelled
       ) {
-        return _.merge(task, { status: { reason: ComputedStatus.Cancelled } });
+        return { ...task, status: { reason: ComputedStatus.Cancelled } };
       }
       if (
         pipelineRun.spec.status === SucceedConditionReason.PipelineRunPending
       ) {
-        return _.merge(task, { status: { reason: ComputedStatus.Idle } });
+        return { ...task, status: { reason: ComputedStatus.Idle } };
       }
-      return _.merge(task, { status: { reason: ComputedStatus.Failed } });
+      if (pipelineRunStatus(pipelineRun) === ComputedStatus.Failed) {
+        return { ...task, status: { reason: ComputedStatus.Failed } };
+      }
+      return { ...task, status: { reason: ComputedStatus.Pending } };
     }
 
     const taskRun = _.find(
@@ -166,16 +170,10 @@ export const appendPipelineRunStatus = (
     );
     const taskStatus: TaskRunStatus = taskRun?.status;
 
-    const mTask = _.merge(task, {
-      status: pipelineRun?.status?.taskRuns
-        ? _.get(
-            _.find(pipelineRun.status.taskRuns, {
-              pipelineTaskName: task.name,
-            }),
-            'status',
-          )
-        : taskStatus,
-    });
+    const mTask = {
+      ...task,
+      status: taskStatus ? { ...taskStatus } : undefined,
+    };
     // append task duration
     if (mTask.status && mTask.status.completionTime && mTask.status.startTime) {
       const date =
@@ -186,9 +184,9 @@ export const appendPipelineRunStatus = (
     // append task status
     if (!mTask.status) {
       mTask.status = { reason: ComputedStatus.Pending };
-    } else if (mTask.status && mTask.status.conditions) {
+    } else if (mTask.status.conditions) {
       mTask.status.reason = pipelineRunStatus(mTask) || ComputedStatus.Pending;
-    } else if (mTask.status && !mTask.status.reason) {
+    } else if (!mTask.status.reason) {
       mTask.status.reason = ComputedStatus.Pending;
     }
     return mTask;
@@ -427,6 +425,7 @@ export const associateServiceAccountToSecret = (
   secret: SecretKind,
   namespace: string,
   isImageSecret: boolean,
+  launchOverlay: LaunchOverlay,
 ) => {
   k8sGet({
     model: ServiceAccountModel,
@@ -448,7 +447,7 @@ export const associateServiceAccountToSecret = (
       }
     })
     .catch((err) => {
-      errorModal({ error: err.message });
+      launchOverlay<ErrorModalProps>(ModalErrorContent, { error: err.message });
     });
 };
 

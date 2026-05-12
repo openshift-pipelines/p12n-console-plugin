@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DescriptionList,
@@ -18,7 +18,7 @@ type TriggeredByProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const TriggeredBySection: React.FC<TriggeredByProps> = (props) => {
+const TriggeredBySection: FC<TriggeredByProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const {
     pipelineRun: {
@@ -49,7 +49,7 @@ const TriggeredBySection: React.FC<TriggeredByProps> = (props) => {
   }
 
   return (
-    <DescriptionList className="pf-v5-u-mt-md">
+    <DescriptionList className="pf-v6-u-mt-md">
       <DescriptionListGroup>
         <DescriptionListTerm>{t('Triggered by')}:</DescriptionListTerm>
         <DescriptionListDescription>{value}</DescriptionListDescription>
