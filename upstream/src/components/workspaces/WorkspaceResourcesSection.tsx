@@ -1,5 +1,5 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import * as React from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DescriptionListDescription,
@@ -23,7 +23,7 @@ type WorkspaceResourcesSectionProps = {
   workspaces: PipelineRunWorkspace[];
 };
 
-const WorkspaceResourcesSection: React.FC<WorkspaceResourcesSectionProps> = ({
+const WorkspaceResourcesSection: FC<WorkspaceResourcesSectionProps> = ({
   namespace,
   workspaces,
 }) => {
@@ -67,7 +67,11 @@ const WorkspaceResourcesSection: React.FC<WorkspaceResourcesSectionProps> = ({
           <ResourceLink
             key={workspace.name}
             name={secret.secretName}
-            kind={SecretModel.kind}
+            groupVersionKind={{
+              group: SecretModel.apiGroup,
+              version: SecretModel.apiVersion,
+              kind: SecretModel.kind,
+            }}
             namespace={namespace}
             displayName={displayName}
           />

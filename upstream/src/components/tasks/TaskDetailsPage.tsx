@@ -1,15 +1,18 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BreadcrumbItem, Text, TextVariants } from '@patternfly/react-core';
-import { Link, useNavigate, useParams } from 'react-router-dom-v5-compat';
+import {
+  BreadcrumbItem,
+  Content,
+  ContentVariants,
+} from '@patternfly/react-core';
+import { Link, useParams } from 'react-router';
 import {
   getGroupVersionKindForModel,
-  useAccessReview,
-  useAnnotationsModal,
-  useDeleteModal,
   useK8sWatchResource,
-  useLabelsModal,
 } from '@openshift-console/dynamic-plugin-sdk';
+import { LazyActionMenu } from '@openshift-console/dynamic-plugin-sdk-internal';
+import { ActionMenuVariant } from '@openshift-console/dynamic-plugin-sdk-internal/lib/api/internal-types';
 import TaskDetails from './TaskDetails';
 import DetailsPage from '../details-page/DetailsPage';
 import { navFactory } from '../utils/horizontal-nav';
@@ -26,41 +29,31 @@ type TaskDetailsPageProps = {
   namespace: string;
 };
 
-const TaskDetailsPage: React.FC<TaskDetailsPageProps> = () => {
+const TaskDetailsPage: FC<TaskDetailsPageProps> = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const params = useParams();
-  const navigate = useNavigate();
   const { name, ns: namespace } = params;
   const [task, loaded, loadError] = useK8sWatchResource<TaskKind>({
     groupVersionKind: getGroupVersionKindForModel(TaskModel),
     namespace,
     name,
   });
-  const launchAnnotationsModal = useAnnotationsModal(task);
-  const launchLabelsModal = useLabelsModal(task);
-  const launchDeleteModal = useDeleteModal(task);
-  const canEditResource = useAccessReview({
-    group: TaskModel.apiGroup,
-    resource: TaskModel.plural,
-    verb: 'update',
-    name,
-    namespace,
-  });
-  const canDeleteResource = useAccessReview({
-    group: TaskModel.apiGroup,
-    resource: TaskModel.plural,
-    verb: 'delete',
-    name,
-    namespace,
-  });
 
-  const editURL = `/k8s/ns/${namespace}/${getReferenceForModel(
-    TaskModel,
-  )}/${encodeURIComponent(name)}/yaml`;
-
-  const resourceTitleFunc = React.useMemo(() => {
+  const resourceTitleFunc = useMemo(() => {
     return <div className="task-details-page">{getTaskName(task)} </div>;
   }, [task]);
+
+  const customActionMenu = useCallback((_kindObj, obj) => {
+    const reference = getReferenceForModel(TaskModel);
+    const context = { [reference]: obj };
+    return (
+      <LazyActionMenu
+        context={context}
+        variant={ActionMenuVariant.DROPDOWN}
+        label={t('Actions')}
+      />
+    );
+  }, []);
 
   if (!loaded) {
     return loadError ? <ErrorPage404 /> : <LoadingBox />;
@@ -70,37 +63,10 @@ const TaskDetailsPage: React.FC<TaskDetailsPageProps> = () => {
     <DetailsPage
       obj={task}
       model={TaskModel}
-      title={<Text component={TextVariants.h1}>{resourceTitleFunc}</Text>}
-      actions={[
-        {
-          key: 'edit-labels',
-          label: t('Edit labels'),
-          onClick: () => launchLabelsModal(),
-          disabled: !canEditResource[0],
-        },
-        {
-          key: 'edit-annotations',
-          label: t('Edit annotations'),
-          onClick: () => launchAnnotationsModal(),
-          disabled: !canEditResource[0],
-        },
-        {
-          key: 'edit-task',
-          label: t('Edit {{resourceKind}}', {
-            resourceKind: TaskModel.kind,
-          }),
-          onClick: () => navigate(editURL),
-          disabled: !canEditResource[0],
-        },
-        {
-          key: 'delete-task',
-          label: t('Delete {{resourceKind}}', {
-            resourceKind: TaskModel.kind,
-          }),
-          onClick: () => launchDeleteModal(),
-          disabled: !canDeleteResource[0],
-        },
-      ]}
+      title={
+        <Content component={ContentVariants.h1}>{resourceTitleFunc}</Content>
+      }
+      customActionMenu={customActionMenu}
       pages={[
         navFactory.details(TaskDetails),
         navFactory.editYaml(ResourceYAMLEditorTab),
@@ -109,7 +75,7 @@ const TaskDetailsPage: React.FC<TaskDetailsPageProps> = () => {
         <BreadcrumbItem key="app-link" component="div">
           <Link
             data-test="breadcrumb-link"
-            className="pf-v5-c-breadcrumb__link"
+            className="pf-v6-c-breadcrumb__link"
             to={`/tasks/ns/${namespace}/`}
           >
             {t('Tasks')}

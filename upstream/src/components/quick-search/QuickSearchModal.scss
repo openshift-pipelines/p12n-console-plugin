@@ -1,8 +1,9 @@
-.ocs-quick-search-modal {
-  --pf-v5-c-modal-box--BackgroundColor: none !important;
+.pipelines-ocs-quick-search-modal {
   box-shadow: none !important;
+  overflow: unset;
+  background: none !important;
   &__no-backdrop {
-    .pf-v5-c-backdrop {
+    .pf-v6-c-backdrop {
       background: none;
       position: absolute;
       overflow: hidden;
