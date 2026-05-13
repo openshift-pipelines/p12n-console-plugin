@@ -31,4 +31,4 @@ LABEL \
     maintainer="pipelines-extcomm@redhat.com" \
     name="openshift-pipelines/pipelines-console-plugin-rhel9" \
     summary="Red Hat OpenShift Pipelines console-plugin console-plugin" \
-    version="vlatest"
+    version="latest"
