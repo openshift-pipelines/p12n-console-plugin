@@ -1,7 +1,7 @@
-ARG BUILDER=registry.redhat.io/ubi9/nodejs-20@sha256:c698e22792587ec745c115a49895321fc96eb934b2819dbd9802503f23bc6e67
-ARG RUNTIME=registry.redhat.io/ubi9/nginx-124@sha256:24c71d894d121f76d11cc6466121acb1da1004c38ec6945a415c017a263f8636
+ARG NJS_BUILDER=registry.access.redhat.com/ubi9/nodejs-24:latest
+ARG NGX_RUNTIME=registry.access.redhat.com/ubi9/nginx-124:latest
 
-FROM $BUILDER AS builder-ui
+FROM $NJS_BUILDER AS builder-ui
 
 WORKDIR /go/src/github.com/openshift-pipelines/console-plugin
 COPY upstream .
@@ -21,8 +21,7 @@ RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
     yarn build
 
 
-FROM $RUNTIME
-ARG VERSION=1.22
+FROM $NGX_RUNTIME
 
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
