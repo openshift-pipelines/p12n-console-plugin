@@ -1,5 +1,6 @@
 import * as _ from 'lodash-es';
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import { Button, Level, LevelItem, Title } from '@patternfly/react-core';
 import MonacoEditor from 'react-monaco-editor';
 import { ChevronDownIcon } from '@patternfly/react-icons/dist/esm/icons/chevron-down-icon';
@@ -11,7 +12,7 @@ import { referenceFor } from '../../utils/k8s-utils';
 import { Sample } from '../types';
 import { FirehoseResult, K8sKind } from '@openshift-console/dynamic-plugin-sdk';
 
-const ResourceSidebarSample: React.FC<ResourceSidebarSampleProps> = ({
+const ResourceSidebarSample: FC<ResourceSidebarSampleProps> = ({
   sample,
   loadSampleYaml,
   downloadSampleYaml,
@@ -22,8 +23,8 @@ const ResourceSidebarSample: React.FC<ResourceSidebarSampleProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <li className="co-resource-sidebar-item">
-      <Title headingLevel="h3" size="lg" className="pf-v5-u-mb-sm">
-        <span className="pf-v5-u-text-transform-uppercase">
+      <Title headingLevel="h3" size="lg" className="pf-v6-u-mb-sm">
+        <span className="pf-v6-u-text-transform-uppercase">
           {highlightText}
         </span>{' '}
         {title}
@@ -38,25 +39,25 @@ const ResourceSidebarSample: React.FC<ResourceSidebarSampleProps> = ({
       <Level>
         <LevelItem>
           <Button
+            icon={<PasteIcon className="co-icon-space-r" />}
             type="button"
             variant="link"
             data-test="load-sample"
             isInline
             onClick={() => loadSampleYaml(id, yaml, reference)}
           >
-            <PasteIcon className="co-icon-space-r" />
             {t('Try it')}
           </Button>
         </LevelItem>
         <LevelItem>
           <Button
+            icon={<DownloadIcon className="co-icon-space-r" />}
             type="button"
             variant="link"
             data-test="download-sample"
             isInline
             onClick={() => downloadSampleYaml(id, yaml, reference)}
           >
-            <DownloadIcon className="co-icon-space-r" />
             {t('Download YAML')}
           </Button>
         </LevelItem>
@@ -91,7 +92,7 @@ interface ResourceSidebarSnippetProps {
   insertSnippetYaml: (id: string, yaml: string, reference: string) => void;
 }
 
-const ResourceSidebarSnippet: React.FC<ResourceSidebarSnippetProps> = ({
+const ResourceSidebarSnippet: FC<ResourceSidebarSnippetProps> = ({
   snippet,
   insertSnippetYaml,
 }) => {
@@ -105,8 +106,8 @@ const ResourceSidebarSnippet: React.FC<ResourceSidebarSnippetProps> = ({
     description,
   } = snippet;
 
-  const [yamlPreview, setYamlPreview] = React.useState<string>(yaml);
-  const [yamlPreviewOpen, setYamlPreviewOpen] = React.useState(false);
+  const [yamlPreview, setYamlPreview] = useState<string>(yaml);
+  const [yamlPreviewOpen, setYamlPreviewOpen] = useState(false);
 
   const resolveYaml = async (callback: (resolvedYaml: string) => void) => {
     if (yaml) {
@@ -142,8 +143,8 @@ const ResourceSidebarSnippet: React.FC<ResourceSidebarSnippetProps> = ({
 
   return (
     <li className="co-resource-sidebar-item">
-      <Title headingLevel="h3" size="lg" className="pf-v5-u-mb-sm">
-        <span className="pf-v5-u-text-transform-uppercase">
+      <Title headingLevel="h3" size="lg" className="pf-v6-u-mb-sm">
+        <span className="pf-v6-u-text-transform-uppercase">
           {highlightText}
         </span>{' '}
         {title}
@@ -151,8 +152,13 @@ const ResourceSidebarSnippet: React.FC<ResourceSidebarSnippetProps> = ({
       <p>{description}</p>
       <Level>
         <LevelItem>
-          <Button type="button" variant="link" isInline onClick={insertSnippet}>
-            <PasteIcon className="co-icon-space-r" />
+          <Button
+            icon={<PasteIcon className="co-icon-space-r" />}
+            type="button"
+            variant="link"
+            isInline
+            onClick={insertSnippet}
+          >
             {t('Insert snippet')}
           </Button>
         </LevelItem>
@@ -187,7 +193,7 @@ interface ResourceSidebarSnippetsProps {
   insertSnippetYaml(id: string, yaml: string, reference: string);
 }
 
-export const ResourceSidebarSnippets: React.FC<
+export const ResourceSidebarSnippets: FC<
   ResourceSidebarSnippetsProps
 > = ({ snippets, insertSnippetYaml }) => {
   return (
@@ -206,7 +212,7 @@ export const ResourceSidebarSnippets: React.FC<
   );
 };
 
-export const ResourceSidebarSamples: React.FC<ResourceSidebarSamplesProps> = ({
+export const ResourceSidebarSamples: FC<ResourceSidebarSamplesProps> = ({
   samples,
   loadSampleYaml,
   downloadSampleYaml,

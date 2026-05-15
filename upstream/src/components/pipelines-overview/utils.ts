@@ -4,11 +4,15 @@ import {
   K8sResourceKindReference,
   PrometheusResponse,
 } from '@openshift-console/dynamic-plugin-sdk';
-import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { adjustToStartOfWeek } from '../pipelines-metrics/utils';
+import {
+  getQueryArgument,
+  removeQueryArgument,
+  setQueryArgument,
+} from '../utils/router';
 
 export const alphanumericCompare = (a: string, b: string): number => {
   return a.localeCompare(b, undefined, {
@@ -38,16 +42,6 @@ export type mainDataType = {
   pipelineName?: string;
   summary?: SummaryProps;
 };
-
-export const listPageTableColumnClasses = [
-  '', //name
-  '', //namespace
-  'pf-m-hidden pf-m-visible-on-md', //total plr
-  'pf-m-hidden pf-m-visible-on-md', //total duration
-  'pf-m-hidden pf-m-visible-on-xl', //avg duration
-  'pf-m-hidden pf-m-visible-on-xl', //success rate
-  'pf-m-hidden pf-m-visible-on-xl', //last run time
-];
 
 export const TimeRangeOptions = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -86,25 +80,25 @@ export const IntervalOptions = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return {
     [OFF_KEY]: t('Refresh off'),
-    '15s': t('{{count}} second', { count: 15 }),
-    '30s': t('{{count}} second', { count: 30 }),
-    '1m': t('{{count}} minute', { count: 1 }),
-    '5m': t('{{count}} minute', { count: 5 }),
-    '15m': t('{{count}} minute', { count: 15 }),
-    '30m': t('{{count}} minute', { count: 30 }),
-    '1h': t('{{count}} hour', { count: 1 }),
-    '2h': t('{{count}} hour', { count: 2 }),
-    '1d': t('{{count}} day', { count: 1 }),
+    '15s': t('{{value}} second', { value: 15 }),
+    '30s': t('{{value}} second', { value: 30 }),
+    '1m': t('{{value}} minute', { value: 1 }),
+    '5m': t('{{value}} minute', { value: 5 }),
+    '15m': t('{{value}} minute', { value: 15 }),
+    '30m': t('{{value}} minute', { value: 30 }),
+    '1h': t('{{value}} hour', { value: 1 }),
+    '2h': t('{{value}} hour', { value: 2 }),
+    '1d': t('{{value}} day', { value: 1 }),
   };
 };
 
 export const useBoolean = (
   initialValue: boolean,
 ): [boolean, () => void, () => void, () => void] => {
-  const [value, setValue] = React.useState(initialValue);
-  const toggle = React.useCallback(() => setValue((v) => !v), []);
-  const setTrue = React.useCallback(() => setValue(true), []);
-  const setFalse = React.useCallback(() => setValue(false), []);
+  const [value, setValue] = useState(initialValue);
+  const toggle = useCallback(() => setValue((v) => !v), []);
+  const setTrue = useCallback(() => setValue(true), []);
+  const setFalse = useCallback(() => setValue(false), []);
   return [value, toggle, setTrue, setFalse];
 };
 
@@ -244,7 +238,7 @@ export const useInterval = (
   date: string,
   pageFlag?: number,
 ) => {
-  React.useEffect(() => {
+  useEffect(() => {
     getData();
     if (interval !== null) {
       const intervalID = setInterval(() => getData(), interval);
@@ -277,73 +271,24 @@ export const getFilter = (date, parentName, kind): string => {
 };
 
 export const useQueryParams = (param) => {
-  const {
-    key,
-    setValue,
-    defaultValue,
-    options,
-    displayFormat,
-    loadFormat,
-    value,
-  } = param;
-  const [isLoaded, setIsLoaded] = React.useState(0);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = {};
-  location.search
-    .substring(1)
-    ?.split('&')
-    .forEach((_) => {
-      const [key, value] = _.split('=');
-      if (key) queryParams[key] = value;
-    });
+  const { key, setValue, options, displayFormat, loadFormat, value } = param;
 
-  function setQueryParams(key?: string, value?: string) {
-    const path = location.pathname;
-
-    if (key && value) queryParams[key] = value;
-    navigate(
-      `${path}?${Object.keys(queryParams)
-        .map((k) => {
-          const v = queryParams[k];
-          if (k) return k + '=' + v;
-        })
-        .join('&')}`,
-    );
-  }
-
-  //Loads Url Params Data
-  React.useEffect(() => {
-    if (queryParams[key]) {
-      const paramValue = queryParams[key];
-      if (!options || options[paramValue])
-        setValue(loadFormat ? loadFormat(paramValue) : paramValue);
-    }
-  }, []);
-  //If Url Params doesn't contain a key, initializes with defaultValue
-  React.useEffect(() => {
-    if (isLoaded >= 0) {
-      if (!queryParams[key]) {
-        const newValue = displayFormat
-          ? displayFormat(defaultValue)
-          : defaultValue;
-        if (newValue) {
-          setQueryParams(key, newValue);
-          setIsLoaded(isLoaded + 1);
-        }
-      } else {
-        setIsLoaded(-1);
+  useEffect(() => {
+    const urlValue = getQueryArgument(key);
+    if (urlValue) {
+      if (!options || options[urlValue]) {
+        setValue(loadFormat ? loadFormat(urlValue) : urlValue);
       }
     }
-  }, [isLoaded]);
-  //Updating Url Params when values of filter changes
-  React.useEffect(() => {
-    const newValue = displayFormat ? displayFormat(value) : value;
-    if (newValue) {
-      setQueryParams(key, newValue);
-    } else if (queryParams[key]) {
-      delete queryParams[key];
-      setQueryParams();
+    return () => removeQueryArgument(key);
+  }, []);
+
+  useEffect(() => {
+    const formatted = displayFormat ? displayFormat(value) : value;
+    if (formatted) {
+      setQueryArgument(key, String(formatted));
+    } else {
+      removeQueryArgument(key);
     }
   }, [value]);
 };

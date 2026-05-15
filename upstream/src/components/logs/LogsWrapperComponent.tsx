@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from 'react';
+import type { PropsWithChildren, FC } from 'react';
+
+import { useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@patternfly/react-core';
 import {
@@ -16,7 +18,7 @@ import { PodKind, TaskRunKind } from '../../types';
 import { MultiStreamLogs } from './MultiStreamLogs';
 import { TektonTaskRunLog } from './TektonTaskRunLog';
 import { useFullscreen } from './fullscreen';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
 import { TektonResourceLabel } from '../../consts';
 import { getMultiClusterPods } from '../utils/multi-cluster-api';
 import { usePoll } from '../pipelines-metrics/poll-hook';
@@ -32,8 +34,8 @@ type LogsWrapperComponentProps = {
   pipelineRunFinished?: boolean;
 };
 
-const LogsWrapperComponent: React.FC<
-  React.PropsWithChildren<LogsWrapperComponentProps>
+const LogsWrapperComponent: FC<
+  PropsWithChildren<LogsWrapperComponentProps>
 > = ({
   resource,
   taskRun,
@@ -46,19 +48,24 @@ const LogsWrapperComponent: React.FC<
   ...props
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const resourceRef = React.useRef(null);
+  const resourceRef = useRef(null);
 
   const k8sResource = isResourceManagedByKueue ? null : resource;
   const [obj, loaded, error] = useK8sWatchResource<PodKind>(k8sResource);
 
   // Multi-cluster Pod state for hub clusters
-  const [mcPod, setMcPod] = React.useState<PodKind | null>(null);
-  const [mcLoaded, setMcLoaded] = React.useState(false);
-  const [mcError, setMcError] = React.useState<unknown>(null);
+  const [mcPod, setMcPod] = useState<PodKind | null>(null);
+  const [mcLoaded, setMcLoaded] = useState(false);
+  const [mcError, setMcError] = useState<unknown>(null);
 
   /* Fetch Pod from multi-cluster API for hub clusters */
-  const fetchMcPod = React.useCallback(async () => {
-    if (!isResourceManagedByKueue || !pipelineRunName || !resource?.name || !resource?.namespace) {
+  const fetchMcPod = useCallback(async () => {
+    if (
+      !isResourceManagedByKueue ||
+      !pipelineRunName ||
+      !resource?.name ||
+      !resource?.namespace
+    ) {
       return;
     }
     try {
@@ -79,17 +86,24 @@ const LogsWrapperComponent: React.FC<
       setMcError(e);
       setMcLoaded(true);
     }
-  }, [isResourceManagedByKueue, pipelineRunName, resource?.name, resource?.namespace]);
+  }, [
+    isResourceManagedByKueue,
+    pipelineRunName,
+    resource?.name,
+    resource?.namespace,
+  ]);
 
   // Poll every 3 seconds while PipelineRun is running, null to disable
   const pollDelay =
-    isResourceManagedByKueue && !pipelineRunFinished && pipelineRunName ? 3000 : null;
+    isResourceManagedByKueue && !pipelineRunFinished && pipelineRunName
+      ? 3000
+      : null;
   usePoll(fetchMcPod, pollDelay, resource?.name, resource?.namespace);
 
   const [isFullscreen, fullscreenRef, fullscreenToggle] =
     useFullscreen<HTMLDivElement>();
-  const [downloadAllStatus, setDownloadAllStatus] = React.useState(false);
-  const currentLogGetterRef = React.useRef<() => string>();
+  const [downloadAllStatus, setDownloadAllStatus] = useState(false);
+  const currentLogGetterRef = useRef<() => string>();
 
   const taskName =
     taskRun?.metadata?.labels?.[TektonResourceLabel.pipelineTask] ||
@@ -117,7 +131,7 @@ const LogsWrapperComponent: React.FC<
     });
     saveAs(blob, `${taskName}.log`);
   };
-  const setLogGetter = React.useCallback(
+  const setLogGetter = useCallback(
     (getter: any) => (currentLogGetterRef.current = getter),
     [],
   );
@@ -138,15 +152,15 @@ const LogsWrapperComponent: React.FC<
   return (
     <div
       ref={fullscreenRef}
-      className="pf-v5-u-pr-xl pf-v5-u-display-flex pf-v5-u-flex-direction-column pf-v5-u-h-100 pf-v5-u-w-100"
+      className="pf-v6-u-pr-xl pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-h-100 pf-v6-u-w-100"
     >
       <div
-        className={`pf-v5-l-flex pf-m-gap-md pf-m-align-items-center pf-m-justify-content-flex-end ${
-          isFullscreen ? 'pf-v5-u-background-color-100 pf-v5-u-p-sm' : ''
+        className={`pf-v6-l-flex pf-m-gap-md pf-m-align-items-center pf-m-justify-content-flex-end ${
+          isFullscreen ? 'pf-v6-u-background-color-100 pf-v6-u-p-sm' : ''
         }`}
       >
         <Button variant="link" onClick={downloadLogs} isInline>
-          <DownloadIcon className="pf-v5-u-mr-xs" />
+          <DownloadIcon className="pf-v6-u-mr-xs" />
           {t('Download')}
         </Button>
         <div>|</div>
@@ -158,10 +172,10 @@ const LogsWrapperComponent: React.FC<
               isDisabled={downloadAllStatus}
               isInline
             >
-              <span className="pf-v5-l-flex pf-m-row pf-m-gap-sm pf-m-align-items-center">
+              <span className="pf-v6-l-flex pf-m-row pf-m-gap-sm pf-m-align-items-center">
                 <DownloadIcon />
                 <span>{downloadAllLabel || t('Download all')}</span>
-                {downloadAllStatus && <LoadingInline />}
+                {downloadAllStatus && <Loading isInline={true} />}
               </span>
             </Button>
             <div>|</div>
@@ -171,19 +185,19 @@ const LogsWrapperComponent: React.FC<
           <Button variant="link" onClick={fullscreenToggle} isInline>
             {isFullscreen ? (
               <>
-                <CompressIcon className="pf-v5-u-mr-xs" />
+                <CompressIcon className="pf-v6-u-mr-xs" />
                 {t('Collapse')}
               </>
             ) : (
               <>
-                <ExpandIcon className="pf-v5-u-mr-xs" />
+                <ExpandIcon className="pf-v6-u-mr-xs" />
                 {t('Expand')}
               </>
             )}
           </Button>
         )}
       </div>
-      <div className="pf-v5-u-flex-1">
+      <div className="pf-v6-u-flex-1">
         {!effectiveError ? (
           <MultiStreamLogs
             {...props}

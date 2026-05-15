@@ -1,10 +1,10 @@
-ARG BUILDER=registry.access.redhat.com/ubi9/nodejs-20
+ARG BUILDER=registry.access.redhat.com/ubi9/nodejs-22
 ARG RUNTIME=registry.access.redhat.com/ubi9/nginx-124
 
 # Stage 1: Build UI
 FROM $BUILDER AS builder-ui
 
-USER root
+USER root   
 
 # Enable Corepack and prepare Yarn 4.6
 RUN npm install -g corepack && corepack enable && corepack prepare yarn@4.6.0 --activate

@@ -1,9 +1,9 @@
 import * as _ from 'lodash-es';
-import * as React from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { PageSection } from '@patternfly/react-core';
 import classNames from 'classnames';
 import * as PropTypes from 'prop-types';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   isGroupVersionKind,
@@ -14,7 +14,7 @@ import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
 import { ResourceLink, Timestamp } from '@openshift-console/dynamic-plugin-sdk';
 import { WSFactory } from '@openshift-console/dynamic-plugin-sdk/lib/utils/k8s/ws-factory';
 import { apiGroupForReference } from '../../../utils/pipeline-utils';
-import { Box, Loading } from '../../../status/status-box';
+import { Box } from '../../../status/status-box';
 import { EventModel, NodeModel } from '../../../../models';
 import { FLAGS } from '../../../../types';
 import { TogglePlay } from './toggle-play';
@@ -22,6 +22,7 @@ import { EventStreamList } from './event-stream';
 import { watchURL } from '../../../utils/common-utils';
 import { resourcePathFromModel } from '../../../utils/utils';
 import { namespaceProptype } from './propTypes';
+import { Loading } from '../../../Loading';
 
 const maxMessages = 500;
 const flushInterval = 500;
@@ -199,11 +200,11 @@ export const NoMatchingEvents = ({ allCount }) => {
       <div className="cos-status-box__title">{t('No matching events')}</div>
       <div className="cp-text-align-center cos-status-box__detail">
         {allCount >= maxMessages
-          ? t('{{count}}+ event exist, but none match the current filter', {
-              count: maxMessages,
+          ? t('{{value}}+ event exist, but none match the current filter', {
+              value: maxMessages,
             })
-          : t('{{count}} event exist, but none match the current filter', {
-              count: allCount,
+          : t('{{value}} event exist, but none match the current filter', {
+              value: allCount,
             })}
       </div>
     </Box>
@@ -214,7 +215,7 @@ export const ErrorLoadingEvents = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Box>
-      <div className="cos-status-box__title cos-error-title">
+      <div className="cos-status-box__title pf-v6-u-text-color-status-danger">
         {t('Error loading events')}
       </div>
       <div className="cos-status-box__detail cp-text-align-center">
@@ -237,13 +238,13 @@ const EventStream = ({
   textFilter,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [active, setActive] = React.useState(true);
-  const [sortedEvents, setSortedEvents] = React.useState([]);
-  const [error, setError] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const ws = React.useRef(null);
+  const [active, setActive] = useState(true);
+  const [sortedEvents, setSortedEvents] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const ws = useRef(null);
 
-  const filteredEvents = React.useMemo(() => {
+  const filteredEvents = useMemo(() => {
     return filterEvents(sortedEvents, { kind, type, filter, textFilter }).slice(
       0,
       maxMessages,
@@ -251,7 +252,7 @@ const EventStream = ({
   }, [sortedEvents, kind, type, filter, textFilter]);
 
   // Handle websocket setup and teardown when dependent props change
-  React.useEffect(() => {
+  useEffect(() => {
     ws.current?.destroy();
     if (!mock) {
       const webSocketID = `${namespace || 'all'}-sysevents`;
@@ -324,7 +325,7 @@ const EventStream = ({
   }, [namespace, fieldSelector, mock, t]);
 
   // Pause/unpause the websocket when the active state changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (active) {
       ws.current?.unpause();
     } else {
@@ -374,11 +375,11 @@ const EventStream = ({
   });
   const messageCount =
     count < maxMessages
-      ? t('Showing {{count}} event', { count })
-      : t('Showing most recent {{count}} event', { count });
+      ? t('Showing {{value}} event', { value: count })
+      : t('Showing most recent {{value}} event', { value: count });
 
   return (
-    <PageSection isFilled variant="light">
+    <PageSection hasBodyWrapper={false} isFilled>
       <div className="co-sysevent-stream">
         <div className="co-sysevent-stream__status">
           <div className="co-sysevent-stream__timeline__btn-text">

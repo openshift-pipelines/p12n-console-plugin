@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { configure, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 
 import { usePacGHManifest } from '../hooks/usePacGHManifest';
 import PacForm from '../PacForm';
