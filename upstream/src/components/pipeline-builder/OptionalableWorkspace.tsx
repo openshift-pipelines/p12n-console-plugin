@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { TextInputTypes } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import InputField from '../pipelines-details/multi-column-field/InputField';
@@ -9,7 +9,7 @@ type OptionalableWorkspace = {
   isReadOnly?: boolean;
 };
 
-const OptionalableWorkspace: React.FC<OptionalableWorkspace> = ({
+const OptionalableWorkspace: FC<OptionalableWorkspace> = ({
   namePrefix,
   isReadOnly,
 }) => {
@@ -25,7 +25,7 @@ const OptionalableWorkspace: React.FC<OptionalableWorkspace> = ({
         isReadOnly={isReadOnly}
         aria-label={t('Name')}
       />
-      <div style={{ marginBottom: 'var(--pf-v5-global--spacer--xs)' }} />
+      <div style={{ marginBottom: "var(--pf-t--global--spacer--xs)" }} />
       <CheckboxField
         name={`${namePrefix}.optional`}
         label={t('Optional workspace')}

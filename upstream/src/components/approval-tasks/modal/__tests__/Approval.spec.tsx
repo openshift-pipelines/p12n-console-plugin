@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { k8sPatch } from '@openshift-console/dynamic-plugin-sdk';
 import Approval from '../Approval';
@@ -28,9 +28,9 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-// Mock react-router-dom-v5-compat
-jest.mock('react-router-dom-v5-compat', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+// Mock react-router
+jest.mock('react-router', () => ({
+  Link: ({ children, to }: { children: ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
 }));
@@ -54,63 +54,10 @@ jest.mock('../../../pipelines-overview/utils', () => ({
   getReferenceForModel: (model: any) => `${model.apiVersion}~${model.kind}`,
 }));
 
-// Mock the modal components
-jest.mock('../../../modals/modal', () => ({
-  ModalWrapper: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) => (
-    <div data-testid="modal-wrapper" onClick={onClose}>
-      {children}
-    </div>
-  ),
-}));
-
-jest.mock('../ApprovalModal', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const React = require('react');
-  return {
-    __esModule: true,
-    default: ({
-      handleSubmit,
-      values,
-      setFieldValue,
-      labelTitle,
-      type,
-      cancel,
-    }: any) => {
-      // Set the reason value before submitting (only if not already set)
-      React.useEffect(() => {
-        if (!values.reason) {
-          setFieldValue('reason', 'test reason');
-        }
-      }, [setFieldValue, values.reason]);
-
-      return (
-        <div data-testid="approval-modal">
-          <h1>{labelTitle}</h1>
-          <form onSubmit={handleSubmit}>
-            <button data-testid="submit-btn" type="submit">
-              Submit
-            </button>
-          </form>
-          <button data-testid="cancel-btn" onClick={cancel}>
-            Cancel
-          </button>
-          <span data-testid="approval-type">{type}</span>
-        </div>
-      );
-    },
-  };
-});
-
 const mockK8sPatch = k8sPatch as jest.MockedFunction<typeof k8sPatch>;
 
 describe('Approval Component - handleSubmit function', () => {
-  const mockCloseModal = jest.fn();
+  const mockCloseOverlay = jest.fn();
 
   const baseApprovalTask: ApprovalTaskKind = {
     apiVersion: 'openshift-pipelines.org/v1alpha1',
@@ -180,9 +127,9 @@ describe('Approval Component - handleSubmit function', () => {
         },
       };
 
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={userApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -190,6 +137,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="approve"
         />,
       );
+
+      // Fill in the reason field
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -219,7 +170,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should reject as direct user successfully', async () => {
@@ -237,9 +188,9 @@ describe('Approval Component - handleSubmit function', () => {
         },
       };
 
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={userApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -247,6 +198,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="reject"
         />,
       );
+
+      // Fill in the reason field (required for reject)
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -276,15 +231,15 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
   });
 
   describe('Group Approval Path', () => {
     it('should approve as group member when user belongs to the group', async () => {
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={baseApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -292,6 +247,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="approve"
         />,
       );
+
+      // Fill in the reason field
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -338,13 +297,13 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should reject as group member when user belongs to the group', async () => {
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={baseApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -352,6 +311,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="reject"
         />,
       );
+
+      // Fill in the reason field (required for reject)
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -398,7 +361,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should add new user to group when user does not exist in group users array', async () => {
@@ -417,9 +380,9 @@ describe('Approval Component - handleSubmit function', () => {
         },
       };
 
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={taskWithEmptyGroup}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -427,6 +390,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="approve"
         />,
       );
+
+      // Fill in the reason field
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -463,7 +430,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should update existing user in group when user already exists', async () => {
@@ -491,9 +458,9 @@ describe('Approval Component - handleSubmit function', () => {
         },
       };
 
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={taskWithExistingUser}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -501,6 +468,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="approve"
         />,
       );
+
+      // Fill in the reason field
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -541,7 +512,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should not update group when user does not belong to the group', async () => {
@@ -552,7 +523,7 @@ describe('Approval Component - handleSubmit function', () => {
 
       const { getByTestId } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={baseApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester3"
@@ -582,7 +553,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
 
     it('should handle group with undefined users array', async () => {
@@ -601,9 +572,9 @@ describe('Approval Component - handleSubmit function', () => {
         },
       };
 
-      const { getByTestId } = render(
+      const { getByTestId, getByLabelText } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={taskWithUndefinedUsers}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -611,6 +582,10 @@ describe('Approval Component - handleSubmit function', () => {
           type="approve"
         />,
       );
+
+      // Fill in the reason field
+      const reasonField = getByLabelText('Reason');
+      fireEvent.change(reasonField, { target: { value: 'test reason' } });
 
       const submitBtn = getByTestId('submit-btn');
       fireEvent.click(submitBtn);
@@ -647,7 +622,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
   });
 
@@ -660,7 +635,7 @@ describe('Approval Component - handleSubmit function', () => {
 
       const { getByTestId } = render(
         <Approval
-          closeModal={mockCloseModal}
+          closeOverlay={mockCloseOverlay}
           resource={baseApprovalTask}
           pipelineRunName="example-approval-pr-mh34l5"
           userName="tester2"
@@ -690,7 +665,7 @@ describe('Approval Component - handleSubmit function', () => {
         });
       });
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      expect(mockCloseOverlay).toHaveBeenCalled();
     });
   });
 });

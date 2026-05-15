@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,9 +22,9 @@ import { getResultsSummary } from '../utils/summary-api';
 import { DataType, FLAGS } from '../../types';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { formatTime, getDropDownDate } from './dateTime';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
 
-import './PipelineRunsDurationCard.scss';
+import './PipelinesOverview.scss';
 
 interface PipelinesRunsDurationProps {
   namespace: string;
@@ -35,7 +36,7 @@ interface PipelinesRunsDurationProps {
   kind?: string;
 }
 
-const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
+const PipelinesRunsDurationCard: FC<PipelinesRunsDurationProps> = ({
   namespace,
   timespan,
   parentName,
@@ -45,23 +46,24 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
-  const [summaryData, setSummaryData] = React.useState<SummaryProps>({});
-  const [loaded, setLoaded] = React.useState(false);
-  const [pipelineRunsDurationError, setPipelineRunsDurationError] =
-    React.useState<string | undefined>();
-  const abortControllerRef = React.useRef<AbortController>();
+  const [summaryData, setSummaryData] = useState<SummaryProps>({});
+  const [loaded, setLoaded] = useState(false);
+  const [pipelineRunsDurationError, setPipelineRunsDurationError] = useState<
+    string | undefined
+  >();
+  const abortControllerRef = useRef<AbortController>();
 
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoaded(false);
     setPipelineRunsDurationError(undefined);
     setSummaryData({});
   }, [namespace, timespan]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -111,9 +113,12 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
   return (
     <>
       <Card
-        className={classNames('pipeline-overview__duration-card', {
-          'card-border': bordered,
-        })}
+        className={classNames(
+          'pf-v6-u-h-100 pipeline-overview__min-width-full pf-v6-u-font-size-lg',
+          {
+            'card-border': bordered,
+          },
+        )}
       >
         <CardTitle>
           <span>{t('Duration')}</span>
@@ -125,23 +130,20 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
               variant="danger"
               isInline
               title={t('Unable to load duration')}
-              className="pf-v5-u-mb-md"
+              className="pf-v6-u-mb-md"
             />
           ) : (
             <>
-              <Grid
-                hasGutter
-                className="pipeline-overview__duration-card__grid"
-              >
-                <GridItem span={6}>
+              <Grid hasGutter className="cpf-v6-u-mb-sm">
+                <GridItem span={9} className="pf-v6-u-mb-sm">
                   <span>
-                    <MonitoringIcon className="pipeline-overview__duration-card__icon" />
+                    <MonitoringIcon className="pf-v6-u-mr-sm" />
                     {t('Average duration')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
                   {loaded ? (
                     summaryData?.['avg_duration'] ? (
@@ -150,23 +152,20 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
                       '-'
                     )
                   ) : (
-                    <LoadingInline />
+                    <Loading isInline={true} />
                   )}
                 </GridItem>
               </Grid>
-              <Grid
-                hasGutter
-                className="pipeline-overview__duration-card__grid"
-              >
-                <GridItem span={6}>
+              <Grid hasGutter className="pf-v6-u-mb-sm">
+                <GridItem span={9} className="pf-v6-u-mb-sm">
                   <span>
-                    <InfoCircleIcon className="pipeline-overview__duration-card__info-icon" />
+                    <InfoCircleIcon className="pf-v6-u-mr-sm pipeline-overview__chart-color-blue" />
                     {t('Maximum')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
                   {loaded ? (
                     summaryData?.['max_duration'] ? (
@@ -175,20 +174,20 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
                       '-'
                     )
                   ) : (
-                    <LoadingInline />
+                    <Loading isInline={true} />
                   )}
                 </GridItem>
               </Grid>
               <Grid hasGutter>
-                <GridItem span={6}>
+                <GridItem span={9}>
                   <span>
-                    <HistoryIcon className="pipeline-overview__duration-card__icon" />
+                    <HistoryIcon className="pf-v6-u-mr-sm" />
                     {t('Total duration')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
                   {loaded ? (
                     summaryData?.['total_duration'] ? (
@@ -197,7 +196,7 @@ const PipelinesRunsDurationCard: React.FC<PipelinesRunsDurationProps> = ({
                       '-'
                     )
                   ) : (
-                    <LoadingInline />
+                    <Loading isInline={true} />
                   )}
                 </GridItem>
               </Grid>
