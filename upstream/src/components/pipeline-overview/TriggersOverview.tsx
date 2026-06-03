@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Flex, FlexItem } from '@patternfly/react-core';
+import type { FC } from 'react';
+import { Flex, FlexItem, List, ListItem } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 
 import { usePipelineTriggerTemplateNames } from '../utils/triggers';
@@ -12,7 +12,7 @@ type TriggersOverviewProps = {
   pipeline: PipelineKind;
 };
 
-const TriggersOverview: React.FC<TriggersOverviewProps> = ({ pipeline }) => {
+const TriggersOverview: FC<TriggersOverviewProps> = ({ pipeline }) => {
   const {
     metadata: { name, namespace },
   } = pipeline;
@@ -25,11 +25,8 @@ const TriggersOverview: React.FC<TriggersOverviewProps> = ({ pipeline }) => {
         data-testid="triggers-heading"
         text={t('Triggers')}
       />
-      <ul className="list-group" data-testid="triggers-list">
-        <li
-          className="list-group-item pipeline-overview"
-          data-testid="triggers-list-item"
-        >
+      <List isPlain data-testid="triggers-list">
+        <ListItem data-testid="triggers-list-item">
           <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
             <FlexItem>
               <TriggerResourceLinks
@@ -39,8 +36,8 @@ const TriggersOverview: React.FC<TriggersOverviewProps> = ({ pipeline }) => {
               />
             </FlexItem>
           </Flex>
-        </li>
-      </ul>
+        </ListItem>
+      </List>
     </>
   ) : null;
 };

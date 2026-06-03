@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import Logs from './Logs';
 import { getRenderContainers } from './logs-utils';
 import { PodKind } from '../../types';
@@ -8,13 +8,19 @@ type MultiStreamLogsProps = {
   taskName?: string;
   setCurrentLogsGetter?: (getter: () => string) => void;
   activeStep?: string;
+  isResourceManagedByKueue?: boolean;
+  pipelineRunName?: string;
+  pipelineRunFinished?: boolean;
 };
 
-export const MultiStreamLogs: React.FC<MultiStreamLogsProps> = ({
+export const MultiStreamLogs: FC<MultiStreamLogsProps> = ({
   resource,
   taskName,
   setCurrentLogsGetter,
   activeStep,
+  isResourceManagedByKueue,
+  pipelineRunName,
+  pipelineRunFinished,
 }) => {
   const { containers, stillFetching } = getRenderContainers(resource);
 
@@ -22,7 +28,7 @@ export const MultiStreamLogs: React.FC<MultiStreamLogsProps> = ({
     <>
       <div
         data-test-id="logs-task-container"
-        className="pf-v5-u-h-100 pf-v5-u-w-100"
+        className="pf-v6-u-h-100 pf-v6-u-w-100"
       >
         <Logs
           stillFetching={stillFetching}
@@ -31,6 +37,9 @@ export const MultiStreamLogs: React.FC<MultiStreamLogsProps> = ({
           containers={containers}
           setCurrentLogsGetter={setCurrentLogsGetter}
           activeStep={activeStep}
+          isResourceManagedByKueue={isResourceManagedByKueue}
+          pipelineRunName={pipelineRunName}
+          pipelineRunFinished={pipelineRunFinished}
         />
       </div>
     </>

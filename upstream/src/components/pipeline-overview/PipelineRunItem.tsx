@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { Grid, GridItem } from '@patternfly/react-core';
+import type { FC } from 'react';
+import { Grid, GridItem, ListItem } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { useTaskRuns } from '../hooks/useTaskRuns';
+import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 import { resourcePath } from '../utils/resource-link';
 import { PipelineRunModel } from '../../models';
-import { PipelineRunKind } from '../../types';
+import { ComputedStatus, PipelineRunKind } from '../../types';
 import { getPLRLogSnippet } from '../logs/pipelineRunLogSnippet';
 import { pipelineRunStatus } from '../utils/pipeline-filter-reducer';
 import Status from '../status/Status';
@@ -18,15 +19,29 @@ type PipelineRunItemProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
+const PipelineRunItem: FC<PipelineRunItemProps> = ({ pipelineRun }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
+  const { isResourceManagedByKueue } = useMultiClusterProxyService({
+    managedBy: pipelineRun?.spec?.managedBy,
+  });
   const {
     metadata: { name, namespace, creationTimestamp },
     status,
   } = pipelineRun;
+  const plrStatus = pipelineRunStatus(pipelineRun);
+  const pipelineRunFinished =
+    plrStatus !== ComputedStatus.Running &&
+    plrStatus !== ComputedStatus.Pending &&
+    plrStatus !== ComputedStatus.Cancelling;
   const [taskRuns] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
+    undefined,
+    undefined,
+    {
+      pipelineRunFinished,
+      pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
+    },
   );
   const path = resourcePath(PipelineRunModel, name, namespace);
   const lastUpdated = status
@@ -34,7 +49,7 @@ const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
     : creationTimestamp;
   const logDetails = getPLRLogSnippet(pipelineRun, taskRuns);
   return (
-    <li className="opp-pipeline-run-item list-group-item">
+    <ListItem className="opp-pipeline-run-item">
       <Grid hasGutter>
         <GridItem span={6}>
           <div>
@@ -57,7 +72,12 @@ const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
         </GridItem>
         {logDetails && (
           <GridItem>
-            <LogSnippetBlock logDetails={logDetails} namespace={namespace}>
+            <LogSnippetBlock
+              logDetails={logDetails}
+              namespace={namespace}
+              isResourceManagedByKueue={isResourceManagedByKueue}
+              pipelineRunName={name}
+            >
               {(logSnippet: string) => (
                 <LogSnippet
                   message={logDetails.title}
@@ -68,7 +88,7 @@ const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
           </GridItem>
         )}
       </Grid>
-    </li>
+    </ListItem>
   );
 };
 

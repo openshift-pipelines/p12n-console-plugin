@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useParams } from 'react-router-dom-v5-compat';
+import type { FC } from 'react';
+import { useParams } from 'react-router';
 import { PageSection } from '@patternfly/react-core';
 import { useTaskRunFilters } from './event-utils';
 import { ResourcesEventStream } from './events';
@@ -9,11 +9,11 @@ export interface TaskRunDetailsProps {
   obj: TaskRunKind;
 }
 
-const TaskRunEvents: React.FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
+const TaskRunEvents: FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
   const { ns: namespace } = useParams();
   const filters = useTaskRunFilters(namespace, taskRun);
   return (
-    <PageSection isFilled variant="light">
+    <PageSection hasBodyWrapper={false} isFilled >
       <ResourcesEventStream filters={filters} namespace={namespace} />
     </PageSection>
   );

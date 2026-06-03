@@ -126,9 +126,13 @@ const config: Configuration = {
     port: 9001,
     // Allow bridge running in a container to connect to the plugin dev server.
     allowedHosts: 'all',
+    liveReload: true,
     client: {
       overlay: false,
+      // Connect to plugin dev server, not console
+      webSocketURL: 'ws://localhost:9001/ws',
     },
+    hot: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
@@ -139,18 +143,43 @@ const config: Configuration = {
     devMiddleware: {
       writeToDisk: true,
     },
+    watchFiles: ['src/**/*'],
   },
   plugins: [
     new ConsoleRemotePlugin(),
     new CopyWebpackPlugin({
       patterns: [{ from: path.resolve(__dirname, 'locales'), to: 'locales' }],
     }),
+    // PatchEntryCallbackPlugin in @openshift/dynamic-plugin-sdk-webpack validates entry chunks
+    // but doesn't skip hot-update assets, causing false-positive errors during HMR.
+    // afterEmit runs after the error is pushed (processAssets) but before done reports it.
+    /* {
+      apply: (compiler: import('webpack').Compiler) => {
+        compiler.hooks.afterEmit.tap(
+          'SuppressHotUpdateEntryError',
+          (compilation) => {
+            compilation.errors = compilation.errors.filter(
+              (e) =>
+                !(
+                  e.message === 'Missing call to __load_plugin_entry__' &&
+                  (e as import('webpack').WebpackError).file?.includes(
+                    '.hot-update.',
+                  )
+                ),
+            );
+          },
+        );
+      },
+    }, */
     // new NodePolyfillPlugin(),
   ],
   devtool: 'source-map',
   optimization: {
     chunkIds: 'named',
     minimize: false,
+
+    /* runtimeChunk: false,
+    splitChunks: false, */
   },
 };
 

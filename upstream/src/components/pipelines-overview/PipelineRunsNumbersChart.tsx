@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import * as _ from 'lodash';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ import {
   ChartGroup,
   ChartThemeColor,
   ChartVoronoiContainer,
-} from '@patternfly/react-charts';
+} from '@patternfly/react-charts/victory';
 import { Alert, Card, CardBody, CardTitle } from '@patternfly/react-core';
 import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
 import {
@@ -26,7 +27,7 @@ import { getResultsSummary } from '../utils/summary-api';
 import { DataType, FLAGS, SummaryResponse } from '../../types';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { getFilter, useInterval } from './utils';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
 
 interface PipelinesRunsNumbersChartProps {
   namespace?: string;
@@ -36,7 +37,6 @@ interface PipelinesRunsNumbersChartProps {
   parentName?: string;
   bordered?: boolean;
   kind?: string;
-  width?: number;
 }
 type DomainType = { x?: DomainTuple; y?: DomainTuple };
 
@@ -66,7 +66,15 @@ const getChartData = (
   return chartData;
 };
 
-const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
+const BOTTOM_PAD_DEFAULT = 35;
+const BOTTOM_PAD_ROTATED = 55;
+const BOTTOM_PAD_LABEL = 15;
+const CHART_BODY_TOP_OFFSET = 10;
+const CHART_BODY_MIN_HEIGHT = 50;
+const CHART_BODY_MAX_HEIGHT = 100;
+const CHART_ASPECT_RATIO = 5;
+
+const PipelinesRunsNumbersChart: FC<PipelinesRunsNumbersChartProps> = ({
   namespace,
   timespan,
   interval,
@@ -74,7 +82,6 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
   parentName,
   bordered,
   kind,
-  width = 530,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
@@ -87,18 +94,24 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
     y: domainY || undefined,
   };
 
-  const [data, setData] = React.useState<SummaryResponse>();
-  const [loaded, setLoaded] = React.useState(false);
-  const [pipelineRunsChartError, setPipelineRunsChartError] = React.useState<
+  const [data, setData] = useState<SummaryResponse>();
+  const [loaded, setLoaded] = useState(false);
+  const [pipelineRunsChartError, setPipelineRunsChartError] = useState<
     string | undefined
   >();
-  const abortControllerRef = React.useRef<AbortController>();
+  const abortControllerRef = useRef<AbortController>();
+  const [chartWidth, setChartWidth] = useState(0);
+  const chartContainerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      setChartWidth(node.clientWidth);
+    }
+  }, []);
 
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -146,7 +159,7 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
       });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoaded(false);
     setPipelineRunsChartError(undefined);
     setData(undefined);
@@ -208,89 +221,114 @@ const PipelinesRunsNumbersChart: React.FC<PipelinesRunsNumbersChartProps> = ({
   }
 
   let xAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: { fill: 'var(--pf-v5-global--Color--100)', fontSize: 12 },
+    tickLabels: {
+      fill: 'var(--pf-t--global--text--color--regular)',
+      fontSize: 12,
+    },
   };
   const yAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: { fill: 'var(--pf-v5-global--Color--100)', fontSize: 12 },
+    tickLabels: {
+      fill: 'var(--pf-t--global--text--color--regular)',
+      fontSize: 12,
+    },
   };
+  let bottomPad: number;
   if (tickValues.length > 7) {
     xAxisStyle = {
       tickLabels: {
-        fill: 'var(--pf-v5-global--Color--100)',
+        fill: 'var(--pf-t--global--text--color--regular)',
         angle: 320,
         fontSize: 10,
         textAnchor: 'end',
         verticalAnchor: 'end',
       },
     };
+    bottomPad = BOTTOM_PAD_ROTATED;
+  } else {
+    bottomPad = BOTTOM_PAD_DEFAULT;
   }
+  if (showLabel) bottomPad += BOTTOM_PAD_LABEL;
+  const chartBodyHeight = Math.max(
+    CHART_BODY_MIN_HEIGHT,
+    Math.min(
+      CHART_BODY_MAX_HEIGHT,
+      Math.round(chartWidth / CHART_ASPECT_RATIO),
+    ),
+  );
+  const chartHeight = CHART_BODY_TOP_OFFSET + chartBodyHeight + bottomPad;
 
   return (
-    <>
-      <Card
-        className={classNames({
-          'pipeline-overview__number-of-plr-card':!pipelineRunsChartError,
+    <Card
+      className={classNames(
+        'pipeline-overview__min-width-full pipeline-overview__overflow-hidden pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-h-100',
+        {
+          'pipeline-overview__number-of-plr-card': !pipelineRunsChartError,
           'card-border': bordered,
+        },
+      )}
+    >
+      <CardTitle className="pf-v6-u-pb-0">
+        <span>{t('Number of PipelineRuns')}</span>
+      </CardTitle>
+      <CardBody
+        className={classNames({
+          'pf-v6-u-flex-1 pipeline-overview__min-height-0 pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-justify-content-flex-end pf-v6-u-align-items-flex-start pf-v6-u-p-0':
+            !pipelineRunsChartError,
         })}
       >
-        <CardTitle className="pipeline-overview__number-of-plr-card__title">
-          <span>{t('Number of PipelineRuns')}</span>
-        </CardTitle>
-        <CardBody 
-          className={classNames({
-            'pipeline-overview__number-of-plr-card__body':!pipelineRunsChartError,
-          })}
+        {pipelineRunsChartError ? (
+          <Alert
+            variant="danger"
+            isInline
+            title={t('Unable to load pipeline runs')}
+            className="pf-v6-u-mb-md pf-v6-u-mt-lg"
+          />
+        ) : (
+          <div
+            ref={chartContainerRef}
+            className={`pf-v6-u-w-100 ${chartWidth > 0 ? 'pf-v6-u-h-100' : ''}`}
           >
-          {pipelineRunsChartError ? (
-            <Alert
-              variant="danger"
-              isInline
-              title={t('Unable to load pipeline runs')}
-              className="pf-v5-u-mb-md pf-v5-u-mt-lg"
-            />
-          ) : (
-            <div className="pipeline-overview__number-of-plr-card__bar-chart-div">
-              {loaded ? (
-                <Chart
-                  containerComponent={
-                    <ChartVoronoiContainer
-                      labels={({ datum }) => `${datum.y}`}
-                      constrainToVisibleArea
-                    />
-                  }
-                  scale={{ x: 'time', y: 'linear' }}
-                  domain={domainValue}
-                  domainPadding={{ x: [30, 25] }}
-                  height={145}
-                  width={width}
-                  padding={{
-                    top: 10,
-                    bottom: 55,
-                    left: 50,
-                  }}
-                  themeColor={ChartThemeColor.blue}
-                >
-                  <ChartAxis
-                    tickValues={tickValues}
-                    style={xAxisStyle}
-                    tickFormat={xTickFormat}
-                    label={showLabel ? dayLabel : ''}
+            {loaded ? (
+              <Chart
+                containerComponent={
+                  <ChartVoronoiContainer
+                    labels={({ datum }) => `${datum.y}`}
+                    constrainToVisibleArea
                   />
-                  <ChartAxis dependentAxis style={yAxisStyle} />
-                  <ChartGroup>
-                    <ChartBar data={chartData} barWidth={18} />
-                  </ChartGroup>
-                </Chart>
-              ) : (
-                <div className="pipeline-overview__number-of-plr-card__loading pf-v5-u-h-100">
-                  <LoadingInline />
-                </div>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </Card>
-    </>
+                }
+                scale={{ x: 'time', y: 'linear' }}
+                domain={domainValue}
+                domainPadding={{ x: [30, 25] }}
+                height={chartHeight}
+                width={chartWidth}
+                padding={{
+                  top: 20,
+                  bottom: bottomPad,
+                  left: 50,
+                  right: 40,
+                }}
+                themeColor={ChartThemeColor.blue}
+              >
+                <ChartAxis
+                  tickValues={tickValues}
+                  style={xAxisStyle}
+                  tickFormat={xTickFormat}
+                  label={showLabel ? dayLabel : ''}
+                />
+                <ChartAxis dependentAxis style={yAxisStyle} />
+                <ChartGroup>
+                  <ChartBar data={chartData} barWidth={18} />
+                </ChartGroup>
+              </Chart>
+            ) : (
+              <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pf-v6-u-justify-content-center pf-v6-u-h-100 pf-v6-u-p-md pf-v6-u-p-0-on-md">
+                <Loading isInline={true} />
+              </div>
+            )}
+          </div>
+        )}
+      </CardBody>
+    </Card>
   );
 };
 
