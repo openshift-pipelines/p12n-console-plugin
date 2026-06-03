@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import {
   ClipboardCopy,
   DescriptionList,
@@ -7,7 +7,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { getPLRLogSnippet } from '../logs/pipelineRunLogSnippet';
 import RunDetailsErrorLog from '../logs/RunDetailsErrorLog';
 import { getReferenceForModel } from '../pipelines-overview/utils';
@@ -15,7 +15,7 @@ import Status from '../status/Status';
 import { ExternalLink } from '../utils/link';
 import { TaskRunModel } from '../../models';
 import { Timestamp } from '@openshift-console/dynamic-plugin-sdk';
-import { PipelineRunKind } from '../../types';
+import { ComputedStatus, PipelineRunKind } from '../../types';
 import {
   pipelineRunFilterReducer,
   pipelineRunTitleFilterReducer,
@@ -31,6 +31,7 @@ import { convertBackingPipelineToPipelineResourceRefProps } from './utils';
 import RepositoryLinkList from './RepositoryLinkList';
 import PipelineRunVulnerabilities from '../pipelines-list/status/PipelineRunVulnerabilities';
 import { useTaskRuns } from '../hooks/useTaskRuns';
+import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 import TriggeredBySection from './TriggeredBySection';
 import PipelineResourceRef from '../triggers-details/PipelineResourceRef';
 import WorkspaceResourceLinkList from '../workspaces/WorkspaceResourceLinkList';
@@ -39,14 +40,30 @@ export type PipelineRunCustomDetailsProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
+const PipelineRunCustomDetails: FC<PipelineRunCustomDetailsProps> = ({
   pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [taskRuns, taskRunsLoaded] = useTaskRuns(
+  const { isResourceManagedByKueue } = useMultiClusterProxyService({
+    managedBy: pipelineRun?.spec?.managedBy,
+  });
+  const plrStatus = pipelineRunFilterReducer(pipelineRun);
+  const pipelineRunFinished =
+    plrStatus !== ComputedStatus.Running &&
+    plrStatus !== ComputedStatus.Pending &&
+    plrStatus !== ComputedStatus.Cancelling;
+  const [taskRuns, k8sLoaded, trLoaded] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
+    undefined,
+    undefined,
+    {
+      pipelineRunFinished,
+      pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
+    },
   );
+  /* this needs decoupling */
+  const taskRunsLoaded = k8sLoaded && trLoaded;
 
   const sbomTaskRun = taskRunsLoaded ? getSbomTaskRun(taskRuns) : null;
   const buildImage = getImageUrl(pipelineRun);
@@ -68,6 +85,8 @@ const PipelineRunCustomDetails: React.FC<PipelineRunCustomDetailsProps> = ({
           <RunDetailsErrorLog
             logDetails={getPLRLogSnippet(pipelineRun, taskRuns)}
             namespace={pipelineRun.metadata.namespace}
+            isResourceManagedByKueue={isResourceManagedByKueue}
+            pipelineRunName={pipelineRun.metadata.name}
           />
         )}
         <DescriptionListGroup>

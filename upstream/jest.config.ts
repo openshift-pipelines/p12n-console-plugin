@@ -130,9 +130,9 @@ const config: Config.InitialOptions = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
+    './__mocks__/textEncoderDecoder.ts',
     './__mocks__/serverFlags.js',
     'jest-canvas-mock',
-    './before-tests.ts',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
@@ -178,7 +178,7 @@ const config: Config.InitialOptions = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!(@patternfly(-\\S+)?|d3(-\\S+)?|delaunator|robust-predicates|internmap|cheerio|lodash-es|@openshift-console|@novnc|@spice-project|@popperjs|i18next(-\\S+)?|@babel/runtime)/.*)',
+    '<rootDir>/node_modules/(?!(@patternfly(-\\S+)?|d3(-\\S+)?|delaunator|robust-predicates|internmap|cheerio|lodash-es|@openshift-console|@novnc|@spice-project|@popperjs|i18next(-\\S+)?|@babel/runtime|react-router|cookie|set-cookie-parser)/.*)',
   ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them

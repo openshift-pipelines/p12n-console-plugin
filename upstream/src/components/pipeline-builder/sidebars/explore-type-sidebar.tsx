@@ -1,13 +1,13 @@
-import * as React from 'react';
+import type { FC, MouseEvent } from 'react';
+import { useState, useEffect } from 'react';
 import * as _ from 'lodash-es';
 import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
   EmptyState,
-  EmptyStateBody,
   EmptyStateVariant,
-  TextContent,
+  Content,
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { CamelCaseWrap, K8sKind } from '@openshift-console/dynamic-plugin-sdk';
@@ -27,17 +27,17 @@ const getRef = (definition: SwaggerDefinition): string => {
   return ref && re.test(ref) ? ref.replace(re, '') : null;
 };
 
-export const ExploreType: React.FC<ExploreTypeProps> = (props) => {
+export const ExploreType: FC<ExploreTypeProps> = (props) => {
   // Track the previously selected items to build breadcrumbs. Each history
   // entry contains the name, description, and path to the definition in the
   // OpenAPI document.
-  const [drilldownHistory, setDrilldownHistory] = React.useState([]);
+  const [drilldownHistory, setDrilldownHistory] = useState([]);
   const { kindObj, schema } = props;
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [allDefinitions, setAllDefinitions] =
-    React.useState<SwaggerDefinitions>(null);
+    useState<SwaggerDefinitions>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (kindObj) {
       fetchSwagger()
         .then((response) => {
@@ -84,7 +84,7 @@ export const ExploreType: React.FC<ExploreTypeProps> = (props) => {
     : [];
 
   const drilldown = (
-    e: React.MouseEvent<HTMLButtonElement>,
+    e: MouseEvent<HTMLButtonElement>,
     name: string,
     desc: string,
     path: string[],
@@ -100,7 +100,7 @@ export const ExploreType: React.FC<ExploreTypeProps> = (props) => {
   };
 
   const breadcrumbClicked = (
-    e: React.MouseEvent<HTMLButtonElement>,
+    e: MouseEvent<HTMLButtonElement>,
     i: number,
   ) => {
     e.preventDefault();
@@ -156,18 +156,17 @@ export const ExploreType: React.FC<ExploreTypeProps> = (props) => {
           })}
         </Breadcrumb>
       )}
-      <TextContent>
+      <Content>
         {description && (
           <p className="co-break-word co-pre-wrap">
             <LinkifyExternal>{description}</LinkifyExternal>
           </p>
         )}
         {_.isEmpty(currentProperties) ? (
-          <EmptyState variant={EmptyStateVariant.xs}>
-            <EmptyStateBody>{t('No Properties found')}</EmptyStateBody>
+          <EmptyState variant={EmptyStateVariant.xs} headingLevel="h4" titleText={t('No Properties found')}>
           </EmptyState>
         ) : (
-          <ul className="co-resource-sidebar-list pf-v5-c-list">
+          <ul className="co-resource-sidebar-list pf-v6-c-list">
             {_.map(
               currentProperties,
               (definition: SwaggerDefinition, name: string) => {
@@ -215,7 +214,7 @@ export const ExploreType: React.FC<ExploreTypeProps> = (props) => {
             )}
           </ul>
         )}
-      </TextContent>
+      </Content>
     </>
   );
 };

@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { ReactText, ReactNode, ReactElement, FC } from 'react';
+import { Fragment } from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -15,22 +16,22 @@ import { FieldProps } from '../pipelines-details/multi-column-field/types';
 import './RadioGroupField.scss';
 
 interface RadioGroupOption {
-  value: React.ReactText;
-  label: React.ReactNode;
+  value: ReactText;
+  label: ReactNode;
   isDisabled?: boolean;
   isChecked?: boolean;
-  children?: React.ReactNode;
-  activeChildren?: React.ReactElement;
+  children?: ReactNode;
+  activeChildren?: ReactElement;
 }
 
 interface RadioGroupFieldProps extends FieldProps {
   isInline?: boolean;
-  labelIcon?: React.ReactElement;
+  labelIcon?: ReactElement;
   options: RadioGroupOption[];
-  onChange?: (value: React.ReactText) => void;
+  onChange?: (value: ReactText) => void;
 }
 
-const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
+const RadioGroupField: FC<RadioGroupFieldProps> = ({
   label,
   labelIcon,
   options,
@@ -45,14 +46,14 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
   const isValid = !(touched && error);
   const errorMessage = !isValid ? error : '';
   return (
-    <FormGroup
+    (<FormGroup
       className={classNames('ocs-radio-group-field', {
         'ocs-radio-group-field--inline': isInline,
       })}
       fieldId={fieldId}
       isRequired={required}
       label={label}
-      labelIcon={labelIcon}
+      labelHelp={labelIcon}
       isInline={isInline}
     >
       {options.map((option) => {
@@ -68,7 +69,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
         );
 
         return (
-          <React.Fragment key={option.value}>
+          (<Fragment key={option.value}>
             <RadioButtonField
               {...field}
               {...props}
@@ -80,10 +81,9 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
               description={description}
               onChange={onChange}
             />
-          </React.Fragment>
+          </Fragment>)
         );
       })}
-
       <FormHelperText>
         <HelperText>
           {!isValid ? (
@@ -95,7 +95,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
           )}
         </HelperText>
       </FormHelperText>
-    </FormGroup>
+    </FormGroup>)
   );
 };
 
