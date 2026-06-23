@@ -1,18 +1,27 @@
-ARG BUILDER=registry.redhat.io/ubi9/nodejs-18@sha256:ffbad8210aee178157e7621b5fa43fb85f1ac205246b0d2606bea778549da8c1
-ARG RUNTIME=registry.access.redhat.com/ubi9/ubi-minimal:latest
+ARG NJS_BUILDER=registry.access.redhat.com/ubi9/nodejs-24:latest
+ARG NGX_RUNTIME=registry.access.redhat.com/ubi9/nginx-124:latest
 
-FROM $BUILDER AS builder-ui
+FROM $NJS_BUILDER AS builder-ui
 
 WORKDIR /go/src/github.com/openshift-pipelines/console-plugin
 COPY upstream .
-RUN npm install -g yarn-1.22.22.tgz
-RUN set -e; for f in patches/*.patch; do echo ${f}; [[ -f ${f} ]] || continue; git apply ${f}; done
-COPY .konflux/yarn.lock .
-RUN yarn install --offline --frozen-lockfile --ignore-scripts && \
+#Install Yarn
+RUN if [[ -d /cachi2/output/deps/npm/ ]]; then \
+      npm install -g /cachi2/output/deps/npm/yarnpkg-cli-dist-4.6.0.tgz; \
+      YARN_ENABLE_NETWORK=0; \
+    else \
+      npm install -g corepack; \
+      corepack enable ;\
+      corepack prepare yarn@4.6.0 --activate;  \
+    fi
+
+# Install dependencies & build
+USER root
+RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
     yarn build
 
-FROM $RUNTIME
-ARG VERSION=next
+
+FROM $NGX_RUNTIME
 
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/nginx.conf /etc/nginx/nginx.conf
