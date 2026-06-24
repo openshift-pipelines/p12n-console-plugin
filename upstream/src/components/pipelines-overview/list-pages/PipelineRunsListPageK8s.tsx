@@ -1,5 +1,7 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
+import { useSearchParams } from 'react-router';
 import { Alert, Card, CardBody, Grid, GridItem } from '@patternfly/react-core';
 import {
   PrometheusResponse,
@@ -117,23 +119,24 @@ const processData = (
   });
 };
 
-const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
+const PipelineRunsListPageK8s: FC<PipelineRunsListPageProps> = ({
   bordered,
   namespace,
   timespan,
   interval,
 }) => {
-  const [pageFlag, setPageFlag] = React.useState(1);
-  const [searchText, setSearchText] = React.useState('');
+  const [pageFlag, setPageFlag] = useState(1);
+  const [searchText, setSearchText] = useState('');
   const [tickValues, type] = getXaxisValues(timespan);
   const { t } = useTranslation('plugin__pipelines-console-plugin');
+  const [, setSearchParams] = useSearchParams();
 
   const [projects, projectsLoaded] = useK8sWatchResource<Project[]>({
     isList: true,
     kind: 'Project',
     optional: true,
   });
-  const [pipelineRunsListError, setPipelineRunsListError] = React.useState<
+  const [pipelineRunsListError, setPipelineRunsListError] = useState<
     string | null
   >(null);
   const [
@@ -183,7 +186,7 @@ const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
           timeout: 90000,
         });
 
-  const summaryDataK8s = React.useMemo(() => {
+  const summaryDataK8s = useMemo(() => {
     if (pipelineRunsMetricsCountError || pipelineRunsMetricsSumError) {
       return [];
     }
@@ -202,7 +205,7 @@ const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
     type,
   ]);
 
-  const summaryDataFiltered = React.useMemo(() => {
+  const summaryDataFiltered = useMemo(() => {
     return summaryDataK8s.filter((summary) =>
       summary.group_value
         .split('/')[1]
@@ -228,17 +231,17 @@ const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
     loadFormat: (v) => (v == 'perrepository' ? 2 : 1),
   });
 
-  // const handlePageChange = (pageNumber: number) => {
-  //   setloaded(false);
-  //   setSummaryData([]);
-  //   setSummaryDataFiltered([]);
-  //   setPageFlag(pageNumber);
-  // };
   const handleNameChange = (value: string) => {
     setSearchText(value);
+    setSearchParams((prev) => {
+      /*Reset Pagination for ConsoleDataView when Filtering by name*/
+      const next = new URLSearchParams(prev);
+      next.set('page', '1');
+      return next;
+    });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const hasNonAbortError =
       (pipelineRunsMetricsCountError &&
         pipelineRunsMetricsCountError.name !== 'AbortError') ||
@@ -266,15 +269,12 @@ const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
             variant="danger"
             isInline
             title={t('Unable to load pipeline runs list')}
-            className="pf-v5-u-mb-md"
+            className="pf-v6-u-mb-md"
           />
         ) : (
           <>
-            <Grid hasGutter className="pipeline-overview__listpage__grid">
-              <GridItem
-                span={9}
-                className="pipeline-overview__listpage__griditem"
-              >
+            <Grid hasGutter>
+              <GridItem span={6} xl={3} rowSpan={1}>
                 {/* Lastrun Status is not provided by API  */}
                 {/* <StatusDropdown /> */}
                 <SearchInputField
@@ -283,27 +283,8 @@ const PipelineRunsListPageK8s: React.FC<PipelineRunsListPageProps> = ({
                   handleNameChange={handleNameChange}
                 />
               </GridItem>
-              {/*
-          Since Pipeline metrics for PAC is not available, commenting this
-          <GridItem span={3}>
-            <ToggleGroup className="pipeline-overview__listpage__button">
-              <ToggleGroupItem
-                text={t('Per Pipeline')}
-                buttonId="pipelineButton"
-                isSelected={pageFlag === 1}
-                onChange={() => handlePageChange(1)}
-              />
-              <ToggleGroupItem
-                text={t('Per Repository')}
-                buttonId="repositoryButton"
-                isSelected={pageFlag === 2}
-                onChange={() => handlePageChange(2)}
-              />
-            </ToggleGroup>
-          </GridItem> */}
-            </Grid>
-            <Grid hasGutter>
-              <GridItem span={12}>
+
+              <GridItem span={12} rowSpan={1}>
                 {pageFlag === 1 ? (
                   <PipelineRunsForPipelinesListK8s
                     summaryData={summaryDataK8s}

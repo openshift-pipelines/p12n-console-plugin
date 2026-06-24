@@ -15,9 +15,9 @@ import {
   TektonTaskAnnotation,
 } from '../pipeline-quicksearch-utils';
 import {
+  sampleArtifactHubCatalogItem,
   sampleCatalogItems,
   sampleTaskCatalogItem,
-  sampleArtifactHubCatalogItem,
 } from './catalog-item-data';
 
 const getInstalledFromAnnotation = () => ({
@@ -197,7 +197,9 @@ describe('pipeline-quicksearch-utils', () => {
     });
 
     it('should return false if the artifact hub task is passed', () => {
-      expect(isInstalledNamespaceTask(sampleArtifactHubCatalogItem)).toBe(false);
+      expect(isInstalledNamespaceTask(sampleArtifactHubCatalogItem)).toBe(
+        false,
+      );
     });
 
     it('should return false if the namespace task is not installed through pipeline builder', () => {
@@ -254,9 +256,9 @@ describe('pipeline-quicksearch-utils', () => {
         ...sampleArtifactHubCatalogItem,
         attributes: {
           ...sampleArtifactHubCatalogItem.attributes,
+          selectedVersionForContentUrl: '0.1',
           selectedVersionContentUrl:
             'https://raw.githubusercontent.com/tektoncd/catalog/main/task/ansible-runner/0.1/ansible-runner.yaml',
-          selectedVersionForContentUrl: '0.1',
         },
       };
       expect(getSelectedVersionUrl(catalogItem, '0.1')).toBe(
@@ -265,7 +267,9 @@ describe('pipeline-quicksearch-utils', () => {
     });
 
     it('should return null when selectedVersionContentUrl is not set', () => {
-      expect(getSelectedVersionUrl(sampleArtifactHubCatalogItem, '0.1')).toBeNull();
+      expect(
+        getSelectedVersionUrl(sampleArtifactHubCatalogItem, '0.1'),
+      ).toBeNull();
     });
   });
 
@@ -292,7 +296,7 @@ describe('pipeline-quicksearch-utils', () => {
       const installedCatalogTask: CatalogItem = {
         ...sampleTaskCatalogItem,
         uid: '23',
-        name: sampleArtifactHubCatalogItem.name,
+        name: sampleArtifactHubCatalogItem.data.name,
         data: {
           ...sampleTaskCatalogItem.data,
           kind: 'Task',

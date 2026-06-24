@@ -78,7 +78,6 @@ export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_PAGE_ROUTE_EXTENSION =
   'HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_PAGE_ROUTE_EXTENSION';
 export const FLAG_HIDE_STATIC_PIPELINE_PLUGIN_PAC_FORM =
   'HIDE_STATIC_PIPELINE_PLUGIN_PAC_FORM';
-export const HUB_INTEGRATION_KEY = 'enable-devconsole-integration';
 
 export const RESOURCE_LOADED_FROM_RESULTS_ANNOTATION =
   'resource.loaded.from.tektonResults';
@@ -204,3 +203,4 @@ export const KUEUE_LABEL_PREFIX = 'kueue.x-k8s.io';
 export const DASH = '-';
 export const ADMIN_PERSPECTIVE_BASE_PATH = '/pipelines';
 export const DEV_PERSPECTIVE_BASE_PATH = '/dev-pipelines';
+export const HUB_INTEGRATION_KEY = 'enable-devconsole-integration';

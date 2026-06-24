@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { AlertVariant } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import {
@@ -42,7 +42,7 @@ const getPipelineRunsofApprovals = (
   return pipelineRuns;
 };
 
-export const PipelineApprovalContext = React.createContext({});
+export const PipelineApprovalContext = createContext({});
 
 export const PipelineApprovalContextProvider = PipelineApprovalContext.Provider;
 
@@ -51,7 +51,7 @@ export const usePipelineApprovalToast = () => {
   const { addToast, removeToast } = useToast();
   const [namespace] = useActiveNamespace();
   const { currentUser, updateUserInfo } = useActiveUserWithUpdate();
-  const [currentToasts, setCurrentToasts] = React.useState<{
+  const [currentToasts, setCurrentToasts] = useState<{
     [key: string]: { toastId: string };
   }>({});
   const [perspective] = useActivePerspective();
@@ -73,7 +73,7 @@ export const usePipelineApprovalToast = () => {
   };
   const [approvalTasks] =
     useK8sWatchResource<ApprovalTaskKind[]>(approvalsResource);
-  React.useEffect(() => {
+  useEffect(() => {
     Object.entries(currentToasts).forEach(([key, { toastId }]) => {
       if (toastId) {
         removeToast(toastId);
@@ -97,7 +97,7 @@ export const usePipelineApprovalToast = () => {
     namespace,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const processApprovalTasks = async () => {
       // Filter approval tasks for current user with async group checking
       const userApprovalTasksInWait = [];

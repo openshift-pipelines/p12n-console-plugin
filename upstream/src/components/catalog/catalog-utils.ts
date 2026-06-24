@@ -162,6 +162,7 @@ export const useHubIntegration = (): [boolean, boolean] => {
     return [false, false];
   }
   if (config && !configLoadErr) {
+    // If the param "enable-devconsole-integration" (HUB_INTEGRATION_KEY) is unset then integration defaults to enabled. ArtifactHub tasks will show up -- same behavior as setting it to "true".
     const devconsoleIntegrationEnabled = config.spec?.hub?.params?.find(
       (p) => p.name === HUB_INTEGRATION_KEY,
     );
@@ -170,6 +171,5 @@ export const useHubIntegration = (): [boolean, boolean] => {
       true,
     ];
   }
-  // If the param "enable-devconsole-integration" is unset then integration defaults to enabled. ArtifactHub tasks will show up -- same behavior as setting it to "true".
   return [true, true];
 };

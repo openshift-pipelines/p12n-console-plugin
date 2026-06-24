@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useMemo } from 'react';
 import * as _ from 'lodash';
 import {
   ARTIFACTHUB,
@@ -74,10 +74,6 @@ export const normalizeArtifactHubTasks = (
                   selectedVersion,
                   isDevConsoleProxyAvailable,
                 ).catch((error) => {
-                  console.warn(
-                    'Error updating ArtifactHub task - callsite useArtifactHubTasksProvider:',
-                    error,
-                  );
                   setFailedTasks((prev) => [
                     ...prev,
                     selectedItem.data.task.name,
@@ -116,8 +112,7 @@ export const normalizeArtifactHubTasks = (
 const useArtifactHubTasksProvider: ExtensionHook<CatalogItem[]> = ({
   namespace,
 }): [CatalogItem[], boolean, string] => {
-  const [artifactHubIntegrationStatus, isIntegrationLoaded] =
-    useHubIntegration();
+  const [artifactHubIntegration, isIntegrationLoaded] = useHubIntegration();
   const [tektonTasks] = useTasksProvider({});
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   const canCreateTask = useAccessReview({
@@ -138,10 +133,10 @@ const useArtifactHubTasksProvider: ExtensionHook<CatalogItem[]> = ({
     isIntegrationLoaded &&
       canCreateTask &&
       canUpdateTask &&
-      artifactHubIntegrationStatus,
+      artifactHubIntegration,
     isDevConsoleProxyAvailable,
   );
-  const normalizedArtifactHubTasks = React.useMemo<CatalogItem[]>(
+  const normalizedArtifactHubTasks = useMemo<CatalogItem[]>(
     () => normalizeArtifactHubTasks(artifactHubTasks, tektonTasks),
     [artifactHubTasks, tektonTasks],
   );

@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,7 +25,6 @@ import {
 
 import { ALL_NAMESPACES_KEY } from '../../consts';
 
-import './PipelineRunsDurationCard.scss';
 import {
   usePipelineMetricsForAllNamespacePoll,
   usePipelineMetricsForNamespaceForPipelinePoll,
@@ -32,7 +32,9 @@ import {
 } from '../pipelines-metrics/hooks';
 import { MetricsQueryPrefix, PipelineQuery } from '../pipelines-metrics/utils';
 import { getXaxisValues } from './dateTime';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
+
+import './PipelinesOverview.scss';
 
 interface PipelinesRunsDurationProps {
   namespace: string;
@@ -43,7 +45,7 @@ interface PipelinesRunsDurationProps {
   bordered?: boolean;
 }
 
-const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
+const PipelineRunsDurationCardK8s: FC<PipelinesRunsDurationProps> = ({
   namespace,
   timespan,
   parentName,
@@ -51,8 +53,9 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
   bordered,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [pipelineRunsDurationError, setPipelineRunsDurationError] =
-    React.useState<string | null>(null);
+  const [pipelineRunsDurationError, setPipelineRunsDurationError] = useState<
+    string | null
+  >(null);
 
   const [
     totalPipelineRunsCountData,
@@ -88,7 +91,7 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
         });
   const [tickValues, type] = getXaxisValues(timespan);
 
-  const totalPipelineRuns = React.useMemo(() => {
+  const totalPipelineRuns = useMemo(() => {
     if (totalPipelineRunsCountError) {
       return;
     }
@@ -134,7 +137,7 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
         });
 
   const [totalPipelineRunsDuration, totalPipelineRunsDurationValue] =
-    React.useMemo(() => {
+    useMemo(() => {
       if (totalPipelineRunsDurationError) {
         return ['-', 0];
       }
@@ -150,7 +153,7 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
       type,
     ]);
 
-  const averageDuration = React.useMemo(() => {
+  const averageDuration = useMemo(() => {
     if (
       totalPipelineRunsDurationError ||
       totalPipelineRunsCountError ||
@@ -164,7 +167,7 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
     );
   }, [totalPipelineRunsDurationValue, totalPipelineRuns]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const hasNonAbortError =
       (totalPipelineRunsCountError &&
         totalPipelineRunsCountError.name !== 'AbortError') ||
@@ -183,9 +186,12 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
   return (
     <>
       <Card
-        className={classNames('pipeline-overview__duration-card', {
-          'card-border': bordered,
-        })}
+        className={classNames(
+          'pf-v6-u-h-100 pipeline-overview__min-width-full',
+          {
+            'card-border': bordered,
+          },
+        )}
       >
         <CardTitle>
           <span>{t('Duration')}</span>
@@ -197,61 +203,55 @@ const PipelineRunsDurationCardK8s: React.FC<PipelinesRunsDurationProps> = ({
               variant="danger"
               isInline
               title={t('Unable to load duration')}
-              className="pf-v5-u-mb-md"
+              className="pf-v6-u-mb-md"
             />
           ) : (
             <>
-              <Grid
-                hasGutter
-                className="pipeline-overview__duration-card__grid"
-              >
-                <GridItem span={6}>
+              <Grid hasGutter className="pf-v6-u-mb-sm">
+                <GridItem span={9} className="pf-v6-u-mb-sm">
                   <span>
-                    <MonitoringIcon className="pipeline-overview__duration-card__icon" />
+                    <MonitoringIcon className="pf-v6-u-mr-sm" />
                     {t('Average duration')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
                   {loadingPipelineRunsCount ? (
-                    <LoadingInline />
+                    <Loading isInline={true} />
                   ) : (
                     averageDuration
                   )}
                 </GridItem>
               </Grid>
-              <Grid
-                hasGutter
-                className="pipeline-overview__duration-card__grid"
-              >
-                <GridItem span={6}>
+              <Grid hasGutter className="pf-v6-u-mb-sm">
+                <GridItem span={9} className="pf-v6-u-mb-sm">
                   <span>
-                    <InfoCircleIcon className="pipeline-overview__duration-card__info-icon" />
+                    <InfoCircleIcon className="pf-v6-u-mr-sm pipeline-overview__chart-color-blue" />
                     {t('Maximum')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
-                  {loadingPipelineRunsCount ? <LoadingInline /> : '-'}
+                  {loadingPipelineRunsCount ? <Loading isInline={true} /> : '-'}
                 </GridItem>
               </Grid>
               <Grid hasGutter>
-                <GridItem span={6}>
+                <GridItem span={9}>
                   <span>
-                    <HistoryIcon className="pipeline-overview__duration-card__icon" />
+                    <HistoryIcon className="pf-v6-u-mr-sm" />
                     {t('Total duration')}
                   </span>
                 </GridItem>
                 <GridItem
-                  span={6}
-                  className="pipeline-overview__duration-card__value"
+                  span={3}
+                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
                 >
                   {loadingPipelineRunsDuration ? (
-                    <LoadingInline />
+                    <Loading isInline={true} />
                   ) : (
                     totalPipelineRunsDuration ?? '-'
                   )}

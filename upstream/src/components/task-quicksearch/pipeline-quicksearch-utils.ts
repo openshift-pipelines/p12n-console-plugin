@@ -110,6 +110,7 @@ export const getSelectedVersionUrl = (
   if (item.attributes.selectedVersionForContentUrl !== version) {
     return null;
   }
+
   return item.attributes.selectedVersionContentUrl ?? null;
 };
 
