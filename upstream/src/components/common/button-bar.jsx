@@ -1,19 +1,19 @@
 /* eslint-disable tsdoc/syntax */
 import * as _ from 'lodash-es';
-import * as React from 'react';
+import { Children, cloneElement } from 'react';
 import classNames from 'classnames';
 import * as PropTypes from 'prop-types';
 import { Alert, AlertGroup } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { LoadingInline } from '../status/status-box';
+import { Loading } from '../Loading';
 
 const injectDisabled = (children, disabled) => {
-  return React.Children.map(children, (c) => {
+  return Children.map(children, (c) => {
     if (!_.isObject(c) || c.type !== 'button') {
       return c;
     }
 
-    return React.cloneElement(c, { disabled: c.props.disabled || disabled });
+    return cloneElement(c, { disabled: c.props.disabled || disabled });
   });
 };
 
@@ -67,7 +67,7 @@ export const ButtonBar = ({
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}
         {injectDisabled(children, inProgress)}
-        {inProgress && <LoadingInline />}
+        {inProgress && <Loading isInline={true} />}
         {infoMessage && <InfoMessage message={infoMessage} />}
       </AlertGroup>
     </div>

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   render,
   fireEvent,
@@ -29,6 +28,10 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
 
 jest.mock('@console/shared/src/hooks/useTelemetry', () => ({
   useTelemetry: () => {},
+}));
+
+jest.mock('react-router', () => ({
+  useNavigate: jest.fn(() => jest.fn()),
 }));
 
 // FIXME Remove this code when jest is updated to at least 25.1.0 -- see https://github.com/jsdom/jsdom/issues/1555
@@ -130,11 +133,11 @@ describe('pipelineQuickSearchDetails', () => {
         />,
       );
       await waitFor(() => {
+        const button = getByRole('button', { name: 'Install and add' });
         expect(
-          getByRole('button', { name: 'Install and add' }).getAttribute(
-            'aria-disabled',
-          ),
-        ).toBe('true');
+          button.hasAttribute('disabled') ||
+            button.getAttribute('aria-disabled') === 'true',
+        ).toBe(true);
       });
     });
 
@@ -146,7 +149,7 @@ describe('pipelineQuickSearchDetails', () => {
       await waitFor(() => {
         expect(
           getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBe('false');
+        ).toBeNull();
       });
     });
 
@@ -157,7 +160,7 @@ describe('pipelineQuickSearchDetails', () => {
       await waitFor(() => {
         expect(
           getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBe('false');
+        ).toBeNull();
       });
     });
 

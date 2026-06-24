@@ -1,8 +1,23 @@
-import * as React from 'react';
-import { LoadingInline } from '../Loading';
+import type { ReactNode, MouseEvent, Ref } from 'react';
+import { Component } from 'react';
+import { Loading } from '../Loading';
 import _ from 'lodash';
-import classNames from 'classnames';
-import { Dropdown } from './dropdown';
+import {
+  FormGroup,
+  Select,
+  SelectOption,
+  SelectList,
+  MenuToggle,
+  MenuToggleElement,
+  TextInputGroup,
+  TextInputGroupMain,
+  TextInputGroupUtilities,
+  Button,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+} from '@patternfly/react-core';
+import { TimesIcon } from '@patternfly/react-icons';
 import * as fuzzy from 'fuzzysearch';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import {
@@ -19,8 +34,10 @@ export type StorageClassDropdownInnerState = {
   items: any;
   name: string;
   selectedKey: string;
-  title: React.ReactNode;
+  title: ReactNode;
   defaultClass: string;
+  isOpen: boolean;
+  filterValue: string;
 };
 
 export type StorageClassDropdownInnerProps = WithTranslation & {
@@ -80,7 +97,7 @@ const StorageClassDropdownNoStorageClassOption = (props) => {
   );
 };
 
-export class StorageClassDropdownInnerWithTranslation extends React.Component<
+export class StorageClassDropdownInnerWithTranslation extends Component<
   StorageClassDropdownInnerProps,
   StorageClassDropdownInnerState
 > {
@@ -88,8 +105,38 @@ export class StorageClassDropdownInnerWithTranslation extends React.Component<
     items: {},
     name: this.props.name,
     selectedKey: this.props.selectedKey,
-    title: <LoadingInline />,
+    title: <Loading isInline={true} />,
     defaultClass: this.props.defaultClass,
+    isOpen: false,
+    filterValue: '',
+  };
+
+  private onToggle = () => {
+    this.setState((prevState) => ({ isOpen: !prevState.isOpen }));
+  };
+
+  private onSelect = (
+    _event: MouseEvent | undefined,
+    value: string | number | undefined,
+  ) => {
+    const key = String(value);
+    this.onChange(key);
+    this.setState({ isOpen: false, filterValue: '' });
+  };
+
+  private onFilterChange = (value: string) => {
+    this.setState({ filterValue: value });
+  };
+
+  private getFilteredItems = () => {
+    const { filterValue, items } = this.state;
+    if (!filterValue) {
+      return items;
+    }
+    return _.pickBy(items, (item) => {
+      const name = item?.name || '';
+      return fuzzy(filterValue, name);
+    });
   };
 
   UNSAFE_componentWillMount() {
@@ -102,7 +149,7 @@ export class StorageClassDropdownInnerWithTranslation extends React.Component<
     if (loadError) {
       this.setState({
         title: (
-          <div className="cos-error-title">
+          <div className="pf-v6-u-text-color-status-danger">
             {t('plugin__pipelines-console-plugin~Error loading {{desc}}', {
               desc: nextProps.desc,
             })}
@@ -117,7 +164,7 @@ export class StorageClassDropdownInnerWithTranslation extends React.Component<
 
     const state = {
       items: {},
-      title: {},
+      title: null as ReactNode,
       defaultClass: '',
     };
     let unorderedItems = {};
@@ -228,59 +275,92 @@ export class StorageClassDropdownInnerWithTranslation extends React.Component<
   };
 
   render() {
-    const { id, loaded, describedBy, noSelection, t } = this.props;
-    const items = {};
-    _.each(
-      this.state.items,
-      (props, key) =>
-        (items[key] = key ? (
-          <StorageClassDropdownEntry {...props} />
-        ) : (
-          <StorageClassDropdownNoStorageClassOption {...props} />
-        )),
-    );
-
-    const { selectedKey, defaultClass } = this.state;
+    const { id, loaded, describedBy, t } = this.props;
+    const { selectedKey, defaultClass, isOpen, filterValue } = this.state;
+    const filteredItems = this.getFilteredItems();
 
     // Only show the dropdown if 'no storage class' is not the only option which depends on defaultClass
-    const itemsAvailableToShow = defaultClass || _.size(items) > 1;
+    const itemsAvailableToShow = defaultClass || _.size(this.state.items) > 1;
+
+    const toggle = (toggleRef: Ref<MenuToggleElement>) => (
+      <MenuToggle
+        ref={toggleRef}
+        onClick={this.onToggle}
+        isExpanded={isOpen}
+        className="co-storage-class-dropdown"
+        style={{ width: '100%' }}
+        id={id}
+      >
+        {this.state.title}
+      </MenuToggle>
+    );
+
     return (
       <>
         {loaded && itemsAvailableToShow && (
-          <div>
-            <label
-              className={classNames('control-label', this.props.hideClassName, {
-                'co-required': this.props.required,
-              })}
-              htmlFor={id}
-            >
-              {t('plugin__pipelines-console-plugin~StorageClass')}
-            </label>
-            <Dropdown
-              className="co-storage-class-dropdown"
-              dropDownClassName="dropdown--full-width"
-              autocompleteFilter={this.autocompleteFilter}
-              autocompletePlaceholder={t(
-                'plugin__pipelines-console-plugin~Select StorageClass',
-              )}
-              items={items}
-              selectedKey={selectedKey}
-              title={this.state.title}
-              onChange={this.onChange}
+          <FormGroup
+            label={t('plugin__pipelines-console-plugin~StorageClass')}
+            fieldId={id}
+            isRequired={this.props.required}
+            className={this.props.hideClassName}
+          >
+            <Select
               id={id}
-              dataTest={this.props?.['data-test']}
-              noSelection={noSelection}
-              menuClassName="dropdown-menu--text-wrap"
-              dropDownContentClassName="odc-pipelines-storageclass-dropdown"
-            />
-            {describedBy && (
-              <p className="help-block" id={describedBy}>
-                {t(
-                  'plugin__pipelines-console-plugin~StorageClass for the new claim',
+              isOpen={isOpen}
+              selected={selectedKey}
+              onSelect={this.onSelect}
+              onOpenChange={(open) => this.setState({ isOpen: open })}
+              toggle={toggle}
+              shouldFocusToggleOnSelect
+            >
+              <TextInputGroup>
+                <TextInputGroupMain
+                  value={filterValue}
+                  onChange={(_event, value) => this.onFilterChange(value)}
+                  placeholder={t(
+                    'plugin__pipelines-console-plugin~Select StorageClass',
+                  )}
+                  autoFocus
+                />
+                {filterValue && (
+                  <TextInputGroupUtilities>
+                    <Button
+                      variant="plain"
+                      onClick={() => this.setState({ filterValue: '' })}
+                      aria-label="Clear filter"
+                    >
+                      <TimesIcon />
+                    </Button>
+                  </TextInputGroupUtilities>
                 )}
-              </p>
+              </TextInputGroup>
+              <SelectList>
+                {Object.keys(filteredItems).map((key) => {
+                  const item = filteredItems[key];
+                  return (
+                    <SelectOption key={key} value={key}>
+                      {key ? (
+                        <StorageClassDropdownEntry {...item} />
+                      ) : (
+                        <StorageClassDropdownNoStorageClassOption {...item} />
+                      )}
+                    </SelectOption>
+                  );
+                })}
+              </SelectList>
+            </Select>
+            {describedBy && (
+              <FormHelperText>
+                <HelperText>
+                  <HelperTextItem id={describedBy}>
+                    {t(
+                      'plugin__pipelines-console-plugin~StorageClass for the new claim',
+                    )}
+                  </HelperTextItem>
+                </HelperText>
+              </FormHelperText>
             )}
-          </div>
+          </FormGroup>
         )}
       </>
     );
