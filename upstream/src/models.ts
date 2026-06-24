@@ -53,7 +53,7 @@ export const PipelineModelV1Beta1 = {
   color,
 };
 
-export const RepositoryModel: K8sKind = {
+export const RepositoryModel = {
   apiGroup: 'pipelinesascode.tekton.dev',
   apiVersion: 'v1alpha1',
   label: 'Repository',
@@ -502,19 +502,4 @@ export const TektonConfigModel: K8sKind = {
   id: 'tektonconfig',
   labelPlural: 'TektonConfigs',
   crd: true,
-};
-
-export const GroupModel: K8sKind = {
-  apiGroup: 'user.openshift.io',
-  apiVersion: 'v1',
-  label: 'Group',
-  labelKey: 'Group',
-  labelPluralKey: 'Groups',
-  plural: 'groups',
-  abbr: 'G',
-  kind: 'Group',
-  id: 'group',
-  labelPlural: 'Groups',
-  crd: true,
-  color,
 };

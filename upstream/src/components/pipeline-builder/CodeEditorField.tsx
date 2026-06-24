@@ -1,5 +1,4 @@
 import * as React from 'react';
-import classNames from 'classnames';
 import { Button } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/esm/icons/info-circle-icon';
 import { FormikValues, useField, useFormikContext } from 'formik';
@@ -54,7 +53,7 @@ const CodeEditorField: React.FC<CodeEditorFieldProps> = ({
   language,
 }) => {
   const [field] = useField(name);
-  const { setFieldValue, setStatus } = useFormikContext<FormikValues>();
+  const { setFieldValue } = useFormikContext<FormikValues>();
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const editorRef = React.useRef();
 
@@ -91,57 +90,47 @@ const CodeEditorField: React.FC<CodeEditorFieldProps> = ({
     [templateExtensions],
   );
 
-  const handleOnChange = (newYAML: string) => {
-    setFieldValue(name, newYAML);
-    setStatus({ submitError: '' });
-  };
-
   return (
-    <div className="osc-yaml-editor odc-p-has-sidebar" data-test="yaml-editor">
-      <div
-        className={classNames('odc-p-has-sidebar__body', {
-          'odc-p-has-sidebar__body--sidebar-open':
-            sidebarOpen && hasSidebarContent,
-        })}
-      >
-        <div className="osc-yaml-editor__editor">
-          <CodeEditor
-            ref={editorRef}
-            value={field.value}
-            minHeight={minHeight ?? '200px'}
-            onChange={handleOnChange}
-            onSave={onSave}
-            showShortcuts={showShortcuts}
-            showMiniMap={showMiniMap}
-            language={language}
-            toolbarLinks={
-              !sidebarOpen &&
-              hasSidebarContent && [
-                <Button
-                  isInline
-                  variant="link"
-                  onClick={() => setSidebarOpen(true)}
-                  key=""
-                >
-                  <InfoCircleIcon className="co-icon-space-r odc-p-has-sidebar__sidebar-link-icon" />
-                  {t('View sidebar')}
-                </Button>,
-              ]
-            }
-          />
-        </div>
+    <div className="osc-yaml-editor" data-test="yaml-editor">
+      <div className="osc-yaml-editor__editor">
+        <CodeEditor
+          ref={editorRef}
+          value={field.value}
+          minHeight={minHeight ?? '200px'}
+          onChange={(yaml: string) => setFieldValue(name, yaml)}
+          onSave={onSave}
+          showShortcuts={showShortcuts}
+          showMiniMap={showMiniMap}
+          language={language}
+          toolbarLinks={
+            !sidebarOpen &&
+            hasSidebarContent && [
+              <Button
+                isInline
+                variant="link"
+                onClick={() => setSidebarOpen(true)}
+                key=""
+              >
+                <InfoCircleIcon className="co-icon-space-r co-p-has-sidebar__sidebar-link-icon" />
+                {t('View sidebar')}
+              </Button>,
+            ]
+          }
+        />
       </div>
       {sidebarOpen && hasSidebarContent && (
-        <CodeEditorSidebar
-          editorRef={editorRef}
-          model={model}
-          schema={schema}
-          samples={showSamples ? samples : []}
-          snippets={snippets}
-          sanitizeYamlContent={sanitizeYamlContent}
-          sidebarLabel={label as string}
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
+        <div className="osc-yaml-editor__sidebar">
+          <CodeEditorSidebar
+            editorRef={editorRef}
+            model={model}
+            schema={schema}
+            samples={showSamples ? samples : []}
+            snippets={snippets}
+            sanitizeYamlContent={sanitizeYamlContent}
+            sidebarLabel={label as string}
+            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          />
+        </div>
       )}
     </div>
   );

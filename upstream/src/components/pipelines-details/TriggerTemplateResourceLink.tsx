@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  ClipboardCopy,
-  ClipboardCopyVariant,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
+import { ClipboardCopy, ClipboardCopyVariant } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 
 import { RouteTemplate } from '../utils/triggers';
@@ -30,12 +23,12 @@ const TriggerTemplateResourceLink: React.FC<
     return null;
   }
   return (
-    <DescriptionList className="odc-trigger-template-list">
-      <DescriptionListGroup>
-        <DescriptionListTerm>{title}</DescriptionListTerm>
+    <div className="odc-trigger-template-list">
+      <dl>
+        <dt>{title}</dt>
         {links.map(({ routeURL, triggerTemplateName }) => {
           return (
-            <DescriptionListDescription key={triggerTemplateName}>
+            <dd key={triggerTemplateName}>
               <ResourceLink
                 kind={kind}
                 name={triggerTemplateName}
@@ -50,11 +43,11 @@ const TriggerTemplateResourceLink: React.FC<
                   </ClipboardCopy>
                 </div>
               )}
-            </DescriptionListDescription>
+            </dd>
           );
         })}
-      </DescriptionListGroup>
-    </DescriptionList>
+      </dl>
+    </div>
   );
 };
 

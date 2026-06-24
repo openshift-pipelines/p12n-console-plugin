@@ -102,7 +102,6 @@ export const createArtifactHubTask = (
   namespace: string,
   version: string,
   isDevConsoleProxyAvailable?: boolean,
-  customName?: string,
 ) => {
   const fetchTask = async (): Promise<K8sResourceKind> => {
     if (isDevConsoleProxyAvailable) {
@@ -123,9 +122,6 @@ export const createArtifactHubTask = (
   return fetchTask()
     .then((task: K8sResourceKind) => {
       task.metadata.namespace = namespace;
-      if (customName) {
-        task.metadata.name = customName;
-      }
       task.metadata.annotations = {
         ...task.metadata.annotations,
         [TektonTaskAnnotation.installedFrom]: ARTIFACTHUB,
@@ -184,24 +180,5 @@ export const updateArtifactHubTask = async (
     // eslint-disable-next-line no-console
     console.warn('Error while updating ArtifactHub Task:', err);
     throw err;
-  }
-};
-
-export const fetchArtifactHubTasks = async (
-  query: string,
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  limit: number = 20,
-): Promise<ArtifactHubTask[]> => {
-  try {
-    const response = await fetch(
-      `${ARTIFACTHUB_API_BASE_URL}/packages/search?ts_query_web=${encodeURIComponent(
-        query,
-      )}&facets=false&sort=relevance&limit=${limit}&offset=0&kind=7`,
-    );
-    const data = await response.json();
-    return data.packages || [];
-  } catch (error) {
-    console.warn('Error searching Artifact Hub tasks:', error);
-    return [];
   }
 };

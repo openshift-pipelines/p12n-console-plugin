@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 
 import PipelineVisualization from './PipelineVisualization';
+import { SectionHeading } from '../pipelines-tasks/tasks-details-pages/headings';
 import { ResourceSummary } from '../details-page/details-page';
 import DynamicResourceLinkList from '../triggers-details/DynamicResourceLinkList';
 import { WorkspaceDefinitionList } from '../pipelines-tasks';
@@ -26,14 +26,14 @@ const PipelineDetails: React.FC<PipelineDetailsTabProps> = ({
 
   return (
     <>
-      <PageSection isFilled variant="light">
-        <Title headingLevel="h2">{t('Pipeline details')}</Title>
+      <div className="co-m-pane__body">
+        <SectionHeading text={t('Pipeline details')} />
         <PipelineVisualization pipeline={pipeline} />
-        <Grid hasGutter>
-          <GridItem sm={6}>
+        <div className="row">
+          <div className="col-sm-6">
             <ResourceSummary resource={pipeline} model={PipelineModel} />
-          </GridItem>
-          <GridItem sm={6}>
+          </div>
+          <div className="col-sm-6">
             <TriggerTemplateResourceLink
               namespace={pipeline.metadata.namespace}
               model={TriggerTemplateModel}
@@ -50,9 +50,9 @@ const PipelineDetails: React.FC<PipelineDetailsTabProps> = ({
               title={t('Finally tasks')}
             />
             <WorkspaceDefinitionList obj={pipeline} />
-          </GridItem>
-        </Grid>
-      </PageSection>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

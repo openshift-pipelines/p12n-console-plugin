@@ -120,14 +120,6 @@ const PipelineRunsForPipelinesList: React.FC<
     columnManagementID: '',
   });
 
-  const isEmptyData =
-    (!summaryDataFiltered || summaryDataFiltered.length === 0) &&
-    (!summaryData || summaryData.length === 0);
-
-  if (loaded && isEmptyData) {
-    return <EmptyMsg />;
-  }
-
   return (
     <VirtualizedTable
       columns={columns}

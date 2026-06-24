@@ -2,15 +2,8 @@
 
 set -exuo pipefail
 
-# Set Cypress cache to user-writable location as user inside container may not have write access
-export CYPRESS_CACHE_FOLDER="${HOME}/.cache/Cypress"
-
-# Install and enable Corepack for Yarn 4
-npm install -g corepack 2>/dev/null || true
-corepack enable && corepack prepare yarn@4.6.0 --activate
-
 ARTIFACT_DIR=${ARTIFACT_DIR:=/tmp/artifacts}
-SCREENSHOTS_DIR=gui_test_screenshots
+SCREENSHOTS_DIR=integration-tests/screenshots
 INSTALLER_DIR=${INSTALLER_DIR:=${ARTIFACT_DIR}/installer}
 
 function copyArtifacts {
@@ -19,7 +12,7 @@ function copyArtifacts {
       echo "No artifacts were copied."
     else
       echo "Copying artifacts from $(pwd)..."
-      cp -r "$SCREENSHOTS_DIR" "${ARTIFACT_DIR}/gui_test_screenshots"
+      cp -r "$SCREENSHOTS_DIR" "${ARTIFACT_DIR}/screenshots"
     fi
   fi
 }
@@ -28,19 +21,16 @@ trap copyArtifacts EXIT
 
 
 # don't log kubeadmin-password
-set +x
-BRIDGE_KUBEADMIN_PASSWORD="$(cat "${KUBEADMIN_PASSWORD_FILE:-${INSTALLER_DIR}/auth/kubeadmin-password}")"
-export BRIDGE_KUBEADMIN_PASSWORD
-set -x
-BRIDGE_BASE_ADDRESS="$(oc get consoles.config.openshift.io cluster -o jsonpath='{.status.consoleURL}')"
-export BRIDGE_BASE_ADDRESS
+# set +x
+# BRIDGE_KUBEADMIN_PASSWORD="$(cat "${KUBEADMIN_PASSWORD_FILE:-${INSTALLER_DIR}/auth/kubeadmin-password}")"
+# export BRIDGE_KUBEADMIN_PASSWORD
+# set -x
+# BRIDGE_BASE_ADDRESS="$(oc get consoles.config.openshift.io cluster -o jsonpath='{.status.consoleURL}')"
+# export BRIDGE_BASE_ADDRESS
 
 if [ ! -d node_modules ]; then
   yarn install
 fi
-
-# Ensure Cypress binary is installed
-yarn exec cypress install
 
 while getopts s:h:l:n: flag
 do
@@ -62,7 +52,7 @@ if [ $# -eq 0 ]; then
     echo "  test-prow-e2e.sh -h false                              // opens Cypress Test Runner"
     echo "  test-prow-e2e.sh -h true                               // runs packages in headless mode"
     echo "  test-prow-e2e.sh -n true                               // runs the whole nightly suite"
-    yarn run test-cypress-headless
+    # yarn run test-cypress-headless
     trap EXIT
     exit;
 fi

@@ -7,7 +7,6 @@ import {
   ResourceModelLink,
   TektonParam,
 } from '../../types';
-import { groupVersionFor } from '../utils/k8s-utils';
 import { getSafeTaskResourceKind } from '../utils/pipeline-augment';
 
 type PipelineTaskLinks = {
@@ -21,7 +20,6 @@ export const getPipelineTaskLinks = (
   const toResourceLinkData = (tasks: PipelineTask[]): ResourceModelLink[] => {
     const { t } = useTranslation('plugin__pipelines-console-plugin');
     if (!tasks) return [];
-    const { version } = groupVersionFor(pipeline.apiVersion);
     return tasks?.map((task) => {
       if (task.taskRef) {
         if (task.taskRef.resolver === 'cluster') {
@@ -33,7 +31,6 @@ export const getPipelineTaskLinks = (
             name: nameParam,
             qualifier: task.name,
             namespace: PIPELINE_NAMESPACE,
-            resourceApiVersion: version,
           };
         }
         return task.taskRef.kind === 'Task'
@@ -41,7 +38,6 @@ export const getPipelineTaskLinks = (
               resourceKind: getSafeTaskResourceKind(task.taskRef.kind),
               name: task.taskRef.name,
               qualifier: task.name,
-              resourceApiVersion: version,
             }
           : {
               resourceKind: task.taskRef?.kind,

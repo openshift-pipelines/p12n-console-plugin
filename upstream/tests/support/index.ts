@@ -6,7 +6,6 @@ import './project';
 // import './resources';
 import './selectors';
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       visitAndWait(
@@ -27,7 +26,7 @@ Cypress.Cookies.debug(true);
 
 Cypress.on('uncaught:exception', (err) => {
   console.error('Uncaught exception', err);
-  return false; // test fails
+  return true; // test fails
 });
 
 Cypress.Commands.overwrite('log', (originalFn, message) => {
@@ -133,7 +132,7 @@ export const create = (obj: any) => {
   const filename = [
     Cypress.config('screenshotsFolder')
       .toString()
-      .replace('/cypress/gui_test_screenshots/', ''),
+      .replace('/cypress/screenshots', ''),
     `${obj.metadata.name}.${obj.kind.toLowerCase()}.json`,
   ].join('/');
   cy.writeFile(filename, JSON.stringify(obj));

@@ -3,7 +3,6 @@ import {
   EmptyState,
   EmptyStateBody,
   EmptyStateVariant,
-  PageSection,
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { PipelineRunModel } from '../../models';
@@ -17,14 +16,14 @@ const OutputTab: React.FC<{ obj: PipelineRunKind }> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
   return pipelineRun.status?.pipelineResults || pipelineRun.status?.results ? (
-    <PageSection variant="light" isFilled>
+    <div className="co-m-pane__body">
       <ResultsList
         results={
           pipelineRun.status?.pipelineResults || pipelineRun.status?.results
         }
         resourceName={t(PipelineRunModel.labelKey)}
       />
-    </PageSection>
+    </div>
   ) : (
     <EmptyState variant={EmptyStateVariant.full}>
       <EmptyStateBody>

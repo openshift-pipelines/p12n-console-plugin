@@ -16,6 +16,9 @@ declare global {
 
 const KUBEADMIN_USERNAME = 'kubeadmin';
 const KUBEADMIN_IDP = 'kube:admin';
+const loginUsername = Cypress.env('BRIDGE_KUBEADMIN_PASSWORD')
+  ? 'user-dropdown'
+  : 'username';
 
 // This will add 'cy.login(...)'
 // ex: cy.login('my-user', 'my-password')
@@ -55,7 +58,7 @@ Cypress.Commands.add(
       );
       cy.get('button[type=submit]').click();
 
-      cy.get('[data-test^="user-dropdown"]').should('be.visible');
+      cy.get(`[data-test="${loginUsername}"]`).should('be.visible');
     });
   },
 );
@@ -66,7 +69,7 @@ Cypress.Commands.add('logout', () => {
     if (win.SERVER_FLAGS?.authDisabled) {
       return;
     }
-    cy.get('[data-test^="user-dropdown"]').click();
+    cy.get('[data-test="user-dropdown"]').click();
     cy.get('[data-test="log-out"]').should('be.visible');
     cy.get('[data-test="log-out"]').click({ force: true });
   });
