@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Stack, StackItem, Title } from '@patternfly/react-core';
 import { FormikErrors, useField } from 'formik';
 import { Trans, useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ function safeIndex<T>(list: T[], comparatorFunc: (v: T) => boolean): number {
   return idx === -1 ? list.length : idx;
 }
 
-const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
+const TaskSidebar: FC<TaskSidebarProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const {
     onRemoveTask,
@@ -98,7 +98,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
           removeThisTask={() => onRemoveTask(thisTask.name)}
         />
       </StackItem>
-      <StackItem className="opp-task-sidebar__content pf-v5-c-form">
+      <StackItem className="opp-task-sidebar__content pf-v6-c-form">
         <TaskSidebarName
           name={`${formikTaskReference}.name`}
           taskName={taskResource.metadata.name}

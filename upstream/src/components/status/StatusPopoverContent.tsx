@@ -1,17 +1,17 @@
-import * as React from 'react';
+import type { ReactNode, FC } from 'react';
 
 import './StatusPopoverContent.scss';
 import { CombinedErrorDetails } from '../../types/log-snippet-types';
 import LogSnippetBlock from '../logs/LogSnippetBlock';
 
 type StatusPopoverContentProps = {
-  link?: React.ReactNode;
+  link?: ReactNode;
   namespace: string;
   logDetails: CombinedErrorDetails;
   isResourceManagedByKueue?: boolean;
   pipelineRunName?: string;
 };
-const StatusPopoverContent: React.FC<StatusPopoverContentProps> = ({
+const StatusPopoverContent: FC<StatusPopoverContentProps> = ({
   namespace,
   logDetails,
   link = null,

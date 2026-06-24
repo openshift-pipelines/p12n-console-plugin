@@ -1,11 +1,11 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Button } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { PipelineKind } from '../../types';
 import {
   AccessReviewResourceAttributes,
   useAccessReview,
-  useModal,
+  useOverlay,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { PipelineRunModel } from '../../models';
 import { startPipelineModal } from '../start-pipeline';
@@ -23,13 +23,13 @@ type PipelineStartButtonProps = {
   namespace: string;
 };
 
-const PipelineStartButton: React.FC<PipelineStartButtonProps & StateProps> = ({
+const PipelineStartButton: FC<PipelineStartButtonProps & StateProps> = ({
   pipeline,
   namespace,
   impersonate,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const launchModal = useModal();
+  const launchModal = useOverlay();
 
   const openPipelineModal = () => {
     launchModal(startPipelineModal, {

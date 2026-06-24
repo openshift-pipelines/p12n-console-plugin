@@ -1,14 +1,15 @@
-import * as React from 'react';
+import type { ReactNode, FC } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
 import { consoleFetchText } from '@openshift-console/dynamic-plugin-sdk';
 import { PodModel } from '../../models';
 import { resourceURL } from '../utils/k8s-utils';
 import { fetchMultiClusterLogs } from '../utils/multi-cluster-api';
 
 type LogSnippetFromPodProps = {
-  children: (logSnippet: string) => React.ReactNode;
+  children: (logSnippet: string) => ReactNode;
   containerName: string;
   namespace: string;
   podName: string;
@@ -18,7 +19,7 @@ type LogSnippetFromPodProps = {
   pipelineRunName?: string;
 };
 
-const LogSnippetFromPod: React.FC<LogSnippetFromPodProps> = ({
+const LogSnippetFromPod: FC<LogSnippetFromPodProps> = ({
   children,
   containerName,
   namespace,
@@ -30,10 +31,10 @@ const LogSnippetFromPod: React.FC<LogSnippetFromPodProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
-  const [logSnippet, setLogSnippet] = React.useState<string>(null);
-  const [logError, setLogError] = React.useState<string>(null);
+  const [logSnippet, setLogSnippet] = useState<string>(null);
+  const [logError, setLogError] = useState<string>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchLogs = async () => {
       try {
         let logContent: string;
@@ -68,7 +69,14 @@ const LogSnippetFromPod: React.FC<LogSnippetFromPodProps> = ({
       }
     };
     fetchLogs();
-  }, [containerName, namespace, podName, t, isResourceManagedByKueue, pipelineRunName]);
+  }, [
+    containerName,
+    namespace,
+    podName,
+    t,
+    isResourceManagedByKueue,
+    pipelineRunName,
+  ]);
 
   if (logError) {
     return (
@@ -79,7 +87,7 @@ const LogSnippetFromPod: React.FC<LogSnippetFromPodProps> = ({
   }
 
   if (!logSnippet) {
-    return <LoadingInline />;
+    return <Loading isInline={true} />;
   }
 
   return <>{children(logSnippet)}</>;

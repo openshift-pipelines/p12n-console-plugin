@@ -1,8 +1,8 @@
-import * as React from 'react';
+import type { FC, ReactElement, ReactNode, MouseEvent, Ref } from 'react';
+import { useState, useCallback, useEffect, isValidElement } from 'react';
 import * as fuzzy from 'fuzzysearch';
-import { TFunction } from 'i18next';
 import * as _ from 'lodash';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   FirehoseResult,
   getGroupVersionKindForResource,
@@ -10,8 +10,18 @@ import {
   K8sResourceKind,
   ResourceIcon,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { LoadingInline } from '../Loading';
-import { Dropdown } from './dropdown';
+import {
+  Select,
+  SelectOption,
+  SelectList,
+  MenuToggle,
+  MenuToggleElement,
+  MenuSearch,
+  MenuSearchInput,
+  SearchInput,
+  Divider,
+} from '@patternfly/react-core';
+import { Loading } from '../Loading';
 
 type DropdownItemProps = {
   name: string;
@@ -19,14 +29,10 @@ type DropdownItemProps = {
   resource: K8sResourceKind;
 };
 
-const DropdownItem: React.FC<DropdownItemProps> = ({
-  name,
-  namespace,
-  resource,
-}) => {
+const DropdownItem: FC<DropdownItemProps> = ({ name, namespace, resource }) => {
   return (
     <span className="co-resource-item">
-      <span className="co-resource-icon--fixed-width">
+      <span className="">
         <ResourceIcon
           groupVersionKind={getGroupVersionKindForResource(resource)}
         />
@@ -43,14 +49,8 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
   );
 };
 
-interface State {
-  resources: {};
-  items: {};
-  title: React.ReactNode;
-}
-
 export interface ResourceDropdownItems {
-  [key: string]: string | React.ReactElement;
+  [key: string]: string | ReactElement;
 }
 
 export const getNamespace = <A extends K8sResourceCommon = K8sResourceCommon>(
@@ -63,18 +63,21 @@ export const getNamespace = <A extends K8sResourceCommon = K8sResourceCommon>(
 
 export interface ResourceDropdownProps {
   id?: string;
+  name?: string;
   ariaLabel?: string;
   className?: string;
   dropDownClassName?: string;
   menuClassName?: string;
   buttonClassName?: string;
   dropDownContentClassName?: string;
-  title?: React.ReactNode;
+  title?: ReactNode;
   titlePrefix?: string;
   allApplicationsKey?: string;
   userSettingsPrefix?: string;
   storageKey?: string;
   disabled?: boolean;
+  helpText?: ReactNode;
+  fullWidth?: boolean;
   allSelectorItem?: {
     allSelectorKey?: string;
     allSelectorTitle?: string;
@@ -93,7 +96,7 @@ export interface ResourceDropdownProps {
   loadError?: string;
   placeholder?: string;
   resources?: FirehoseResult[];
-  selectedKey: string;
+  selectedKey?: string;
   autoSelect?: boolean;
   resourceFilter?: (resource: K8sResourceKind) => boolean;
   onChange?: (
@@ -106,269 +109,354 @@ export interface ResourceDropdownProps {
   autocompleteFilter?: (strText: string, item: object) => boolean;
   customResourceKey?: (key: string, resource: K8sResourceKind) => string;
   appendItems?: ResourceDropdownItems;
-  t: TFunction;
 }
 
-class ResourceDropdown extends React.Component<ResourceDropdownProps, State> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      resources: this.props.loaded ? this.getResourceList(props) : {},
-      items: this.props.loaded ? this.getDropdownList(props, false) : {},
-      title: this.props.loaded ? (
-        <span className="btn-dropdown__item--placeholder">
-          {this.props.placeholder}
-        </span>
-      ) : (
-        <LoadingInline />
-      ),
-    };
-  }
+const ResourceDropdown: FC<ResourceDropdownProps> = (props) => {
+  const { t } = useTranslation();
+  const {
+    id,
+    ariaLabel,
+    className,
+    dropDownClassName,
+    titlePrefix,
+    selectedKey,
+    placeholder,
+    disabled,
+    loaded,
+    loadError,
+    autoSelect,
+    onLoad,
+    title: propsTitle,
+    actionItems,
+    resources,
+    customResourceKey,
+    resourceFilter,
+    dataSelector,
+    transformLabel,
+    allSelectorItem,
+    noneSelectorItem,
+    showBadge = false,
+    appendItems,
+    onChange,
+    autocompleteFilter,
+  } = props;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  UNSAFE_componentWillReceiveProps(nextProps: ResourceDropdownProps) {
-    const {
-      loaded,
-      loadError,
-      autoSelect,
-      selectedKey,
-      placeholder,
-      onLoad,
-      title,
-      actionItems,
-    } = nextProps;
-    if (!loaded && !loadError) {
-      this.setState({ title: <LoadingInline /> });
-      return;
-    }
+  const [resourcesState, setResourcesState] = useState({});
+  const [items, setItems] = useState<Record<string, any>>({});
+  const [title, setTitle] = useState<React.ReactNode>(
+    loaded ? (
+      <span className="btn-dropdown__item--placeholder">{placeholder}</span>
+    ) : (
+      <Loading isInline={true} />
+    ),
+  );
+  const [isOpen, setIsOpen] = useState(false);
+  const [filterValue, setFilterValue] = useState('');
 
-    // If autoSelect is true only then have an item pre-selected based on selectedKey.
-    if (
-      !this.props.loadError &&
-      !autoSelect &&
-      (!this.props.loaded || !selectedKey)
-    ) {
-      this.setState({
-        title: (
-          <span className="btn-dropdown__item--placeholder">{placeholder}</span>
+  const craftResourceKey = useCallback(
+    (resource: K8sResourceKind): { customKey: string; key: string } => {
+      let key;
+      if (resourceFilter && resourceFilter(resource)) {
+        key = _.get(resource, dataSelector);
+      } else if (!resourceFilter) {
+        key = _.get(resource, dataSelector);
+      }
+      return {
+        customKey: customResourceKey ? customResourceKey(key, resource) : key,
+        key,
+      };
+    },
+    [customResourceKey, resourceFilter, dataSelector],
+  );
+
+  const getResourceList = useCallback(
+    (currentResources: FirehoseResult[]) => {
+      const resourceList = {};
+      _.each(currentResources, ({ data }) => {
+        _.each(data, (resource) => {
+          const { customKey, key } = craftResourceKey(resource);
+          const indexKey = customKey || key;
+          if (indexKey) {
+            resourceList[indexKey] = resource;
+          }
+        });
+      });
+      return resourceList;
+    },
+    [craftResourceKey],
+  );
+
+  const getDropdownList = useCallback(
+    (currentResources: FirehoseResult[]) => {
+      const unsortedList = { ...appendItems };
+      const namespaces = new Set(
+        _.flatten(
+          _.map(currentResources, ({ data }) => data?.map(getNamespace)),
         ),
+      );
+      const containsMultipleNs = namespaces.size > 1;
+      _.each(currentResources, ({ data }) => {
+        _.reduce(
+          data,
+          (acc, resource) => {
+            const { customKey, key: name } = craftResourceKey(resource);
+            const dataValue = customKey || name;
+            if (dataValue) {
+              if (showBadge) {
+                const namespace = containsMultipleNs
+                  ? getNamespace(resource)
+                  : null;
+                acc[dataValue] = getGroupVersionKindForResource(resource) ? (
+                  <DropdownItem
+                    key={resource.metadata.uid}
+                    name={name}
+                    namespace={namespace}
+                    resource={resource}
+                  />
+                ) : (
+                  name
+                );
+              } else {
+                acc[dataValue] = transformLabel
+                  ? transformLabel(resource)
+                  : name;
+              }
+            }
+            return acc;
+          },
+          unsortedList,
+        );
       });
-    }
+      const sortedList = {};
 
-    if (loadError) {
-      this.setState({
-        title: (
-          <span className="cos-error-title">
-            {this.props.t(
-              'plugin__pipelines-console-plugin~Error loading - {{placeholder}}',
-              {
-                placeholder,
-              },
-            )}
-          </span>
-        ),
-      });
-      return;
-    }
+      if (allSelectorItem && !_.isEmpty(unsortedList)) {
+        sortedList[allSelectorItem.allSelectorKey] =
+          allSelectorItem.allSelectorTitle;
+      }
+      if (noneSelectorItem && !_.isEmpty(unsortedList)) {
+        sortedList[noneSelectorItem.noneSelectorKey] =
+          noneSelectorItem.noneSelectorTitle;
+      }
 
-    const resourceList = this.getDropdownList(
-      { ...this.props, ...nextProps },
-      true,
-    );
-    // set placeholder as title if resourceList is empty no actionItems are there
-    if (
-      loaded &&
-      !loadError &&
-      _.isEmpty(resourceList) &&
-      !actionItems &&
-      placeholder &&
-      !title
-    ) {
-      this.setState({
-        title: (
-          <span className="btn-dropdown__item--placeholder">{placeholder}</span>
-        ),
-      });
-    }
-    this.setState({ items: resourceList });
-    if (nextProps.loaded && onLoad) {
-      onLoad(resourceList);
-    }
-    this.setState({ resources: this.getResourceList(nextProps) });
-  }
+      _.keys(unsortedList)
+        .sort()
+        .forEach((key) => {
+          sortedList[key] = unsortedList[key];
+        });
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (_.isEqual(this.state, nextState) && _.isEqual(this.props, nextProps)) {
-      return false;
-    }
-    return true;
-  }
-
-  private craftResourceKey = (
-    resource: K8sResourceKind,
-    props: ResourceDropdownProps,
-  ): { customKey: string; key: string } => {
-    const { customResourceKey, resourceFilter, dataSelector } = props;
-    let key;
-    if (resourceFilter && resourceFilter(resource)) {
-      key = _.get(resource, dataSelector);
-    } else if (!resourceFilter) {
-      key = _.get(resource, dataSelector);
-    }
-    return {
-      customKey: customResourceKey ? customResourceKey(key, resource) : key,
-      key,
-    };
-  };
-
-  private getResourceList = (nextProps: ResourceDropdownProps) => {
-    const { resources } = nextProps;
-    const resourceList = {};
-    _.each(resources, ({ data }) => {
-      _.each(data, (resource) => {
-        const { customKey, key } = this.craftResourceKey(resource, nextProps);
-        const indexKey = customKey || key;
-        if (indexKey) {
-          resourceList[indexKey] = resource;
-        }
-      });
-    });
-    return resourceList;
-  };
-
-  private getDropdownList = (
-    props: ResourceDropdownProps,
-    updateSelection: boolean,
-  ) => {
-    const {
-      loaded,
-      actionItems,
-      autoSelect,
-      selectedKey,
-      resources,
+      return sortedList;
+    },
+    [
+      appendItems,
+      craftResourceKey,
+      showBadge,
       transformLabel,
       allSelectorItem,
       noneSelectorItem,
-      showBadge = false,
-      appendItems,
-    } = props;
+    ],
+  );
 
-    const unsortedList = { ...appendItems };
-    const namespaces = new Set(
-      _.flatten(_.map(resources, ({ data }) => data?.map(getNamespace))),
-    );
-    const containsMultipleNs = namespaces.size > 1;
-    _.each(resources, ({ data }) => {
-      _.reduce(
-        data,
-        (acc, resource) => {
-          const { customKey, key: name } = this.craftResourceKey(
-            resource,
-            props,
-          );
-          const dataValue = customKey || name;
-          if (dataValue) {
-            if (showBadge) {
-              const namespace = containsMultipleNs
-                ? getNamespace(resource)
-                : null;
-              acc[dataValue] = getGroupVersionKindForResource(resource) ? (
-                <DropdownItem
-                  key={resource.metadata.uid}
-                  name={name}
-                  namespace={namespace}
-                  resource={resource}
-                />
-              ) : (
-                name
-              );
-            } else {
-              acc[dataValue] = transformLabel ? transformLabel(resource) : name;
-            }
-          }
-          return acc;
-        },
-        unsortedList,
+  // Handle data updates and initial load
+  useEffect(() => {
+    if (!loaded && !loadError) {
+      setTitle(<Loading isInline={true} />);
+      return;
+    }
+
+    if (loadError) {
+      setTitle(
+        <span className="pf-v6-u-text-color-status-danger">
+          {t(
+            'plugin__pipelines-console-plugin~Error loading - {{placeholder}}',
+            { placeholder },
+          )}
+        </span>,
       );
-    });
-    const sortedList = {};
-
-    if (allSelectorItem && !_.isEmpty(unsortedList)) {
-      sortedList[allSelectorItem.allSelectorKey] =
-        allSelectorItem.allSelectorTitle;
-    }
-    if (noneSelectorItem && !_.isEmpty(unsortedList)) {
-      sortedList[noneSelectorItem.noneSelectorKey] =
-        noneSelectorItem.noneSelectorTitle;
+      return;
     }
 
-    _.keys(unsortedList)
-      .sort()
-      .forEach((key) => {
-        sortedList[key] = unsortedList[key];
-      });
+    if (loaded && resources) {
+      const resourceList = getDropdownList(resources);
+      const newResources = getResourceList(resources);
 
-    if (updateSelection) {
-      let selectedItem = selectedKey;
-      if (
-        (_.isEmpty(sortedList) || !sortedList[selectedKey]) &&
-        allSelectorItem &&
-        allSelectorItem.allSelectorKey !== selectedKey
-      ) {
-        selectedItem = allSelectorItem.allSelectorKey;
-      } else if (autoSelect && !selectedKey) {
-        selectedItem =
-          loaded && _.isEmpty(sortedList) && actionItems
-            ? actionItems[0].actionKey
-            : _.get(_.keys(sortedList), 0);
+      setItems(resourceList);
+      setResourcesState(newResources);
+
+      // Update title based on selectedKey
+      if (propsTitle) {
+        setTitle(propsTitle);
+      } else if (selectedKey && resourceList[selectedKey]) {
+        const selectedActionItem =
+          actionItems && actionItems.find((ai) => selectedKey === ai.actionKey);
+        const newTitle = selectedActionItem
+          ? selectedActionItem.actionTitle
+          : resourceList[selectedKey];
+        setTitle(newTitle);
+      } else if (autoSelect && !selectedKey && !_.isEmpty(resourceList)) {
+        const firstKey = _.keys(resourceList)[0];
+        const selectedActionItem =
+          actionItems && actionItems.find((ai) => firstKey === ai.actionKey);
+        const newTitle = selectedActionItem
+          ? selectedActionItem.actionTitle
+          : resourceList[firstKey];
+        setTitle(newTitle);
+        onChange &&
+          onChange(firstKey, resourceList[firstKey], newResources[firstKey]);
+      } else if (_.isEmpty(resourceList) && !actionItems) {
+        setTitle(
+          <span className="btn-dropdown__item--placeholder">
+            {placeholder}
+          </span>,
+        );
+      } else if (!selectedKey && !autoSelect) {
+        setTitle(
+          <span className="btn-dropdown__item--placeholder">
+            {placeholder}
+          </span>,
+        );
       }
-      selectedItem && this.handleChange(selectedItem, sortedList);
+
+      if (onLoad) {
+        onLoad(resourceList);
+      }
     }
-    return sortedList;
+  }, [
+    loaded,
+    loadError,
+    resources,
+    selectedKey,
+    placeholder,
+    propsTitle,
+    autoSelect,
+    actionItems,
+    onLoad,
+    onChange,
+    t,
+    getDropdownList,
+    getResourceList,
+  ]);
+
+  const onToggle = () => {
+    setIsOpen((prev) => !prev);
   };
 
-  private handleChange = (key, items) => {
+  const onSelect = (
+    _event: MouseEvent | undefined,
+    value: string | number | undefined,
+  ) => {
+    const key = String(value);
     const name = items[key];
-    const { actionItems, onChange, selectedKey } = this.props;
     const selectedActionItem =
       actionItems && actionItems.find((ai) => key === ai.actionKey);
-    const title = selectedActionItem ? selectedActionItem.actionTitle : name;
-    if (title !== this.state.title) {
-      this.setState({ title });
-    }
+    const newTitle = selectedActionItem ? selectedActionItem.actionTitle : name;
+
+    setTitle(newTitle);
+    setIsOpen(false);
+    setFilterValue('');
+
     if (key !== selectedKey) {
-      onChange && onChange(key, name, this.state.resources[key]);
+      onChange && onChange(key, name, resourcesState[key]);
     }
   };
 
-  private onChange = (key: string) => {
-    this.handleChange(key, this.state.items);
+  const onFilterChange = (value: string) => {
+    setFilterValue(value);
   };
 
-  render() {
-    return (
-      <Dropdown
-        id={this.props.id}
-        ariaLabel={this.props.ariaLabel}
-        className={this.props.className}
-        dropDownClassName={this.props.dropDownClassName}
-        menuClassName={this.props.menuClassName}
-        buttonClassName={this.props.buttonClassName}
-        dropDownContentClassName={this.props.dropDownContentClassName}
-        titlePrefix={this.props.titlePrefix}
-        autocompleteFilter={this.props.autocompleteFilter || fuzzy}
-        actionItems={this.props.actionItems}
-        items={this.state.items}
-        onChange={this.onChange}
-        selectedKey={this.props.selectedKey}
-        title={this.props.title || this.state.title}
-        autocompletePlaceholder={this.props.placeholder}
-        userSettingsPrefix={this.props.userSettingsPrefix}
-        storageKey={this.props.storageKey}
-        disabled={this.props.disabled}
-      />
-    );
-  }
-}
+  const getFilteredItems = () => {
+    if (!filterValue) {
+      return items;
+    }
 
-export default withTranslation()(ResourceDropdown);
+    return _.pickBy(items, (item) => {
+      if (autocompleteFilter) {
+        // For custom filters, create an object structure that filters expect
+        if (isValidElement(item)) {
+          // Ensure props.name is a string for React elements
+          const itemProxy = {
+            props: {
+              name: String((item.props as any)?.name || ''),
+            },
+          };
+          return autocompleteFilter(filterValue, itemProxy);
+        } else {
+          return autocompleteFilter(filterValue, { name: String(item || '') });
+        }
+      } else {
+        // For default fuzzy search, extract string value
+        const itemString = isValidElement(item)
+          ? (item.props as any)?.name || ''
+          : String(item || '');
+        return fuzzy(filterValue, itemString);
+      }
+    });
+  };
+
+  const filteredItems = getFilteredItems();
+  const displayTitle = propsTitle || title;
+
+  const toggle = (toggleRef: Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={onToggle}
+      isExpanded={isOpen}
+      isDisabled={disabled}
+      className={dropDownClassName}
+      id={id}
+      aria-label={ariaLabel}
+    >
+      {titlePrefix && `${titlePrefix}: `}
+      {displayTitle}
+    </MenuToggle>
+  );
+
+  return (
+    <Select
+      id={id}
+      isOpen={isOpen}
+      selected={selectedKey}
+      onSelect={onSelect}
+      onOpenChange={(open) => setIsOpen(open)}
+      onOpenChangeKeys={['Escape']}
+      toggle={toggle}
+      shouldFocusToggleOnSelect
+      className={className}
+      isScrollable
+      popperProps={{ appendTo: 'inline' }}
+    >
+      {autocompleteFilter && (
+        <>
+          <MenuSearch>
+            <MenuSearchInput>
+              <SearchInput
+                value={filterValue}
+                onChange={(_event, value) => onFilterChange(value)}
+                placeholder={placeholder}
+                inputProps={{
+                  autoFocus: true,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </MenuSearchInput>
+          </MenuSearch>
+          <Divider />
+        </>
+      )}
+      <SelectList>
+        {Object.keys(filteredItems).length === 0 && filterValue ? (
+          <SelectOption isDisabled>
+            {t('plugin__pipelines-console-plugin~No results found')}
+          </SelectOption>
+        ) : (
+          Object.keys(filteredItems).map((key) => (
+            <SelectOption key={key} value={key}>
+              {filteredItems[key]}
+            </SelectOption>
+          ))
+        )}
+      </SelectList>
+    </Select>
+  );
+};
+
+export default ResourceDropdown;

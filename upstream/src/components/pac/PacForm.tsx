@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { PageSection } from '@patternfly/react-core';
@@ -14,7 +14,7 @@ import PacAppForm from './PacAppForm';
 import { LoadingBox } from '../status/status-box';
 import { Breadcrumbs } from '../common/Breadcrumbs';
 
-const PacForm: React.FC<{ namespace: string }> = ({ namespace }) => {
+const PacForm: FC<{ namespace: string }> = ({ namespace }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { loaded, manifestData } = usePacGHManifest();
 
@@ -36,7 +36,7 @@ const PacForm: React.FC<{ namespace: string }> = ({ namespace }) => {
   return (
     <>
       <NamespaceBar isDisabled={true} />
-      <PageSection
+      <PageSection hasBodyWrapper={false}
         type="breadcrumb"
         className="co-m-nav-title--detail"
         data-test="pac-form-page-section"
@@ -48,7 +48,7 @@ const PacForm: React.FC<{ namespace: string }> = ({ namespace }) => {
       <Formik
         initialValues={{ applicationName: PAC_GH_APP_NAME, manifestData }}
         onSubmit={() => {}}
-        onReset={history.goBack}
+        onReset={history.back}
         validateOnBlur={false}
         validateOnChange={false}
         validationSchema={pacValidationSchema(t)}

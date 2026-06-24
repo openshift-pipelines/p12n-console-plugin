@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Alert, Banner } from '@patternfly/react-core';
 import { LogViewer } from '@patternfly/react-log-viewer';
 import { Base64 } from 'js-base64';
@@ -10,7 +11,7 @@ import { ContainerSpec, ContainerStatus, PodKind } from '../../types';
 import { PodModel } from '../../models';
 import { resourceURL } from '../utils/k8s-utils';
 import { containerToLogSourceStatus } from '../utils/pipeline-utils';
-import { LoadingInline } from '../Loading';
+import { Loading } from '../Loading';
 import {
   getMultiClusterLogsUrl,
   getMultiClusterLogsStreamPath,
@@ -59,7 +60,7 @@ const processLogData = (
   return result;
 };
 
-const Logs: React.FC<LogsProps> = ({
+const Logs: FC<LogsProps> = ({
   stillFetching,
   resource,
   taskName,
@@ -74,21 +75,21 @@ const Logs: React.FC<LogsProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { metadata = {} } = resource;
   const { name: resName, namespace: resNamespace } = metadata;
-  const [error, setError] = React.useState<boolean>(false);
-  const [logData, setLogData] = React.useState<LogData>({});
-  const [formattedLogString, setFormattedLogString] = React.useState('');
-  const [scrollToRow, setScrollToRow] = React.useState<number>(0);
-  const [activeContainers, setActiveContainers] = React.useState<Set<string>>(
+  const [error, setError] = useState<boolean>(false);
+  const [logData, setLogData] = useState<LogData>({});
+  const [formattedLogString, setFormattedLogString] = useState('');
+  const [scrollToRow, setScrollToRow] = useState<number>(0);
+  const [activeContainers, setActiveContainers] = useState<Set<string>>(
     new Set(),
   );
 
   // Ref to track current pipelineRunFinished value for WebSocket retry logic
-  const pipelineRunFinishedRef = React.useRef(pipelineRunFinished);
-  React.useEffect(() => {
+  const pipelineRunFinishedRef = useRef(pipelineRunFinished);
+  useEffect(() => {
     pipelineRunFinishedRef.current = pipelineRunFinished;
   }, [pipelineRunFinished]);
 
-  const findTargetRowForActiveStep = React.useMemo(
+  const findTargetRowForActiveStep = useMemo(
     () => (formattedString: string) => {
       if (!activeStep) return null;
       const lines = formattedString.split('\n');
@@ -105,13 +106,13 @@ const Logs: React.FC<LogsProps> = ({
     [activeStep],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentLogsGetter(() => {
       return formattedLogString;
     });
   }, [setCurrentLogsGetter, formattedLogString]);
 
-  const appendMessage = React.useCallback(
+  const appendMessage = useCallback(
     (containerName: string, blockContent: string, resourceStatus: string) => {
       if (blockContent) {
         setLogData((prevLogData) => {
@@ -244,7 +245,7 @@ const Logs: React.FC<LogsProps> = ({
     return mcWs;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     containers.forEach((container) => {
       if (activeContainers.has(container.name)) return;
       setActiveContainers((prev) => new Set(prev).add(container.name));
@@ -374,7 +375,7 @@ const Logs: React.FC<LogsProps> = ({
     pipelineRunFinished,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const formattedString = processLogData(logData, containers);
     const targetRow = findTargetRowForActiveStep(formattedString);
     if (typeof targetRow === 'number') {
@@ -410,7 +411,7 @@ const Logs: React.FC<LogsProps> = ({
   }, [logData, activeStep, findTargetRowForActiveStep]);
 
   return (
-    <div className="pf-v5-u-h-100 pf-v5-u-w-100">
+    <div className="pf-v6-u-h-100 pf-v6-u-w-100">
       {error && (
         <Alert
           variant="danger"
@@ -421,13 +422,13 @@ const Logs: React.FC<LogsProps> = ({
       <LogViewer
         useAnsiClasses={true}
         header={
-          <Banner className="pf-v5-l-flex pf-v5-l-gap-md">
-            <span data-test-id="logs-taskName" className="pf-v5-u-font-size-md">
+          <Banner className="pf-v6-l-flex pf-v6-l-gap-md">
+            <span data-test-id="logs-taskName" className="pf-v6-u-font-size-md">
               {taskName}
             </span>
             {stillFetching ? (
               <span data-test-id="loading-indicator">
-                <LoadingInline />
+                <Loading isInline={true} />
               </span>
             ) : null}
           </Banner>
