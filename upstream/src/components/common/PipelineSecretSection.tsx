@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Button } from '@patternfly/react-core';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Formik, useField, useFormikContext } from 'formik';
@@ -9,7 +9,7 @@ import {
   associateServiceAccountToSecret,
   getSecretAnnotations,
 } from '../utils/pipeline-utils';
-import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
+import { k8sCreate, useOverlay } from '@openshift-console/dynamic-plugin-sdk';
 import { CommonPipelineModalFormikValues, SecretType } from '../../types';
 import { ExpandCollapse } from './expand-collapse';
 import { advancedSectionValidationSchema } from '../start-pipeline/validation-utils';
@@ -24,13 +24,14 @@ const initialValues = {
   formData: {},
 };
 
-const PipelineSecretSection: React.FC = () => {
+const PipelineSecretSection: FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [secretOpenField] = useField<boolean>('secretOpen');
   const {
     setFieldValue,
     values: { namespace },
   } = useFormikContext<CommonPipelineModalFormikValues>();
+  const launchOverlay = useOverlay();
 
   const handleSubmit = (values, actions) => {
     const newSecret = {
@@ -51,6 +52,7 @@ const PipelineSecretSection: React.FC = () => {
           resp,
           namespace,
           values.annotations.key === SecretAnnotationId.Image,
+          launchOverlay,
         );
       })
       .catch((err) => {
@@ -94,8 +96,8 @@ const PipelineSecretSection: React.FC = () => {
                 setFieldValue(secretOpenField.name, true);
               }}
               className="odc-pipeline-secret-section__secret-action"
-              icon={<PlusCircleIcon />}
             >
+              <PlusCircleIcon className="pf-v6-u-mx-sm" />
               {t('Add Secret')}
             </Button>
           )}

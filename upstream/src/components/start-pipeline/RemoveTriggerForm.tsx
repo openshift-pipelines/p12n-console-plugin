@@ -1,7 +1,7 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Icon, Split, SplitItem } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
-import { global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/global_warning_color_100';
+import { t_chart_global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/t_chart_global_warning_color_100';
 import { Trans, useTranslation } from 'react-i18next';
 import { PipelineKind } from '../../types';
 import TriggerTemplateSelector from './TriggerTemplateSelector';
@@ -10,7 +10,7 @@ type RemoveTriggerFormProps = {
   pipeline: PipelineKind;
 };
 
-const RemoveTriggerForm: React.FC<RemoveTriggerFormProps> = (props) => {
+const RemoveTriggerForm: FC<RemoveTriggerFormProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { pipeline } = props;
   const pipelineName = pipeline.metadata.name;
@@ -24,10 +24,12 @@ const RemoveTriggerForm: React.FC<RemoveTriggerFormProps> = (props) => {
       </SplitItem>
       <SplitItem isFilled>
         <p className="co-break-word">
-          <Trans t={t}>
-            Select the trigger to remove from pipeline <b>{{ pipelineName }}</b>
-            .
-          </Trans>
+          <Trans
+            t={t}
+            i18nKey="Select the trigger to remove from pipeline <1>{{pipelineName}}</1>."
+            values={{ pipelineName }}
+            components={{ 1: <b /> }}
+          />
         </p>
         <TriggerTemplateSelector
           name="selectedTrigger"

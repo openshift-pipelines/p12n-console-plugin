@@ -1,7 +1,7 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { Grid, GridItem, ListItem } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { useTaskRuns } from '../hooks/useTaskRuns';
 import { useMultiClusterProxyService } from '../hooks/useMultiClusterProxyService';
 import { resourcePath } from '../utils/resource-link';
@@ -19,9 +19,11 @@ type PipelineRunItemProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
+const PipelineRunItem: FC<PipelineRunItemProps> = ({ pipelineRun }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
+  const { isResourceManagedByKueue } = useMultiClusterProxyService({
+    managedBy: pipelineRun?.spec?.managedBy,
+  });
   const {
     metadata: { name, namespace, creationTimestamp },
     status,
@@ -34,9 +36,11 @@ const PipelineRunItem: React.FC<PipelineRunItemProps> = ({ pipelineRun }) => {
   const [taskRuns] = useTaskRuns(
     pipelineRun?.metadata?.namespace,
     pipelineRun?.metadata?.name,
-    { 
-      pipelineRunFinished, 
-      pipelineRunManagedBy: pipelineRun?.spec?.managedBy 
+    undefined,
+    undefined,
+    {
+      pipelineRunFinished,
+      pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
     },
   );
   const path = resourcePath(PipelineRunModel, name, namespace);

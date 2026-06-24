@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useRef, useState, memo } from 'react';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { useTranslation } from 'react-i18next';
 import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
@@ -41,7 +42,7 @@ interface QuickSearchProps {
   taskGroup: PipelineBuilderTaskGroup;
 }
 
-const Contents: React.FC<
+const Contents: FC<
   {
     catalogService: CatalogService;
   } & QuickSearchProps
@@ -56,10 +57,10 @@ const Contents: React.FC<
   taskGroup,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const savedCallback = React.useRef(null);
+  const savedCallback = useRef(null);
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
   savedCallback.current = callback;
-  const [failedTasks, setFailedTasks] = React.useState<string[]>([]);
+  const [failedTasks, setFailedTasks] = useState<string[]>([]);
 
   useLoadingTaskCleanup(onUpdateTasks, taskGroup);
   useCleanupOnFailure(failedTasks, onUpdateTasks, taskGroup);
@@ -111,6 +112,7 @@ const Contents: React.FC<
 
   const catalogServiceItems = catalogService.items.reduce((acc, item) => {
     const installedTask = findInstalledTask(catalogService.items, item);
+
     if (
       item.provider === TaskProviders.artifactHub &&
       item.type !== TaskProviders.redhat
@@ -226,7 +228,7 @@ const Contents: React.FC<
   );
 };
 
-const PipelineQuickSearch: React.FC<QuickSearchProps> = ({
+const PipelineQuickSearch: FC<QuickSearchProps> = ({
   namespace,
   viewContainer,
   isOpen,
@@ -258,4 +260,4 @@ const PipelineQuickSearch: React.FC<QuickSearchProps> = ({
   );
 };
 
-export default React.memo(PipelineQuickSearch);
+export default memo(PipelineQuickSearch);

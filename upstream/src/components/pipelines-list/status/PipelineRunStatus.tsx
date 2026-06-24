@@ -1,11 +1,11 @@
-import * as React from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router';
 import { PipelineRunModel } from '../../../models';
 import { PipelineRunKind, TaskRunKind } from '../../../types';
 import PipelineResourceStatus from './PipelineResourceStatus';
 import StatusPopoverContent from './StatusPopoverContent';
-import { LoadingInline } from '../../Loading';
+import { Loading } from '../../Loading';
 import { getPLRLogSnippet } from '../../logs/pipelineRunLogSnippet';
 import { getReferenceForModel } from '../../pipelines-overview/utils';
 import { useMultiClusterProxyService } from '../../hooks/useMultiClusterProxyService';
@@ -17,7 +17,7 @@ type PipelineRunStatusProps = {
   taskRuns: TaskRunKind[];
   taskRunsLoaded: boolean;
 };
-const PipelineRunStatus: React.FC<PipelineRunStatusProps> = ({
+const PipelineRunStatus: FC<PipelineRunStatusProps> = ({
   status,
   pipelineRun,
   title,
@@ -25,7 +25,9 @@ const PipelineRunStatus: React.FC<PipelineRunStatusProps> = ({
   taskRunsLoaded,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { isResourceManagedByKueue } = useMultiClusterProxyService({ managedBy: pipelineRun?.spec?.managedBy });
+  const { isResourceManagedByKueue } = useMultiClusterProxyService({
+    managedBy: pipelineRun?.spec?.managedBy,
+  });
   const logPath = `/k8s/ns/${
     pipelineRun?.metadata.namespace
   }/${getReferenceForModel(PipelineRunModel)}/${
@@ -43,7 +45,7 @@ const PipelineRunStatus: React.FC<PipelineRunStatusProps> = ({
         />
       </PipelineResourceStatus>
     ) : (
-      <LoadingInline />
+      <Loading isInline={true} />
     )
   ) : (
     <>{'-'}</>

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import withDragDropContext from '../text-column-field/drag-drop-context';
 import { ConnectDropTarget, DropTargetMonitor } from 'react-dnd/lib/interfaces';
 import { NativeTypes } from 'react-dnd-html5-backend';
@@ -18,7 +18,7 @@ export const containsNonPrintableCharacters = (value: string) => {
   return /[\x00-\x09\x0E-\x1F]/.test(value);
 };
 
-class FileInputWithTranslation extends React.Component<
+class FileInputWithTranslation extends Component<
   FileInputProps,
   FileInputState
 > {
@@ -100,10 +100,10 @@ class FileInputWithTranslation extends React.Component<
             {this.props.label}
           </label>
           <div className="modal-body__field">
-            <div className="pf-v5-c-input-group">
+            <div className="pf-v6-c-input-group">
               <input
                 type="text"
-                className="pf-v5-c-form-control"
+                className="pf-v6-c-form-control"
                 aria-label={t('plugin__pipelines-console-plugin~Filename')}
                 value={this.props.inputFileName}
                 aria-describedby={
@@ -112,7 +112,7 @@ class FileInputWithTranslation extends React.Component<
                 readOnly
                 disabled
               />
-              <span className="pf-v5-c-button pf-m-tertiary co-btn-file">
+              <span className="pf-v6-c-button pf-m-tertiary co-btn-file">
                 <input
                   id={id}
                   type="file"
@@ -134,7 +134,7 @@ class FileInputWithTranslation extends React.Component<
                     ? this.props['data-test-id']
                     : 'file-input-textarea'
                 }
-                className="pf-v5-c-form-control co-file-dropzone__textarea"
+                className="pf-v6-c-form-control co-file-dropzone__textarea"
                 onChange={this.onDataChange}
                 value={this.props.inputFileData}
                 aria-label={this.props.label}
@@ -194,7 +194,7 @@ const FileInputComponent = DropTarget(
 )(FileInput);
 
 const DroppableFileInputWithTranslation = withDragDropContext(
-  class DroppableFileInput extends React.Component<
+  class DroppableFileInput extends Component<
     DroppableFileInputProps,
     DroppableFileInputState
   > {

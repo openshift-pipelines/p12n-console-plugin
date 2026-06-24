@@ -1,5 +1,12 @@
-import * as React from 'react';
-import { FormGroup, Alert } from '@patternfly/react-core';
+import type { FC, ReactEventHandler } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  FormGroup,
+  Alert,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+} from '@patternfly/react-core';
 import { useField, useFormikContext, FormikValues } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useFormikValidationFix } from '../../pipelines-details/multi-column-field/formik-validation-fix';
@@ -9,7 +16,6 @@ import _ from 'lodash';
 import { ExpandCollapse } from '../../common/expand-collapse';
 import { RequestSizeInput } from '../../common/request-size-input';
 import { StorageClassDropdown } from '../../common/StorageClassDropdown';
-
 import './VolumeClaimTemplateForm.scss';
 
 type AccessMode = 'ReadWriteOnce' | 'ReadWriteMany' | 'ReadOnlyMany';
@@ -221,7 +227,7 @@ interface RequestSize {
   unit: string;
 }
 
-const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
+const VolumeClaimTemplateForm: FC<VolumeClaimTemplateFormProps> = ({
   name,
   initialSizeValue = '1',
   initialSizeUnit = 'Gi',
@@ -231,28 +237,28 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
   const [field] = useField(name);
   const initAccessModeHelp = t('Permissions to the mounted drive.');
   const [accessModeHelp, setAccessModeHelp] =
-    React.useState(initAccessModeHelp);
+    useState(initAccessModeHelp);
   const { setFieldValue, setFieldTouched, errors } =
     useFormikContext<FormikValues>();
   const [allowedAccessModes, setAllowedAccessModes] =
-    React.useState<string[]>(initialAccessModes);
-  const [volumeMode, setVolumeMode] = React.useState(initialVolumeMode);
-  const [accessMode, setAccessMode] = React.useState('ReadWriteOnce');
-  const [requestSizeError, setRequestSizeError] = React.useState(null);
+    useState<string[]>(initialAccessModes);
+  const [volumeMode, setVolumeMode] = useState(initialVolumeMode);
+  const [accessMode, setAccessMode] = useState('ReadWriteOnce');
+  const [requestSizeError, setRequestSizeError] = useState(null);
   const [requestSizeValue, setRequestSizeValue] =
-    React.useState(initialSizeValue);
-  const [requestSizeUnit, setRequestSizeUnit] = React.useState(initialSizeUnit);
-  const [storageProvisioner, setStorageProvisioner] = React.useState('');
-  const [storageClass, setStorageClass] = React.useState('');
+    useState(initialSizeValue);
+  const [requestSizeUnit, setRequestSizeUnit] = useState(initialSizeUnit);
+  const [storageProvisioner, setStorageProvisioner] = useState('');
+  const [storageClass, setStorageClass] = useState('');
   useFormikValidationFix(field.value);
 
-  const handleAccessMode: React.ReactEventHandler<HTMLInputElement> = (
+  const handleAccessMode: ReactEventHandler<HTMLInputElement> = (
     event,
   ) => {
     setAccessMode(event.currentTarget.value);
   };
 
-  const handleVolumeMode: React.ReactEventHandler<HTMLInputElement> = (
+  const handleVolumeMode: ReactEventHandler<HTMLInputElement> = (
     event,
   ) => {
     setVolumeMode(event.currentTarget.value);
@@ -283,7 +289,7 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
     setRequestSizeUnit(unit);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setRequestSizeError(null);
     const volumeClaimTemplate = {
       spec: {
@@ -326,26 +332,32 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
       {errors[name] && (
         <Alert isInline variant="danger" title={t('Required')} />
       )}
-      <p className="help-block">{helpText}</p>
+      <FormHelperText>
+        <HelperText>
+          <HelperTextItem>{helpText}</HelperTextItem>
+        </HelperText>
+      </FormHelperText>
       <ExpandCollapse
         textExpanded={t('Hide VolumeClaimTemplate options')}
         textCollapsed={t('Show VolumeClaimTemplate options')}
       >
-        <div className="odc-VolumeClaimTemplateForm--section">
-          <StorageClassDropdown
-            onChange={handleStorageClass}
-            id="storageclass-dropdown"
-            data-test="storageclass-dropdown"
-            describedBy="storageclass-dropdown-help"
-            required={false}
-            name="storageClass"
-          />
-        </div>
-        <div className="odc-VolumeClaimTemplateForm--section">
-          <label className="control-label co-required" htmlFor="access-mode">
-            {t('Access Mode')}
-          </label>
-          <FormGroup fieldId="accessMode" data-test-id="accessModeRadio">
+        <StorageClassDropdown
+          onChange={handleStorageClass}
+          id="storageclass-dropdown"
+          data-test="storageclass-dropdown"
+          describedBy="storageclass-dropdown-help"
+          required={false}
+          name="storageClass"
+        />
+        <FormGroup
+          label={t('Access Mode')}
+          isRequired
+          fieldId="accessMode"
+          data-test-id="accessModeRadio"
+          role="radiogroup"
+          className="pf-v6-u-mt-md"
+        >
+          <div className="pf-v6-l-flex pf-m-row-gap-x-md pf-v6-l-flex-wrap">
             {getAccessModeRadios().map((radio) => {
               const disabled = !allowedAccessModes.includes(radio.value);
               return (
@@ -353,7 +365,6 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
                   {...radio}
                   key={radio.value}
                   onChange={handleAccessMode}
-                  inline
                   disabled={disabled}
                   checked={radio.value === accessMode}
                   aria-describedby="access-mode-help"
@@ -361,17 +372,21 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
                 />
               );
             })}
-
-            <p className="help-block">{accessModeHelp}</p>
-          </FormGroup>
-        </div>
-        <div className="odc-VolumeClaimTemplateForm--section">
-          <label
-            className="control-label co-required"
-            htmlFor="request-size-input"
-          >
-            {t('Size')}
-          </label>
+          </div>
+          <FormHelperText>
+            <HelperText>
+              <HelperTextItem id="access-mode-help">
+                {accessModeHelp}
+              </HelperTextItem>
+            </HelperText>
+          </FormHelperText>
+        </FormGroup>
+        <FormGroup
+          label={t('Size')}
+          isRequired
+          fieldId="request-size-input"
+          className="pf-v6-u-mt-md"
+        >
           <RequestSizeInput
             name="requestSize"
             required
@@ -383,31 +398,36 @@ const VolumeClaimTemplateForm: React.FC<VolumeClaimTemplateFormProps> = ({
             inputID="request-size-input"
             data-test-id="pvc-size-input"
           />
-          {requestSizeError ? (
-            <p className="pf-v5-c-form__helper-text pf-m-error">
-              {requestSizeError}
-            </p>
-          ) : (
-            <p className="help-block">{t('Desired storage capacity')}</p>
-          )}
-        </div>
-        <div className="odc-VolumeClaimTemplateForm--section">
-          <label className="control-label" htmlFor="volume-mode">
-            {t('Volume Mode')}
-          </label>
-          <FormGroup fieldId="volumeMode" data-test-id="volumeModeRadio">
+          <FormHelperText>
+            <HelperText>
+              <HelperTextItem
+                id="request-size-help"
+                variant={requestSizeError ? 'error' : 'default'}
+              >
+                {requestSizeError || t('Desired storage capacity')}
+              </HelperTextItem>
+            </HelperText>
+          </FormHelperText>
+        </FormGroup>
+        <FormGroup
+          label={t('Volume Mode')}
+          fieldId="volumeMode"
+          data-test-id="volumeModeRadio"
+          role="radiogroup"
+          className="pf-v6-u-mt-md"
+        >
+          <div className="pf-v6-l-flex pf-m-row-gap-x-md pf-v6-l-flex-wrap">
             {getVolumeModeRadios().map((radio) => (
               <RadioInput
                 {...radio}
                 key={radio.value}
                 onChange={handleVolumeMode}
-                inline
                 checked={radio.value === volumeMode}
                 name={`${name}.volumeMode`}
               />
             ))}
-          </FormGroup>
-        </div>
+          </div>
+        </FormGroup>
       </ExpandCollapse>
     </FormGroup>
   );

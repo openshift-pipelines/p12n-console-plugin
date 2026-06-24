@@ -1,11 +1,7 @@
 @use '../../logs/ansi-log-colors' as *;
 
 .odc-task-run-log {
-  display: flex;
-  flex: 1;
-  padding: var(--pf-v5-global--spacer--xl);
-
-  .pf-v5-c-log-viewer__text {
+  .pf-v6-c-log-viewer__text {
     white-space: pre;
   }
 

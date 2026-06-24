@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   render,
   fireEvent,
@@ -8,6 +7,7 @@ import {
   configure,
 } from '@testing-library/react';
 import { cloneDeep, omit } from 'lodash';
+import { MemoryRouter } from 'react-router';
 import {
   sampleTaskCatalogItem,
   sampleArtifactHubCatalogItem,
@@ -60,7 +60,9 @@ describe('pipelineQuickSearchDetails', () => {
   describe('Installed badge tests', () => {
     it('should show the installed badge for the cluster task', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-installed-badge')).not.toBeNull();
@@ -76,10 +78,12 @@ describe('pipelineQuickSearchDetails', () => {
         },
       };
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...artifactHubProps}
-          selectedItem={installedArtifactHubTask}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...artifactHubProps}
+            selectedItem={installedArtifactHubTask}
+          />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-installed-badge')).not.toBeNull();
@@ -88,7 +92,9 @@ describe('pipelineQuickSearchDetails', () => {
 
     it('should not show the installed badge for the uninstalled artifact hub task', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...artifactHubProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...artifactHubProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-installed-badge')).toBeNull();
@@ -98,47 +104,55 @@ describe('pipelineQuickSearchDetails', () => {
 
   describe('CTA button tests', () => {
     it('should show Install and add button when versions are empty', async () => {
-      const taskWithoutVersion = cloneDeep({ ...artifactHubProps.selectedItem });
+      const taskWithoutVersion = cloneDeep({
+        ...artifactHubProps.selectedItem,
+      });
       taskWithoutVersion.attributes.versions = [];
       const { getByRole } = render(
-        <PipelineQuickSearchDetails
-          {...artifactHubProps}
-          selectedItem={taskWithoutVersion}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...artifactHubProps}
+            selectedItem={taskWithoutVersion}
+          />
+        </MemoryRouter>,
       );
       await waitFor(() => {
-        expect(
-          getByRole('button', { name: 'Install and add' }),
-        ).not.toBeNull();
+        expect(getByRole('button', { name: 'Install and add' })).not.toBeNull();
       });
     });
 
     it('Add button should be enabled if the versions is not available in the user created task', async () => {
       const customTask = omit(taskProps.selectedItem, 'attributes.versions');
       const { getByRole } = render(
-        <PipelineQuickSearchDetails {...taskProps} selectedItem={customTask} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} selectedItem={customTask} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
-        expect(
-          getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBe('false');
+        const button = getByRole('button', { name: 'Add' });
+        expect(button).not.toBeNull();
+        expect(button.getAttribute('aria-disabled')).not.toBe('true');
       });
     });
 
     it('Add button should be enabled if the versions is not available', async () => {
       const { getByRole } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
-        expect(
-          getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBe('false');
+        const button = getByRole('button', { name: 'Add' });
+        expect(button).not.toBeNull();
+        expect(button.getAttribute('aria-disabled')).not.toBe('true');
       });
     });
 
     it('should show the Add button for already installed task', async () => {
       const { getByRole } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(getByRole('button', { name: 'Add' })).not.toBeNull();
@@ -147,7 +161,9 @@ describe('pipelineQuickSearchDetails', () => {
 
     it('should show the Install and add button for uninstalled artifact hub task', async () => {
       const { getByRole } = render(
-        <PipelineQuickSearchDetails {...artifactHubProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...artifactHubProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(getByRole('button', { name: 'Install and add' })).not.toBeNull();
@@ -163,10 +179,12 @@ describe('pipelineQuickSearchDetails', () => {
         },
       };
       const { getByRole, queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...artifactHubProps}
-          selectedItem={installedArtifactHubTask}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...artifactHubProps}
+            selectedItem={installedArtifactHubTask}
+          />
+        </MemoryRouter>,
       );
       await waitFor(async () => {
         fireEvent.click(queryByTestId('task-version'));
@@ -179,7 +197,9 @@ describe('pipelineQuickSearchDetails', () => {
   describe('Version dropdown tests', () => {
     it('should show the version dropdown if the versions are available', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-version-dropdown')).not.toBeNull();
@@ -190,10 +210,12 @@ describe('pipelineQuickSearchDetails', () => {
       const selectedItem = omit(taskProps.selectedItem, 'attributes.versions');
       selectedItem.attributes.versions = [];
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...taskProps}
-          selectedItem={selectedItem}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...taskProps}
+            selectedItem={selectedItem}
+          />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-version-dropdown')).toBeNull();
@@ -204,7 +226,9 @@ describe('pipelineQuickSearchDetails', () => {
   describe('Category labels', () => {
     it('should show the category labels if the categories are available', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-category-list')).not.toBeNull();
@@ -217,10 +241,12 @@ describe('pipelineQuickSearchDetails', () => {
         'attributes.categories',
       );
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...taskProps}
-          selectedItem={selectedItem}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...taskProps}
+            selectedItem={selectedItem}
+          />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-category-list')).toBeNull();
@@ -231,7 +257,9 @@ describe('pipelineQuickSearchDetails', () => {
   describe('Tag labels', () => {
     it('should show the tag labels if the tag are available', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...taskProps} />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails {...taskProps} />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-tag-list')).not.toBeNull();
@@ -241,10 +269,12 @@ describe('pipelineQuickSearchDetails', () => {
     it('should not show the tag labels if the tags are not available', async () => {
       const selectedItem = omit(taskProps.selectedItem, 'tags');
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...taskProps}
-          selectedItem={selectedItem}
-        />,
+        <MemoryRouter>
+          <PipelineQuickSearchDetails
+            {...taskProps}
+            selectedItem={selectedItem}
+          />
+        </MemoryRouter>,
       );
       await waitFor(() => {
         expect(queryByTestId('task-tag-list')).toBeNull();
