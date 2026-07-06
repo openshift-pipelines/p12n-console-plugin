@@ -158,7 +158,6 @@ export type PipelineRunStatus = {
 
 export type PipelineRunKind = K8sResourceCommon & {
   spec: {
-    managedBy?: string;
     pipelineRef?: {
       name?: string;
       resolver?: string;

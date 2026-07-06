@@ -3,7 +3,6 @@ import {
   Drawer,
   DrawerContent,
   DrawerContentBody,
-  PageSection,
 } from '@patternfly/react-core';
 import { FormikProps } from 'formik';
 import * as _ from 'lodash';
@@ -105,6 +104,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
   const updateTasks = (changes: CleanupResults): void => {
     const { tasks, listTasks, finallyTasks, finallyListTasks, loadingTasks } =
       changes;
+
     setFieldValue('formData', {
       ...formData,
       tasks,
@@ -178,20 +178,6 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
     }
   }, [selectedTask]);
 
-  const handleRemoveTask = React.useCallback(
-    async (taskName: string) => {
-      setSelectedTask(null);
-      updateTasks(
-        applyChange(
-          taskGroup,
-          { type: UpdateOperationType.REMOVE_TASK, data: { taskName } },
-          namespace,
-        ),
-      );
-    },
-    [namespace, taskGroup, updateTasks],
-  );
-
   return (
     <Drawer isExpanded={!!selectedTask} position="right">
       <DrawerContent
@@ -219,7 +205,19 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
               onRemoveTask={(taskName: string) => {
                 launchModal(RemoveTaskModal, {
                   taskName,
-                  onRemove: () => handleRemoveTask(taskName),
+                  onRemove: () => {
+                    setSelectedTask(null);
+                    updateTasks(
+                      applyChange(
+                        taskGroup,
+                        {
+                          type: UpdateOperationType.REMOVE_TASK,
+                          data: { taskName },
+                        },
+                        namespace,
+                      ),
+                    );
+                  },
                 });
               }}
               selectedData={selectedTask}
@@ -237,11 +235,11 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
               className="opp-pipeline-builder-form"
               onSubmit={handleSubmit}
             >
-              <PageSection isFilled variant="light">
+              <div className="opp-pipeline-builder-form__content">
                 <FormBody
                   flexLayout
                   disablePaneBody
-                  className="opp-pipeline-builder-form"
+                  className="co-m-pane__body co-m-pane__body--no-top-margin"
                 >
                   <PipelineQuickSearch
                     namespace={namespace}
@@ -273,7 +271,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
                     }
                   />
                 </FormBody>
-              </PageSection>
+              </div>
               <FormFooter
                 handleReset={closeSidebarAndHandleReset}
                 errorMessage={status?.submitError}
@@ -281,7 +279,7 @@ const PipelineBuilderForm: React.FC<PipelineBuilderFormProps> = (props) => {
                 submitLabel={existingPipeline ? t('Save') : t('Create')}
                 disableSubmit={
                   editorType === EditorType.YAML
-                    ? !dirty || !_.isEmpty(errors) || !!status?.submitError
+                    ? !dirty
                     : !dirty ||
                       !_.isEmpty(errors) ||
                       !_.isEmpty(status?.tasks) ||

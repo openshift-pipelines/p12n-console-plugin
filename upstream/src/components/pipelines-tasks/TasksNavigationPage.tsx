@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   HorizontalNav,
@@ -23,7 +23,7 @@ const taskRunModelRef = getReferenceForModel(TaskRunModel);
 const TasksNavigationPage = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [activeNamespace] = useActiveNamespace();
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const createItems = {
     tasks: TaskModel.labelKey || TaskModel.label,
@@ -32,14 +32,14 @@ const TasksNavigationPage = () => {
 
   const onCreate = (type: string) => {
     return type === 'tasks'
-      ? navigate(
+      ? history.push(
           `/k8s/ns/${
             activeNamespace === ALL_NAMESPACES_KEY
               ? DEFAULT_NAMESPACE
               : activeNamespace
           }/${taskModelRef}/~new`,
         )
-      : navigate(
+      : history.push(
           `/k8s/ns/${
             activeNamespace === ALL_NAMESPACES_KEY
               ? DEFAULT_NAMESPACE

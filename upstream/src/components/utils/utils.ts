@@ -2,11 +2,8 @@ import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import _ from 'lodash';
 import {
   DELETED_RESOURCE_IN_K8S_ANNOTATION,
-  KUEUE_LABEL_PREFIX,
-  PIPELINE_RUN_KUEUE_ORIGIN_LABEL,
   preferredNameAnnotation,
   RESOURCE_LOADED_FROM_RESULTS_ANNOTATION,
-  StartedByAnnotation,
 } from '../../consts';
 import { PipelineRunModel } from '../../models';
 import {
@@ -149,7 +146,6 @@ export const migratePipelineRun = (
 
 export const getPipelineRunData = (
   pipeline: PipelineKind = null,
-  currentUser: string,
   latestRun?: PipelineRunKind,
   options?: { generateName: boolean },
 ): PipelineRunKind => {
@@ -172,9 +168,9 @@ export const getPipelineRunData = (
     {},
     pipeline?.metadata?.annotations,
     latestRun?.metadata?.annotations,
-    {
-      [StartedByAnnotation.user]: currentUser,
-    },
+    // {
+    //   [StartedByAnnotation.user]: getActiveUserName(),
+    // },
     !latestRun?.spec.pipelineRef &&
       !latestRun?.metadata.annotations?.[preferredNameAnnotation] && {
         [preferredNameAnnotation]: pipelineName,
@@ -206,18 +202,13 @@ export const getPipelineRunData = (
       namespace: pipeline
         ? pipeline.metadata.namespace
         : latestRun.metadata.namespace,
-      labels: _.omitBy(
-        _.merge(
-          {},
-          pipeline?.metadata?.labels,
-          latestRun?.metadata?.labels,
-          (latestRun?.spec.pipelineRef || pipeline) && {
-            'tekton.dev/pipeline': pipelineName,
-          },
-        ),
-        (_value, key) =>
-          latestRun?.metadata?.labels?.[PIPELINE_RUN_KUEUE_ORIGIN_LABEL] &&
-          key.startsWith(KUEUE_LABEL_PREFIX),
+      labels: _.merge(
+        {},
+        pipeline?.metadata?.labels,
+        latestRun?.metadata?.labels,
+        (latestRun?.spec.pipelineRef || pipeline) && {
+          'tekton.dev/pipeline': pipelineName,
+        },
       ),
     },
     spec: {

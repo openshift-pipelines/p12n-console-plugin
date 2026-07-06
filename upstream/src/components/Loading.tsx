@@ -1,28 +1,23 @@
 import * as React from 'react';
-import { Bullseye, Spinner, SpinnerProps } from '@patternfly/react-core';
+import classNames from 'classnames';
 
 type LoadingProps = {
   className?: string;
-  isInline?: boolean;
-  size?: SpinnerProps["size"];
-  ariaLabel?: string;
 };
 
-export const Loading: React.FC<LoadingProps> = ({ className, isInline, size, ariaLabel }) => (
-  <Bullseye 
-    data-test="loading-indicator" 
-    className={className}
+export const Loading: React.FC<LoadingProps> = ({ className }) => (
+  <div
+    className={classNames('co-m-loader co-an-fade-in-out', className)}
+    data-test="loading-indicator"
   >
-    <Spinner 
-      size={size}
-      isInline={isInline}
-      aria-label={ariaLabel}
-    />
-  </Bullseye>
+    <div className="co-m-loader-dot__one" />
+    <div className="co-m-loader-dot__two" />
+    <div className="co-m-loader-dot__three" />
+  </div>
 );
 Loading.displayName = 'Loading';
 
 export const LoadingInline: React.FC = () => (
-  <Loading isInline = {true} />
+  <Loading className="co-m-loader--inline" />
 );
 LoadingInline.displayName = 'LoadingInline';

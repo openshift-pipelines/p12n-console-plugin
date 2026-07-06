@@ -1,14 +1,5 @@
 [
   {
-    "type": "console.redux-reducer",
-    "properties": {
-      "scope": "pipelinesOverviewFilters",
-      "reducer": {
-        "$codeRef": "pipelinesOverviewFiltersReducer.pipelinesOverviewFiltersReducer"
-      }
-    }
-  },
-  {
     "type": "console.flag/model",
     "properties": {
       "model": {
@@ -28,85 +19,6 @@
         "kind": "Pipeline"
       },
       "flag": "OPENSHIFT_PIPELINE"
-    }
-  },
-  {
-    "type": "console.flag/model",
-    "properties": {
-      "model": {
-        "group": "pipelinesascode.tekton.dev",
-        "version": "v1alpha1",
-        "kind": "Repository"
-      },
-      "flag": "OPENSHIFT_PIPELINE_AS_CODE"
-    }
-  },
-  {
-    "type": "console.yaml-template",
-    "properties": {
-      "name": "default",
-      "model": {
-        "group": "tekton.dev",
-        "kind": "Pipeline",
-        "version": "v1"
-      },
-      "template": { "$codeRef": "yamlTemplates.newPipelineTemplate" }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION"
-      ]
-    }
-  },
-  {
-    "type": "console.yaml-template",
-    "properties": {
-      "name": "default",
-      "model": {
-        "group": "tekton.dev",
-        "kind": "Task",
-        "version": "v1"
-      },
-      "template": { "$codeRef": "yamlTemplates.newTaskTemplate" }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION"
-      ]
-    }
-  },
-  {
-    "type": "console.yaml-template",
-    "properties": {
-      "name": "default",
-      "model": {
-        "group": "tekton.dev",
-        "kind": "TaskRun",
-        "version": "v1"
-      },
-      "template": { "$codeRef": "yamlTemplates.newTaskRunTemplate" }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION"
-      ]
-    }
-  },
-  {
-    "type": "console.yaml-template",
-    "properties": {
-      "name": "default",
-      "model": {
-        "group": "tekton.dev",
-        "kind": "PipelineResource",
-        "version": "v1"
-      },
-      "template": { "$codeRef": "yamlTemplates.newPipelineResourceTemplate" }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_CONSOLE_YAML_TEMPLATE_EXTENSION"
-      ]
     }
   },
   {
@@ -566,19 +478,6 @@
     },
     "flags": {
       "required": ["HIDE_STATIC_PIPELINE_PLUGIN_PIPELINES_LIST"]
-    }
-  },
-  {
-    "type": "console.page/route",
-    "properties": {
-      "exact": false,
-      "path": ["/pac/all-namespaces", "/pac/ns/:ns"],
-      "component": {
-        "$codeRef": "pacComponent.PacPage"
-      }
-    },
-    "flags": {
-      "required": ["HIDE_STATIC_PIPELINE_PLUGIN_PAC_FORM"]
     }
   },
   {
@@ -1283,34 +1182,6 @@
     }
   },
   {
-    "type": "console.page/resource/details",
-    "properties": {
-      "model": {
-        "group": "tekton.dev",
-        "version": "v1beta1",
-        "kind": "Task"
-      },
-      "component": { "$codeRef": "taskDetails.TaskDetailsPage" }
-    },
-    "flags": {
-      "required": ["HIDE_STATIC_PIPELINE_PLUGIN_TASK_DETAILS"]
-    }
-  },
-  {
-    "type": "console.page/resource/details",
-    "properties": {
-      "model": {
-        "group": "tekton.dev",
-        "version": "v1",
-        "kind": "Task"
-      },
-      "component": { "$codeRef": "taskDetails.TaskDetailsPage" }
-    },
-    "flags": {
-      "required": ["HIDE_STATIC_PIPELINE_PLUGIN_TASK_DETAILS"]
-    }
-  },
-  {
     "type": "console.tab/horizontalNav",
     "properties": {
       "id": "Output",
@@ -1407,8 +1278,7 @@
     "flags": {
       "required": [
         "OPENSHIFT_PIPELINE",
-        "HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER",
-        "HIDE_STATIC_PIPELINE_PLUGIN_DEVCONSOLE_ADD_ACTION_EXTENSION"
+        "HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER"
       ]
     },
     "properties": {
@@ -1529,85 +1399,6 @@
       "required": [
         "OPENSHIFT_PIPELINE",
         "HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER"
-      ]
-    }
-  },
-  {
-    "type": "console.page/route",
-    "properties": {
-      "exact": true,
-      "path": "/k8s/ns/:ns/pipelinesascode.tekton.dev~v1alpha1~Repository/~new/form",
-      "component": {
-        "$codeRef": "repositoriesForm.RepositoryFormPage"
-      }
-    },
-    "flags": {
-      "required": [
-        "OPENSHIFT_PIPELINE",
-        "HIDE_STATIC_PIPELINE_PLUGIN_REPOSITORY_FORM"
-      ]
-    }
-  },
-  {
-    "type": "console.topology/data/factory",
-    "properties": {
-      "id": "pipeline-topology-model-factory",
-      "priority": 800,
-      "resources": {
-        "pipelines": {
-          "model": {
-            "kind": "Pipeline",
-            "group": "tekton.dev",
-            "version": "v1"
-          },
-          "opts": { "isList": true, "optional": true, "namespaced": true }
-        },
-        "pipelineRuns": {
-          "model": {
-            "kind": "PipelineRun",
-            "group": "tekton.dev",
-            "version": "v1"
-          },
-          "opts": { "isList": true, "optional": true, "namespaced": true }
-        }
-      },
-      "getDataModelReconciler": {
-        "$codeRef": "topology.getPipelinesDataModelReconciler"
-      }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DATA_FACTORY_EXTENSION"
-      ]
-    }
-  },
-  {
-    "type": "console.topology/decorator/provider",
-    "properties": {
-      "id": "pipeline-run-decorator",
-      "priority": 100,
-      "quadrant": "lowerLeft",
-      "decorator": { "$codeRef": "topology.getPipelineRunDecorator" }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DECORATOR_PROVIDER_EXTENSION"
-      ]
-    }
-  },
-  {
-    "type": "console.topology/details/tab-section",
-    "properties": {
-      "id": "topology-tab-section-pipelines-overview",
-      "tab": "topology-side-bar-tab-resource",
-      "insertBefore": "topology-tab-section-network-overview",
-      "provider": {
-        "$codeRef": "topology.usePipelinesSideBarTabSection"
-      }
-    },
-    "flags": {
-      "required": [
-        "HIDE_STATIC_PIPELINE_PLUGIN_TOPOLOGY_DETAILS_TABSECTION_EXTENSION"
       ]
     }
   }

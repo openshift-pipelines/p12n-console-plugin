@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as _ from 'lodash-es';
-import { Button, DescriptionList } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons/dist/esm/icons/pencil-alt-icon';
 import {
   K8sModel,
@@ -65,7 +65,7 @@ export const ResourceSummary: React.FC<ResourceSummaryProps> = ({
   const canUpdate = canUpdateAccess && canUpdateResource;
 
   return (
-    <DescriptionList data-test-id="resource-summary">
+    <dl data-test-id="resource-summary" className="co-m-pane__details">
       <DetailsItem
         label={t('Name')}
         obj={resource}
@@ -158,7 +158,7 @@ export const ResourceSummary: React.FC<ResourceSummaryProps> = ({
       >
         <OwnerReferences resource={resource} />
       </DetailsItem>
-    </DescriptionList>
+    </dl>
   );
 };
 

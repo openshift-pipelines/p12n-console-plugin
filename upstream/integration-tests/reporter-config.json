@@ -1,11 +1,11 @@
 {
   "reporterEnabled": "mocha-junit-reporter, mochawesome",
   "mochaJunitReporterReporterOptions": {
-    "mochaFile": "./gui_test_screenshots/junit_cypress-[hash].xml",
+    "mochaFile": "./screenshots/junit_cypress-[hash].xml",
     "toConsole": false
   },
   "mochawesomeReporterOptions": {
-    "reportDir": "./gui_test_screenshots/",
+    "reportDir": "./screenshots/",
     "reportFilename": "cypress_report",
     "overwrite": false,
     "html": false,

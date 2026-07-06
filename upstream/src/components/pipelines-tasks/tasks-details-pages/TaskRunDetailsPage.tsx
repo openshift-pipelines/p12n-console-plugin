@@ -4,7 +4,7 @@ import {
   TextVariants,
   Tooltip,
 } from '@patternfly/react-core';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 import * as React from 'react';
 import { useParams } from 'react-router-dom-v5-compat';
 import { ArchiveIcon } from '@patternfly/react-icons';

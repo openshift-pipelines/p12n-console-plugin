@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { PageSection } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -21,11 +20,7 @@ const PipelineRunParametersForm: React.FC<PipelineRunParametersFormProps> = ({
     <>
       <Formik initialValues={initialValues} onSubmit={null}>
         {() => (
-          <PageSection
-            variant="light"
-            isFilled
-            className="pipelines-console-plugin__page-section-width pf-v5-u-p-0 pipelines-console-plugin__background-transparent"
-          >
+          <div className="co-m-pane__body">
             <PipelineRunParameters
               fieldName="parameters"
               isReadOnly
@@ -40,9 +35,8 @@ const PipelineRunParametersForm: React.FC<PipelineRunParametersFormProps> = ({
                 name: '',
                 value: '',
               }}
-              className="pipelines-console-plugin__background-transparent"
             />
-          </PageSection>
+          </div>
         )}
       </Formik>
     </>

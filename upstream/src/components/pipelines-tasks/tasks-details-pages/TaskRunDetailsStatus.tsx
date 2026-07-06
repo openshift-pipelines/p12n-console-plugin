@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
+
 import {
   taskRunFilterReducer,
   taskRunFilterTitleReducer,
@@ -20,7 +15,6 @@ import RunDetailsErrorLog from '../../../components/logs/RunDetailsErrorLog';
 import { getTRLogSnippet } from '../taskRunLogSnippet';
 import Status from '../../status/Status';
 import WorkspaceResourceLinkList from '../../workspaces/WorkspaceResourceLinkList';
-import { useMultiClusterProxyService } from '../../hooks/useMultiClusterProxyService';
 
 export interface TaskRunDetailsStatusProps {
   taskRun: TaskRunKind;
@@ -30,62 +24,55 @@ const TaskRunDetailsStatus: React.FC<TaskRunDetailsStatusProps> = ({
   taskRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const {isResourceManagedByKueue} = useMultiClusterProxyService({ labels: taskRun?.metadata?.labels });
-  const pipelineRunName =
-    taskRun.metadata?.labels?.[TektonResourceLabel.pipelinerun];
 
   return (
-    <DescriptionList>
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-        <DescriptionListDescription>
+    <>
+      <dl>
+        <dt>{t('Status')}</dt>
+        <dd>
           <Status
             status={taskRunFilterReducer(taskRun)}
             title={taskRunFilterTitleReducer(taskRun)}
           />
-        </DescriptionListDescription>
-      </DescriptionListGroup>
+        </dd>
+      </dl>
       {taskRun.metadata?.labels?.[TektonResourceLabel.pipelinerun] && (
-        <DescriptionListGroup data-test="pipelineRun">
-          <DescriptionListTerm>{t('PipelineRun')}</DescriptionListTerm>
-          <DescriptionListDescription>
+        <dl data-test="pipelineRun">
+          <dt>{t('PipelineRun')}</dt>
+          <dd>
             <ResourceLink
               kind={getReferenceForModel(PipelineRunModel)}
               name={taskRun.metadata.labels[TektonResourceLabel.pipelinerun]}
               namespace={taskRun.metadata.namespace}
             />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
+          </dd>
+        </dl>
       )}
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('Started')}</DescriptionListTerm>
-        <DescriptionListDescription>
+      <dl>
+        <dt>{t('Started')}</dt>
+        <dd>
           <Timestamp timestamp={taskRun?.status?.startTime} />
-        </DescriptionListDescription>
-      </DescriptionListGroup>
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('Duration')}</DescriptionListTerm>
-        <DescriptionListDescription>
-          {pipelineRunDuration(taskRun)}
-        </DescriptionListDescription>
-      </DescriptionListGroup>
+        </dd>
+      </dl>
+      <dl>
+        <dt>{t('Duration')}</dt>
+        <dd>{pipelineRunDuration(taskRun)}</dd>
+      </dl>
       <RunDetailsErrorLog
         logDetails={getTRLogSnippet(taskRun)}
         namespace={taskRun.metadata?.namespace}
-        isResourceManagedByKueue={isResourceManagedByKueue}
-        pipelineRunName={pipelineRunName}
       />
       {taskRun?.status?.podName && (
-        <DescriptionListGroup data-test="pod">
-          <DescriptionListTerm>{t('Pod')}</DescriptionListTerm>
-          <DescriptionListDescription>
+        <dl data-test="pod">
+          <dt>{t('Pod')}</dt>
+          <dd>
             <ResourceLink
               kind={PodModel.kind}
               name={taskRun.status.podName}
               namespace={taskRun.metadata.namespace}
             />
-          </DescriptionListDescription>
-        </DescriptionListGroup>
+          </dd>
+        </dl>
       )}
       <WorkspaceResourceLinkList
         workspaces={taskRun.spec.workspaces}
@@ -93,7 +80,7 @@ const TaskRunDetailsStatus: React.FC<TaskRunDetailsStatusProps> = ({
         ownerResourceName={taskRun.metadata.name}
         ownerResourceKind={taskRun.kind}
       />
-    </DescriptionList>
+    </>
   );
 };
 

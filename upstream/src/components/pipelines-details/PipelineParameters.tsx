@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PageSection, TextInputTypes } from '@patternfly/react-core';
+import { TextInputTypes } from '@patternfly/react-core';
 import MultiColumnField from './multi-column-field/MultiColumnField';
 import InputField from './multi-column-field/InputField';
 
@@ -15,7 +15,6 @@ type PipelineParametersProps = {
   fieldName: string;
   emptyValues: { [name: string]: string };
   isReadOnly?: boolean;
-  className?: string;
 };
 
 const PipelineParameters: React.FC<PipelineParametersProps> = ({
@@ -30,10 +29,9 @@ const PipelineParameters: React.FC<PipelineParametersProps> = ({
   fieldName,
   emptyValues,
   isReadOnly = false,
-  className,
 }) => {
   return (
-    <PageSection variant="light" isFilled className={className}>
+    <div className="co-m-pane__form">
       <MultiColumnField
         data-test="pipeline-parameters"
         name={fieldName}
@@ -75,7 +73,7 @@ const PipelineParameters: React.FC<PipelineParametersProps> = ({
           aria-label={valueLabel}
         />
       </MultiColumnField>
-    </PageSection>
+    </div>
   );
 };
 

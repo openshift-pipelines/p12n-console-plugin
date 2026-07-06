@@ -57,9 +57,7 @@ const useTRRuns = <Kind extends K8sResourceCommon>(
           isDevConsoleProxyAvailable,
         );
         if (!disposed) {
-          const token =
-            tkPipelineRuns[1].nextPageToken ||
-            tkPipelineRuns[1].next_page_token;
+          const token = tkPipelineRuns[1].nextPageToken;
           const callInflight = !!tkPipelineRuns?.[2];
           const loaded = !callInflight;
           if (!callInflight) {
