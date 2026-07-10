@@ -10,14 +10,18 @@ import {
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 import { t_chart_color_green_500 as greenColor } from '@patternfly/react-tokens/dist/js/t_chart_color_green_500';
 import { CatalogItem } from '@openshift-console/dynamic-plugin-sdk';
-import { TektonHubTaskVersion } from '../catalog/apis/tektonHub';
 import { isSelectedVersionInstalled } from './pipeline-quicksearch-utils';
 import { useTranslation } from 'react-i18next';
+
+type TaskVersion = {
+  version: string | number;
+  [key: string]: unknown;
+};
 
 interface PipelineQuickSearchVersionDropdownProps {
   selectedVersion: string;
   item: CatalogItem;
-  versions: TektonHubTaskVersion[];
+  versions: TaskVersion[];
   onChange: (key: string) => void;
 }
 
@@ -56,9 +60,12 @@ const PipelineQuickSearchVersionDropdown: FC<
 
   return (
     <Select
+      id="quick-search-version-dropdown"
       className="opp-quick-search-details__version-dropdown"
       isOpen={isOpen}
-      onSelect={(_, value: string) => {
+      onSelect={(e: React.MouseEvent, value: string) => {
+        /*Fix to avoid modal close on select of version dropdown*/
+        e.stopPropagation();
         if (value) {
           onChange(value);
         }
