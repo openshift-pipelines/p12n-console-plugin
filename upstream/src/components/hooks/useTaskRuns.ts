@@ -21,7 +21,7 @@ import {
 } from '../../models';
 import { ApprovalTaskKind, PipelineRunKind, TaskRunKind } from '../../types';
 import { useDeepCompareMemoize } from '../utils/common-utils';
-import { EQ } from '../utils/tekton-results';
+import { AND, EQ } from '../utils/tekton-results';
 import { useMultiClusterProxyService } from './useMultiClusterProxyService';
 import { useMultiClusterTaskRuns } from './useMultiClusterTaskRuns';
 import { useTRRuns } from './useTektonResults';
@@ -71,6 +71,7 @@ export type UseTaskRunsOptions = {
   skipFetch?: boolean;
   name?: string /* used for fetching a single task run by metadata.name */;
   limit?: number /* used for fetching a limited number of task runs */;
+  dateRangeFilter?: string;
 };
 
 export const useTaskRuns = (
@@ -80,8 +81,14 @@ export const useTaskRuns = (
   pipelineRunUid?: string,
   options?: UseTaskRunsOptions,
 ): [TaskRunKind[], boolean, boolean, Error | undefined, boolean, boolean] => {
-  const { pipelineRunFinished, pipelineRunManagedBy, skipFetch, name, limit } =
-    options || {};
+  const {
+    pipelineRunFinished,
+    pipelineRunManagedBy,
+    skipFetch,
+    name,
+    limit,
+    dateRangeFilter,
+  } = options || {};
   const selector: Selector = useMemo(() => {
     if (pipelineRunName && pipelineRunUid) {
       return {
@@ -111,7 +118,7 @@ export const useTaskRuns = (
   ] = useRuns<TaskRunKind>(
     TASK_RUN_GVK,
     namespace,
-    { selector, skipFetch, name, limit },
+    { selector, skipFetch, name, limit, filter: dateRangeFilter },
     pipelineRunFinished,
     pipelineRunManagedBy,
   );
@@ -191,12 +198,17 @@ export const usePipelineRuns = (
     selector?: Selector;
     limit?: number;
     name?: string;
+    filter?: string;
+    skipFetch?: boolean;
   },
 ): [PipelineRunKind[], boolean, boolean, Error | undefined, boolean, boolean] =>
   useRuns<PipelineRunKind>(PIPELINE_RUN_GVK, namespace, {
     selector: options?.selector,
     limit: options?.limit /* similar to one present in UseTaskRunsOptions */,
     name: options?.name /* similar to one present in UseTaskRunsOptions */,
+    filter: options?.filter,
+    skipFetch:
+      options?.skipFetch /* similar to one present in UseTaskRunsOptions */,
   });
 
 export const useRuns = <Kind extends K8sResourceKind>(
@@ -207,6 +219,7 @@ export const useRuns = <Kind extends K8sResourceKind>(
     limit?: number;
     name?: string;
     skipFetch?: boolean;
+    filter?: string; // CEL expression sent to Tekton Results to retrieve PRs within the date range
   },
   pipelineRunFinished?: boolean,
   pipelineRunManagedBy?: string,
@@ -298,7 +311,7 @@ export const useRuns = <Kind extends K8sResourceKind>(
       effectiveLoaded &&
       !effectiveError &&
       prevLength > 0 &&
-      etcdRuns.length < prevLength
+      etcdRuns?.length < prevLength
     ) {
       setTrRefetchKey((k) => k + 1);
     }
@@ -315,10 +328,10 @@ export const useRuns = <Kind extends K8sResourceKind>(
 
   const trOptions: typeof optionsMemo = useMemo(() => {
     if (optionsMemo?.name) {
-      const { name, ...rest } = optionsMemo;
+      const { name, filter, ...rest } = optionsMemo;
       return {
         ...rest,
-        filter: EQ('data.metadata.name', name),
+        filter: AND(EQ('data.metadata.name', name), filter),
       };
     }
     return optionsMemo;
