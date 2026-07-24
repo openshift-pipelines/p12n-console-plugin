@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { ListPageBody } from '@openshift-console/dynamic-plugin-sdk';
 import usePipelineRunsColumns from './usePipelineRunsColumns';
@@ -11,8 +11,10 @@ import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal'
 import { useTranslation } from 'react-i18next';
 import { useDataViewFilter } from '../hooks/useDataViewFilter';
 import { DataViewFilterToolbar } from '../common/DataViewFilterToolbar';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
 
 import './PipelineRunsList.scss';
+import { isChildPipelineRun } from '../utils/pipeline-utils';
 
 type PipelineRunsListProps = {
   namespace?: string;
@@ -48,8 +50,14 @@ const PipelineRunsList: FC<PipelineRunsListProps> = ({
     }
   }, []);
 
+  const { dateFilterCEL } = useDateRangeFilter('PipelineRun');
+
   const [pipelineRuns, k8sLoaded, trLoaded, pipelineRunsLoadError] =
-    useGetPipelineRuns(namespace, { name: PLRsForName, kind: PLRsForKind });
+    useGetPipelineRuns(namespace, {
+      name: PLRsForName,
+      kind: PLRsForKind,
+      dateRangeFilter: dateFilterCEL,
+    });
 
   const {
     filterValues,
@@ -58,10 +66,9 @@ const PipelineRunsList: FC<PipelineRunsListProps> = ({
     filteredData,
     updatedCheckboxFilters,
   } = useDataViewFilter<PipelineRunKind>({
-    data: pipelineRuns || [],
+    data: (pipelineRuns || []).filter((r) => !isChildPipelineRun(r)),
     options: {
       resourceType: 'PipelineRun',
-      defaultDataSourceValues: ['cluster-data'],
     },
   });
 
