@@ -1,4 +1,4 @@
-ARG BUILDER=registry.redhat.io/ubi9/nodejs-22@sha256:c5fa408240ada5f820b6a31004fd483437ad46884505f8c6f80f650359f8add1
+ARG BUILDER=registry.redhat.io/ubi9/nodejs-22@sha256:148f9b515d897c0dba3e7bdb821c8bba3e0c3df946bf082ece9b4f453411e7ab
 ARG RUNTIME=registry.access.redhat.com/ubi9/nginx-124@sha256:beb7ad927c18341b77134d3b696e81801ce7dd1749a191719457c376904ad7de
 
 FROM $BUILDER AS builder-ui
