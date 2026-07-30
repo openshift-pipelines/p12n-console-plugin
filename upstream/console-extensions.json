@@ -179,7 +179,7 @@
       "abbr": "PLR"
     }
   },
-    {
+  {
     "type": "console.model-metadata",
     "properties": {
       "model": {
@@ -208,19 +208,19 @@
     }
   },
   {
-      "type": "console.model-metadata",
-      "properties": {
-        "model": {
-          "group": "tekton.dev",
-          "version": "v1beta1",
-          "kind": "TaskRun"
-        },
-        "color": "#38812f",
-        "label": "%plugin__pipelines-console-plugin~TaskRun%",
-        "labelPlural": "%plugin__pipelines-console-plugin~TaskRuns%",
-        "abbr": "TR"
-      }
-    },
+    "type": "console.model-metadata",
+    "properties": {
+      "model": {
+        "group": "tekton.dev",
+        "version": "v1beta1",
+        "kind": "TaskRun"
+      },
+      "color": "#38812f",
+      "label": "%plugin__pipelines-console-plugin~TaskRun%",
+      "labelPlural": "%plugin__pipelines-console-plugin~TaskRuns%",
+      "abbr": "TR"
+    }
+  },
   {
     "type": "console.model-metadata",
     "properties": {
@@ -246,8 +246,7 @@
       "color": "#38812f",
       "label": "%plugin__pipelines-console-plugin~TriggerBinding%",
       "labelPlural": "%plugin__pipelines-console-plugin~TriggerBindings%",
-      "abbr": "TB",
-      "badge": "tech"
+      "abbr": "TB"
     }
   },
   {
@@ -261,8 +260,7 @@
       "color": "#38812f",
       "label": "%plugin__pipelines-console-plugin~ClusterTriggerBinding%",
       "labelPlural": "%plugin__pipelines-console-plugin~ClusterTriggerBindings%",
-      "abbr": "CTB",
-      "badge": "tech"
+      "abbr": "CTB"
     }
   },
   {
@@ -276,8 +274,7 @@
       "color": "#38812f",
       "label": "%plugin__pipelines-console-plugin~TriggerTemplate%",
       "labelPlural": "%plugin__pipelines-console-plugin~TriggerTemplates%",
-      "abbr": "TT",
-      "badge": "tech"
+      "abbr": "TT"
     }
   },
   {
@@ -291,8 +288,7 @@
       "color": "#38812f",
       "label": "%plugin__pipelines-console-plugin~EventListener%",
       "labelPlural": "%plugin__pipelines-console-plugin~EventListeners%",
-      "abbr": "EL",
-      "badge": "tech"
+      "abbr": "EL"
     }
   },
   {
@@ -306,8 +302,7 @@
       "color": "#38812f",
       "label": "%plugin__pipelines-console-plugin~Repository%",
       "labelPlural": "%plugin__pipelines-console-plugin~Repositories%",
-      "abbr": "R",
-      "badge": "dev"
+      "abbr": "R"
     }
   },
   {
@@ -324,20 +319,6 @@
       "abbr": "TC"
     }
   },
-  {
-    "type": "console.model-metadata",
-    "properties": {
-      "model": {
-        "group": "operator.tekton.dev",
-        "version": "v1alpha1",
-        "kind": "TektonHub"
-      },
-      "color": "#38812f",
-      "label": "%plugin__pipelines-console-plugin~TektonHub%",
-      "labelPlural": "%plugin__pipelines-console-plugin~TektonHubs%",
-      "abbr": "TH"
-    }
-  }, 
   {
     "type": "console.context-provider",
     "properties": {
@@ -1480,7 +1461,7 @@
     "properties": {
       "type": "Community",
       "title": "%plugin__pipelines-console-plugin~Community%",
-      "catalogDescription": "%plugin__pipelines-console-plugin~Browse tekton hub tasks.%"
+      "catalogDescription": "%plugin__pipelines-console-plugin~Browse community tasks.%"
     },
     "flags": {
       "required": [
@@ -1496,21 +1477,6 @@
       "type": "Red Hat",
       "title": "%plugin__pipelines-console-plugin~Tasks%",
       "provider": { "$codeRef": "catalog.TektonTaskProvider" }
-    },
-    "flags": {
-      "required": [
-        "OPENSHIFT_PIPELINE",
-        "HIDE_STATIC_PIPELINE_PLUGIN_PIPELINE_BUILDER"
-      ]
-    }
-  },
-  {
-    "type": "console.catalog/item-provider",
-    "properties": {
-      "catalogId": "pipelines-task-catalog",
-      "type": "Community",
-      "title": "%plugin__pipelines-console-plugin~Tasks%",
-      "provider": { "$codeRef": "catalog.TektonHubTaskProvider" }
     },
     "flags": {
       "required": [
@@ -1621,7 +1587,9 @@
         "version": "v1",
         "kind": "Task"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   },
   {
@@ -1632,7 +1600,9 @@
         "version": "v1",
         "kind": "Pipeline"
       },
-      "provider": { "$codeRef": "pipelineActionsProvider.usePipelineActionsProvider" }
+      "provider": {
+        "$codeRef": "pipelineActionsProvider.usePipelineActionsProvider"
+      }
     }
   },
   {
@@ -1643,7 +1613,9 @@
         "version": "v1",
         "kind": "PipelineRun"
       },
-      "provider": { "$codeRef": "pipelineRunActionsProvider.usePipelineRunActionsProvider" }
+      "provider": {
+        "$codeRef": "pipelineRunActionsProvider.usePipelineRunActionsProvider"
+      }
     }
   },
   {
@@ -1654,7 +1626,22 @@
         "version": "v1",
         "kind": "TaskRun"
       },
-      "provider": { "$codeRef": "taskRunActionsProvider.useTaskRunActionsProvider" }
+      "provider": {
+        "$codeRef": "taskRunActionsProvider.useTaskRunActionsProvider"
+      }
+    }
+  },
+  {
+    "type": "console.action/resource-provider",
+    "properties": {
+      "model": {
+        "group": "openshift-pipelines.org",
+        "version": "v1alpha1",
+        "kind": "ApprovalTask"
+      },
+      "provider": {
+        "$codeRef": "approvalTaskActionsProvider.useApprovalTaskActionsProvider"
+      }
     }
   },
   {
@@ -1665,7 +1652,9 @@
         "version": "v1beta1",
         "kind": "ClusterTriggerBinding"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   },
   {
@@ -1676,7 +1665,9 @@
         "version": "v1beta1",
         "kind": "EventListener"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   },
   {
@@ -1687,7 +1678,9 @@
         "version": "v1beta1",
         "kind": "TriggerTemplate"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   },
   {
@@ -1698,7 +1691,9 @@
         "version": "v1beta1",
         "kind": "TriggerBinding"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   },
   {
@@ -1709,7 +1704,9 @@
         "version": "v1alpha1",
         "kind": "Repository"
       },
-      "provider": { "$codeRef": "defaultActionsProvider.useDefaultActionsProvider" }
+      "provider": {
+        "$codeRef": "defaultActionsProvider.useDefaultActionsProvider"
+      }
     }
   }
 ]

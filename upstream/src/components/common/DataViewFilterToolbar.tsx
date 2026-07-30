@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Badge,
   Button,
+  Label,
   Menu,
   MenuContent,
   MenuItem,
@@ -11,6 +12,7 @@ import {
   MenuToggle,
   Popper,
   SearchInput,
+  SelectList,
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
@@ -19,6 +21,7 @@ import {
   ToolbarToggleGroup,
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
+import './DataViewFilterToolbar.scss';
 export interface FilterOption {
   value: string;
   label: string;
@@ -32,12 +35,14 @@ export interface CheckboxFilterConfig {
   placeholder?: string;
   options: FilterOption[];
   defaultValues?: string[];
+  singleSelect?: boolean;
 }
 
 export interface FilterValues {
   name: string;
   labels: string[];
-  [key: string]: string | string[];
+  labelSuggestions?: string[];
+  [key: string]: string | string[] | undefined;
 }
 
 interface DataViewFilterToolbarProps {
@@ -73,6 +78,11 @@ const CheckboxFilterInput: FC<{
 
   const onMenuSelect = (_event: unknown, itemId: string | number) => {
     const id = String(itemId);
+    if (config.singleSelect) {
+      onSelect([id]);
+      setIsOpen(false);
+      return;
+    }
     const newSelected = selected.includes(id)
       ? selected.filter((s) => s !== id)
       : [...selected, id];
@@ -117,7 +127,7 @@ const CheckboxFilterInput: FC<{
               ) : undefined
             }
           >
-            {config.placeholder || config.title}
+            {config.placeholder}
           </MenuToggle>
         }
         triggerRef={toggleRef}
@@ -134,15 +144,17 @@ const CheckboxFilterInput: FC<{
                   <MenuItem
                     key={option.value}
                     itemId={option.value}
-                    hasCheckbox
+                    hasCheckbox={!config.singleSelect}
                     isSelected={selected.includes(option.value)}
                   >
                     {option.label}
-                    <Badge isRead className="pf-v6-u-ml-sm">
-                      {option.totalCount !== undefined
-                        ? `${option.count}/${option.totalCount}`
-                        : option.count}
-                    </Badge>
+                    {!config.singleSelect && (
+                      <Badge isRead className="pf-v6-u-ml-sm">
+                        {option.totalCount !== undefined
+                          ? `${option.count}/${option.totalCount}`
+                          : option.count}
+                      </Badge>
+                    )}
                   </MenuItem>
                 ))}
               </MenuList>
@@ -153,6 +165,94 @@ const CheckboxFilterInput: FC<{
         appendTo={containerRef.current || undefined}
         isVisible={isOpen}
       />
+    </div>
+  );
+};
+
+const LabelFilterInput: FC<{
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (label: string) => void;
+  suggestions: string[];
+  selectedLabels: string[];
+  placeholder?: string;
+}> = ({
+  value,
+  onChange,
+  onSelect,
+  suggestions,
+  selectedLabels,
+  placeholder,
+}) => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const filtered = useMemo(() => {
+    if (!value.trim()) return [];
+    const processedText = value.trim().replace(/\s*=\s*/, '=');
+    const lower = processedText.toLowerCase();
+    return suggestions.filter(
+      (s) => !selectedLabels.includes(s) && s.toLowerCase().includes(lower),
+    );
+  }, [suggestions, selectedLabels, value]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleSelect = (label: string) => {
+    onSelect(label);
+    onChange('');
+    setShowSuggestions(false);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="pipelines-console-plugin-position-relative"
+    >
+      <SearchInput
+        placeholder={placeholder}
+        value={value}
+        onChange={(_event, v) => {
+          onChange(v);
+          setShowSuggestions(!!v.trim());
+        }}
+        onFocus={() => {
+          if (value.trim()) setShowSuggestions(true);
+        }}
+        onClear={() => {
+          onChange('');
+          setShowSuggestions(false);
+        }}
+        onKeyUp={(e) => {
+          if (e.key === 'Enter' && value.trim()) {
+            handleSelect(value.trim());
+          }
+        }}
+      />
+      {showSuggestions && filtered.length > 0 && (
+        <SelectList className="cp-label-suggestion-box">
+          {filtered.map((label) => (
+            <div key={label}>
+              <Label
+                variant="outline"
+                color="purple"
+                onClick={() => handleSelect(label)}
+                style={{ cursor: 'pointer' }}
+              >
+                {label}
+              </Label>
+            </div>
+          ))}
+        </SelectList>
+      )}
     </div>
   );
 };
@@ -350,24 +450,20 @@ export const DataViewFilterToolbar: FC<DataViewFilterToolbarProps> = ({
                 categoryName={t('Label')}
                 showToolbarItem={activeCategory === t('Label')}
               >
-                <SearchInput
-                  placeholder={t('Filter by label')}
+                <LabelFilterInput
                   value={labelInput}
-                  onChange={(_event, value) => setLabelInput(value)}
-                  onClear={() => setLabelInput('')}
-                  onKeyUp={(e) => {
-                    if (
-                      e.key === 'Enter' &&
-                      labelInput.trim() &&
-                      !(filterValues.labels || []).includes(labelInput.trim())
-                    ) {
+                  onChange={setLabelInput}
+                  onSelect={(label) => {
+                    if (!(filterValues.labels || []).includes(label)) {
                       onFilterChange('labels', [
                         ...(filterValues.labels || []),
-                        labelInput.trim(),
+                        label,
                       ]);
-                      setLabelInput('');
                     }
                   }}
+                  suggestions={filterValues.labelSuggestions || []}
+                  selectedLabels={filterValues.labels || []}
+                  placeholder={t('Filter by label')}
                 />
               </ToolbarFilter>
             )}
@@ -396,7 +492,10 @@ export const DataViewFilterToolbar: FC<DataViewFilterToolbarProps> = ({
                     config={filterConfig}
                     selected={selected}
                     onSelect={(values) =>
-                      onFilterChange(filterConfig.id, values)
+                      onFilterChange(
+                        filterConfig.id,
+                        filterConfig.singleSelect ? values[0] : values,
+                      )
                     }
                   />
                 </ToolbarFilter>
