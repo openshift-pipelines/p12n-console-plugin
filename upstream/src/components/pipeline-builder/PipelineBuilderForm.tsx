@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -37,6 +37,7 @@ import {
   EditorType,
 } from './types';
 import { applyChange } from './update-utils';
+import { filterOptionalTaskParams } from './utils';
 
 import './PipelineBuilderForm.scss';
 import CodeEditorField from './CodeEditorField';
@@ -58,7 +59,8 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
   const selectedTaskRef = useRef<SelectedBuilderTask>(null);
   selectedTaskRef.current = selectedTask;
   const contentRef = useRef<HTMLDivElement>(null);
-
+  const [hideOptionalTaskParam, setHideOptionalTaskParam] =
+    useState<boolean>(false);
   const {
     existingPipeline,
     status,
@@ -143,6 +145,28 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
   const LAST_VIEWED_EDITOR_TYPE_USERSETTING_KEY =
     'pipeline.pipelineBuilderForm.editor.lastView';
 
+  const displayYaml = useMemo(
+    () =>
+      hideOptionalTaskParam
+        ? sanitizeToYaml(
+            filterOptionalTaskParams(
+              formData,
+              taskResources,
+              hideOptionalTaskParam,
+            ),
+            namespace,
+            existingPipeline,
+          )
+        : undefined,
+    [
+      hideOptionalTaskParam,
+      formData,
+      taskResources,
+      namespace,
+      existingPipeline,
+    ],
+  );
+
   const formEditor = (
     <PipelineBuilderFormEditor
       hasExistingPipeline={!!existingPipeline}
@@ -160,6 +184,8 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
       model={PipelineModel}
       showSamples={!existingPipeline}
       onSave={handleSubmit}
+      hideOptionalTaskParam={hideOptionalTaskParam}
+      displayValue={displayYaml}
     />
   );
 
@@ -229,6 +255,7 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
                   });
                 }}
                 selectedData={selectedTask}
+                hideOptionalTaskParam={hideOptionalTaskParam}
               />
             </DrawerPanelContent>
           ) : null
@@ -278,6 +305,8 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
                     lastViewUserSettingKey={
                       LAST_VIEWED_EDITOR_TYPE_USERSETTING_KEY
                     }
+                    hideOptionalTaskParam={hideOptionalTaskParam}
+                    setHideOptionalTaskParam={setHideOptionalTaskParam}
                   />
                 </FormBody>
               </PageSection>

@@ -165,7 +165,7 @@ export const KEBAB_ACTION_EDIT_LABELS_ID = 'edit-labels';
 export const KEBAB_BUTTON_ID = 'kebab-button';
 
 export const DELETED_RESOURCE_IN_K8S_ANNOTATION = 'resource.deleted.in.k8s';
-
+export const DEFAULT_WORKSPACE_ANNOTATION = 'tekton.dev/default-workspace';
 export const chainsSignedAnnotation = 'chains.tekton.dev/signed';
 export const preferredNameAnnotation = 'pipeline.openshift.io/preferredName';
 export const FLAG_OPENSHIFT_PIPELINE_AS_CODE = 'OPENSHIFT_PIPELINE_AS_CODE';
@@ -201,3 +201,9 @@ export const PIPELINE_RUN_KUEUE_ORIGIN_LABEL =
   'kueue.x-k8s.io/multikueue-origin';
 export const KUEUE_LABEL_PREFIX = 'kueue.x-k8s.io';
 export const DASH = '-';
+export const ADMIN_PERSPECTIVE_BASE_PATH = '/pipelines';
+export const DEV_PERSPECTIVE_BASE_PATH = '/dev-pipelines';
+export const HUB_INTEGRATION_KEY = 'enable-devconsole-integration';
+
+/** Prefix for all useUserPreference keys stored in the user-settings ConfigMap. */
+export const USER_PREFERENCE_PREFIX = 'plugin__pipelines-console-plugin';

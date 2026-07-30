@@ -10,6 +10,7 @@ import { Banner } from '@patternfly/react-core';
 import './TektonTaskRunLog.scss';
 import '../pipelineRuns-details/PipelineRunLogs.scss';
 import { useTranslation } from 'react-i18next';
+import { resetAnsiStatePerLine } from './logs-utils';
 
 type TektonTaskRunLogProps = {
   taskRun?: TaskRunKind;
@@ -46,7 +47,7 @@ export const TektonTaskRunLog: FC<TektonTaskRunLogProps> = ({
     if (!trResults) return '';
     const formattedTaskName = `${taskName.toUpperCase()}`;
 
-    return `${formattedTaskName}\n${trResults}\n\n`;
+    return resetAnsiStatePerLine(`${formattedTaskName}\n${trResults}\n\n`);
   }, [trResults, taskName]);
   const lastRowIndex = trResults ? formattedResults.split('\n').length : 0;
 
@@ -54,7 +55,7 @@ export const TektonTaskRunLog: FC<TektonTaskRunLogProps> = ({
     <>
       <div
         data-test-id="tr-logs-task-container"
-        className="odc-tekton-taskrun-log pf-v6-u-h-100 pf-v6-u-w-100"
+        className="pf-v6-u-h-100 pf-v6-u-w-100"
       >
         <LogViewer
           useAnsiClasses={true}
