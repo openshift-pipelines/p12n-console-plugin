@@ -5,63 +5,63 @@ arches:
 - arch: aarch64
   packages:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/g/git-2.43.7-1.el8_10.aarch64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 94860
     checksum: sha256:360e8689c9a9f5c286b4428a3c46f7017eea21751a9499ae168462a41e1e17a0
     name: git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/g/git-core-2.43.7-1.el8_10.aarch64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 11216788
     checksum: sha256:d23f02a074c97383eda8f833f8a3f1916b4b1c55ba5149d0cbfd4ee69254d471
     name: git-core
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/g/git-core-doc-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 3216756
     checksum: sha256:09202aba03724180992d4cb6a3c617423ee25dc61f2c162990a25d7781977058
     name: git-core-doc
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/p/perl-Error-0.17025-2.el8.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 47160
     checksum: sha256:a6ba7653293a529eddb0245935f26091e2fef58e1d479297056e78a4424acd92
     name: perl-Error
     evr: 1:0.17025-2.el8
     sourcerpm: perl-Error-0.17025-2.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/p/perl-Git-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 81136
     checksum: sha256:cc2b622933dabf0579711ce3fdccfd5b485483b8b0f8ed4dc2df3d59842ba735
     name: perl-Git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/Packages/p/perl-TermReadKey-2.37-7.el8.aarch64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-aarch64-appstream-rpms
     size: 40824
     checksum: sha256:0730f7dbf64d2b608716d14affb23beedbc7449d01901331439b61acf606004a
     name: perl-TermReadKey
     evr: 2.37-7.el8
     sourcerpm: perl-TermReadKey-2.37-7.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/Packages/l/libedit-3.1-23.20170329cvs.el8.aarch64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-aarch64-baseos-rpms
     size: 101124
     checksum: sha256:b93a509fc65dd88761b4f7f21d8a05f1cd22e878ac59eb7d8e1507f5a2376a1e
     name: libedit
     evr: 3.1-23.20170329cvs.el8
     sourcerpm: libedit-3.1-23.20170329cvs.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/Packages/o/openssh-8.0p1-30.el8_10.aarch64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-aarch64-baseos-rpms
     size: 504048
     checksum: sha256:efc250917308e9f9d8af2ee106e7690749a51fd050b0515aadcfc07b70c5cfb8
     name: openssh
     evr: 8.0p1-30.el8_10
     sourcerpm: openssh-8.0p1-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/Packages/o/openssh-clients-8.0p1-30.el8_10.aarch64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-aarch64-baseos-rpms
     size: 644944
     checksum: sha256:08c529b300f61d5837754278fedb7b7c196ef570cc18cff1014dd82a18535010
     name: openssh-clients
@@ -72,63 +72,63 @@ arches:
 - arch: ppc64le
   packages:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/g/git-2.43.7-1.el8_10.ppc64le.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 94860
     checksum: sha256:82c5a684aa3de13e7bba7e0c544351036599d864a55326a3832e209f3d13b935
     name: git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/g/git-core-2.43.7-1.el8_10.ppc64le.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 13149784
     checksum: sha256:2b64e0733bb2e2098121db7b1d6f2f86f8053261f4e0cd40e977f64a0c49fb91
     name: git-core
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/g/git-core-doc-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 3216756
     checksum: sha256:09202aba03724180992d4cb6a3c617423ee25dc61f2c162990a25d7781977058
     name: git-core-doc
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/p/perl-Error-0.17025-2.el8.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 47160
     checksum: sha256:a6ba7653293a529eddb0245935f26091e2fef58e1d479297056e78a4424acd92
     name: perl-Error
     evr: 1:0.17025-2.el8
     sourcerpm: perl-Error-0.17025-2.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/p/perl-Git-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 81136
     checksum: sha256:cc2b622933dabf0579711ce3fdccfd5b485483b8b0f8ed4dc2df3d59842ba735
     name: perl-Git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/Packages/p/perl-TermReadKey-2.37-7.el8.ppc64le.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-ppc64le-appstream-rpms
     size: 42972
     checksum: sha256:c39803f28ce1946f2c7d901e65768f47ee6db7258d88b0799c3d102986a3245f
     name: perl-TermReadKey
     evr: 2.37-7.el8
     sourcerpm: perl-TermReadKey-2.37-7.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/Packages/l/libedit-3.1-23.20170329cvs.el8.ppc64le.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-ppc64le-baseos-rpms
     size: 112464
     checksum: sha256:7f8760b668bc465f9e538da9bfa281d1c881d05611ba54a0ac38a97338694ce2
     name: libedit
     evr: 3.1-23.20170329cvs.el8
     sourcerpm: libedit-3.1-23.20170329cvs.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/Packages/o/openssh-8.0p1-30.el8_10.ppc64le.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-ppc64le-baseos-rpms
     size: 537660
     checksum: sha256:ab818906ee1b4dbec03223f9455d958b1cfeb01c32cda7cc63853a1cb1324432
     name: openssh
     evr: 8.0p1-30.el8_10
     sourcerpm: openssh-8.0p1-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/Packages/o/openssh-clients-8.0p1-30.el8_10.ppc64le.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-ppc64le-baseos-rpms
     size: 707840
     checksum: sha256:70cac54bd0a20fa91398be48f52110c3518fa1f62db3345552d323df5eb01622
     name: openssh-clients
@@ -139,63 +139,63 @@ arches:
 - arch: s390x
   packages:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/g/git-2.43.7-1.el8_10.s390x.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 94880
     checksum: sha256:11cb5de7f2c20cf19598ed25573c5c770e1f2111b6fb8ce2aec43069071e3fb8
     name: git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/g/git-core-2.43.7-1.el8_10.s390x.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 11034972
     checksum: sha256:713ab39f22985d648d355541b3331ef10d0536910071561fae19f4950c95ba84
     name: git-core
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/g/git-core-doc-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 3216756
     checksum: sha256:09202aba03724180992d4cb6a3c617423ee25dc61f2c162990a25d7781977058
     name: git-core-doc
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/p/perl-Error-0.17025-2.el8.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 47160
     checksum: sha256:a6ba7653293a529eddb0245935f26091e2fef58e1d479297056e78a4424acd92
     name: perl-Error
     evr: 1:0.17025-2.el8
     sourcerpm: perl-Error-0.17025-2.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/p/perl-Git-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 81136
     checksum: sha256:cc2b622933dabf0579711ce3fdccfd5b485483b8b0f8ed4dc2df3d59842ba735
     name: perl-Git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/Packages/p/perl-TermReadKey-2.37-7.el8.s390x.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-s390x-appstream-rpms
     size: 40184
     checksum: sha256:26219fa130713bece304833e8c917b8050563accdf48841c03269ece91501a62
     name: perl-TermReadKey
     evr: 2.37-7.el8
     sourcerpm: perl-TermReadKey-2.37-7.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/Packages/l/libedit-3.1-23.20170329cvs.el8.s390x.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-s390x-baseos-rpms
     size: 101176
     checksum: sha256:9a2e49109984bfe36d34cc1815a6aee230a2d8bb3c13b03763a367216af34d67
     name: libedit
     evr: 3.1-23.20170329cvs.el8
     sourcerpm: libedit-3.1-23.20170329cvs.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/Packages/o/openssh-8.0p1-30.el8_10.s390x.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-s390x-baseos-rpms
     size: 526216
     checksum: sha256:9eb94120aa457d93523266fb7c87c483c70aa890eb0a2aa7cde78e877efb79b1
     name: openssh
     evr: 8.0p1-30.el8_10
     sourcerpm: openssh-8.0p1-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/Packages/o/openssh-clients-8.0p1-30.el8_10.s390x.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-s390x-baseos-rpms
     size: 711896
     checksum: sha256:e846e1d2d9b1d20ee5e67149de2406f333425e40bef1a36d05364b5be8015ba3
     name: openssh-clients
@@ -206,63 +206,63 @@ arches:
 - arch: x86_64
   packages:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/g/git-2.43.7-1.el8_10.x86_64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 94884
     checksum: sha256:c9c97b1e34949a29e3ef951f9f91d583cc6e5859cd3028995ac3095b2f5051db
     name: git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/g/git-core-2.43.7-1.el8_10.x86_64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 11631124
     checksum: sha256:51124ac7ed4c97b5a62a34a3b5e6139a3012d8fd516d3d56bc83490b19aa6bc9
     name: git-core
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/g/git-core-doc-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 3216756
     checksum: sha256:09202aba03724180992d4cb6a3c617423ee25dc61f2c162990a25d7781977058
     name: git-core-doc
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/p/perl-Error-0.17025-2.el8.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 47160
     checksum: sha256:a6ba7653293a529eddb0245935f26091e2fef58e1d479297056e78a4424acd92
     name: perl-Error
     evr: 1:0.17025-2.el8
     sourcerpm: perl-Error-0.17025-2.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/p/perl-Git-2.43.7-1.el8_10.noarch.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 81136
     checksum: sha256:cc2b622933dabf0579711ce3fdccfd5b485483b8b0f8ed4dc2df3d59842ba735
     name: perl-Git
     evr: 2.43.7-1.el8_10
     sourcerpm: git-2.43.7-1.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/appstream/os/Packages/p/perl-TermReadKey-2.37-7.el8.x86_64.rpm
-    repoid: ubi-8-appstream-rpms
+    repoid: ubi-8-for-x86_64-appstream-rpms
     size: 41200
     checksum: sha256:ea22b60430f762e2b8e2d5697522af1aa937ea0b933c6dbe5b5a8ca4f2b7dbd6
     name: perl-TermReadKey
     evr: 2.37-7.el8
     sourcerpm: perl-TermReadKey-2.37-7.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/os/Packages/l/libedit-3.1-23.20170329cvs.el8.x86_64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-x86_64-baseos-rpms
     size: 104512
     checksum: sha256:0391105afa53c9503b59591615bd7c98e2f7a4cd94ff4fd1451c4234522f3880
     name: libedit
     evr: 3.1-23.20170329cvs.el8
     sourcerpm: libedit-3.1-23.20170329cvs.el8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/os/Packages/o/openssh-8.0p1-30.el8_10.x86_64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-x86_64-baseos-rpms
     size: 540012
     checksum: sha256:62eb712706e61115febfe496648c5016974f2f5edaf1a9c34d11dcc6ccd79cd7
     name: openssh
     evr: 8.0p1-30.el8_10
     sourcerpm: openssh-8.0p1-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/os/Packages/o/openssh-clients-8.0p1-30.el8_10.x86_64.rpm
-    repoid: ubi-8-baseos-rpms
+    repoid: ubi-8-for-x86_64-baseos-rpms
     size: 663200
     checksum: sha256:73a53770beb99ceb67edca69eb3b1fd02ef45c81305ec9c2fb27e059a79e78bb
     name: openssh-clients
