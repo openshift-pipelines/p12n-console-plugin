@@ -25,13 +25,13 @@ arches:
     name: git-core-doc
     evr: 2.52.0-1.el9
     sourcerpm: git-2.52.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-DynaLoader-1.47-481.1.el9_6.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-DynaLoader-1.47-484.el9_8.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 25913
-    checksum: sha256:cddb0b2e16a10b80b6b3ffd6409b210aeba404acc589a958f280cac24d12403f
+    size: 31319
+    checksum: sha256:9ea9679d8757801cdda78829883915af346cf56ba4b3be84e85bfc1aab6c3db1
     name: perl-DynaLoader
-    evr: 1.47-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 1.47-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-Error-0.17029-7.el9.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 47552
@@ -53,13 +53,13 @@ arches:
     name: perl-TermReadKey
     evr: 2.38-11.el9
     sourcerpm: perl-TermReadKey-2.38-11.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-lib-0.65-481.1.el9_6.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-lib-0.65-484.el9_8.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 14815
-    checksum: sha256:ac5fca3480c9429a1c86b7a781a0713776a75719b9337297f602cfb9cd2eeb12
+    size: 20214
+    checksum: sha256:f7a478f76b48a32c1c590aa42011ab03bbc46179bcf7136154d74aa6efda0e57
     name: perl-lib
-    evr: 0.65-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 0.65-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/os/Packages/l/libcbor-0.7.0-5.el9.aarch64.rpm
     repoid: ubi-9-for-aarch64-baseos-rpms
     size: 59368
@@ -120,13 +120,13 @@ arches:
     name: git-core-doc
     evr: 2.52.0-1.el9
     sourcerpm: git-2.52.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/Packages/p/perl-DynaLoader-1.47-481.1.el9_6.ppc64le.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/Packages/p/perl-DynaLoader-1.47-484.el9_8.ppc64le.rpm
     repoid: ubi-9-for-ppc64le-appstream-rpms
-    size: 25936
-    checksum: sha256:d40baa9bec3e963e77a9a65c1ed7c42ece796c367422b3f7c250ea204b3b707a
+    size: 31350
+    checksum: sha256:4d89ffc7e6c7b1ea75d30f7fcd856644780d6be4d310fa796082c2ad390cbd9a
     name: perl-DynaLoader
-    evr: 1.47-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 1.47-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/Packages/p/perl-Error-0.17029-7.el9.noarch.rpm
     repoid: ubi-9-for-ppc64le-appstream-rpms
     size: 47552
@@ -148,13 +148,13 @@ arches:
     name: perl-TermReadKey
     evr: 2.38-11.el9
     sourcerpm: perl-TermReadKey-2.38-11.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/Packages/p/perl-lib-0.65-481.1.el9_6.ppc64le.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/Packages/p/perl-lib-0.65-484.el9_8.ppc64le.rpm
     repoid: ubi-9-for-ppc64le-appstream-rpms
-    size: 14826
-    checksum: sha256:69c593e1972d39ab4e30e00672777165f6d5860daa8111faf781ed6d135be96c
+    size: 20247
+    checksum: sha256:e9eefd493b99102757adb7abb42713a839c1b49567f65db637a9e7a82fa8dc52
     name: perl-lib
-    evr: 0.65-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 0.65-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/baseos/os/Packages/l/libcbor-0.7.0-5.el9.ppc64le.rpm
     repoid: ubi-9-for-ppc64le-baseos-rpms
     size: 62130
@@ -215,13 +215,13 @@ arches:
     name: git-core-doc
     evr: 2.52.0-1.el9
     sourcerpm: git-2.52.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/Packages/p/perl-DynaLoader-1.47-481.1.el9_6.s390x.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/Packages/p/perl-DynaLoader-1.47-484.el9_8.s390x.rpm
     repoid: ubi-9-for-s390x-appstream-rpms
-    size: 25923
-    checksum: sha256:17266b2caf6162bfaa3f8fc73b11e47c61dd7c693e8de4dc28d6272c12e4e683
+    size: 31343
+    checksum: sha256:c735bc44c1e8020ba727dc1019a3c26dc63af98a59ebc0abf02a66bd4ba6321e
     name: perl-DynaLoader
-    evr: 1.47-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 1.47-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/Packages/p/perl-Error-0.17029-7.el9.noarch.rpm
     repoid: ubi-9-for-s390x-appstream-rpms
     size: 47552
@@ -243,13 +243,13 @@ arches:
     name: perl-TermReadKey
     evr: 2.38-11.el9
     sourcerpm: perl-TermReadKey-2.38-11.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/Packages/p/perl-lib-0.65-481.1.el9_6.s390x.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/Packages/p/perl-lib-0.65-484.el9_8.s390x.rpm
     repoid: ubi-9-for-s390x-appstream-rpms
-    size: 14823
-    checksum: sha256:c013123fbff6efcf263d330ffb1f07c5e8a0413f1137379a52852234bdb1529b
+    size: 20239
+    checksum: sha256:626d3fb54295a211de13389bc5e80f052e4d1872f9cb73c956a96e92f8f5331d
     name: perl-lib
-    evr: 0.65-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 0.65-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/baseos/os/Packages/l/libcbor-0.7.0-5.el9.s390x.rpm
     repoid: ubi-9-for-s390x-baseos-rpms
     size: 59841
@@ -310,13 +310,13 @@ arches:
     name: git-core-doc
     evr: 2.52.0-1.el9
     sourcerpm: git-2.52.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-DynaLoader-1.47-481.1.el9_6.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-DynaLoader-1.47-484.el9_8.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 25958
-    checksum: sha256:937d31c9fc324bfa7434e8455cf1828afd46e4502f661566a7286853d8d46bf1
+    size: 31371
+    checksum: sha256:966ad16b3f1801336f4f53a9a3af773c82fd757cc7f0f9ab37482b364fd8f939
     name: perl-DynaLoader
-    evr: 1.47-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 1.47-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-Error-0.17029-7.el9.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 47552
@@ -338,13 +338,13 @@ arches:
     name: perl-TermReadKey
     evr: 2.38-11.el9
     sourcerpm: perl-TermReadKey-2.38-11.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-lib-0.65-481.1.el9_6.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-lib-0.65-484.el9_8.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 14847
-    checksum: sha256:badc59793f32fa6e98fd705101af0b879720db5e0811b46755640d3d64165715
+    size: 20268
+    checksum: sha256:1f39a916a6ab536a90126ba8f2d9db4435f0fab665021a498d4771bd572cec48
     name: perl-lib
-    evr: 0.65-481.1.el9_6
-    sourcerpm: perl-5.32.1-481.1.el9_6.src.rpm
+    evr: 0.65-484.el9_8
+    sourcerpm: perl-5.32.1-484.el9_8.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/baseos/os/Packages/l/libcbor-0.7.0-5.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-baseos-rpms
     size: 60575
