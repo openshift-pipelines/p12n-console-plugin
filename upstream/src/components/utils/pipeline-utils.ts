@@ -137,6 +137,7 @@ export const appendPipelineRunStatus = (
   pipeline,
   pipelineRun,
   taskRuns: TaskRunKind[],
+  childPipelineRuns?: PipelineRunKind[],
   isFinallyTasks = false,
 ) => {
   const tasks =
@@ -146,7 +147,10 @@ export const appendPipelineRunStatus = (
     if (!pipelineRun.status) {
       return task;
     }
-    if (!taskRuns || taskRuns.length === 0) {
+    if (
+      (!taskRuns || taskRuns.length === 0) &&
+      (!childPipelineRuns || childPipelineRuns.length === 0)
+    ) {
       if (
         pipelineRun.spec.status === SucceedConditionReason.PipelineRunCancelled
       ) {
@@ -168,7 +172,16 @@ export const appendPipelineRunStatus = (
       (tr) =>
         tr.metadata.labels[TektonResourceLabel.pipelineTask] === task.name,
     );
-    const taskStatus: TaskRunStatus = taskRun?.status;
+
+    const childPipelineRun = _.find(
+      childPipelineRuns,
+      (plr) =>
+        plr.metadata.labels[TektonResourceLabel.pipelineTask] === task.name,
+    );
+
+    const taskStatus: TaskRunStatus = isPipelineInPipelineTask(task)
+      ? childPipelineRun?.status
+      : taskRun?.status;
 
     const mTask = {
       ...task,
@@ -202,13 +215,19 @@ export const getPipelineTasks = (
     spec: {},
   },
   taskRuns: TaskRunKind[],
+  childPipelineRuns?: PipelineRunKind[],
 ): PipelineTask[][] => {
   // Each unit in 'out' array is termed as stage | out = [stage1 = [task1], stage2 = [task2,task3], stage3 = [task4]]
   const out = [];
   if (!pipeline.spec?.tasks || _.isEmpty(pipeline.spec.tasks)) {
     return out;
   }
-  const taskList = appendPipelineRunStatus(pipeline, pipelineRun, taskRuns);
+  const taskList = appendPipelineRunStatus(
+    pipeline,
+    pipelineRun,
+    taskRuns,
+    childPipelineRuns,
+  );
 
   // Step 1: Push all nodes without any dependencies in different stages
   taskList.forEach((task) => {
@@ -293,7 +312,7 @@ export const getFinallyTasksWithStatus = (
   pipeline: PipelineKind,
   pipelineRun: PipelineRunKind,
   taskRuns: TaskRunKind[],
-) => appendPipelineRunStatus(pipeline, pipelineRun, taskRuns, true);
+) => appendPipelineRunStatus(pipeline, pipelineRun, taskRuns, null, true);
 
 export const containerToLogSourceStatus = (
   container: ContainerStatus,
@@ -759,3 +778,49 @@ export const getPipelinesAndPipelineRunsForResource = (
     pipelineRuns: getPipelineRunsForPipeline(resourcePipeline, props),
   };
 };
+
+/* returns an array of child pipeline runs for a given pipeline run */
+export const getChildPipelineRunReferences = (pipelineRun: PipelineRunKind) =>
+  (pipelineRun?.status?.childReferences ?? []).filter(
+    (ref) => ref.kind === 'PipelineRun',
+  );
+
+/* returns an array of child pipelines for a given pipeline run */
+export const getChildPipelinesFromPipelineRun = (
+  pipelineRun: PipelineRunKind,
+): PipelineKind[] => {
+  const childPipelineNames = pipelineRun.status?.pipelineSpec?.tasks
+    ?.map((child) =>
+      child.pipelineRef || child.pipelineSpec ? child.name : null,
+    )
+    .filter(Boolean);
+  return childPipelineNames.map((name) => ({
+    apiVersion: `${PipelineModel.apiGroup}/${PipelineModel.apiVersion}`,
+    kind: PipelineModel.kind,
+    metadata: {
+      name,
+      namespace: pipelineRun.metadata.namespace,
+    },
+  }));
+};
+
+export const isPipelineInPipeline = (pipeline: PipelineKind): boolean =>
+  pipeline?.spec?.tasks?.some(isPipelineInPipelineTask) ?? false;
+
+export const isPipelineInPipelineTask = (task: PipelineTask): boolean =>
+  !!task?.pipelineRef || !!task?.pipelineSpec;
+
+export const isPipelineInPipelineRun = (
+  pipelineRun: PipelineRunKind,
+): boolean =>
+  pipelineRun?.status?.childReferences?.some(
+    (child) => child.kind === 'PipelineRun',
+  ) ||
+  pipelineRun?.status?.pipelineSpec?.tasks?.some(
+    (item) => item.pipelineRef || item.pipelineSpec,
+  );
+
+export const isChildPipelineRun = (pipelineRun: K8sResourceKind): boolean =>
+  pipelineRun?.metadata?.ownerReferences?.some(
+    (ref) => ref.kind === 'PipelineRun',
+  ) ?? false;

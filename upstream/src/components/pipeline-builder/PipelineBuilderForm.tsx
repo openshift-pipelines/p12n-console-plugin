@@ -26,7 +26,7 @@ import {
 import RemoveTaskModal from './modals';
 import PipelineBuilderFormEditor from './PipelineBuilderFormEditor';
 import PipelineBuilderHeader from './PipelineBuilderHeader';
-import TaskSidebar from './task-sidebar/TaskSidebar';
+import ResourceSidebar from './resource-sidebar/ResourceSidebar';
 import {
   CleanupResults,
   PipelineBuilderTaskGroup,
@@ -37,15 +37,15 @@ import {
   EditorType,
 } from './types';
 import { applyChange } from './update-utils';
-import { filterOptionalTaskParams } from './utils';
+import { appendExternalResource, filterOptionalTaskParams } from './utils';
 
-import './PipelineBuilderForm.scss';
 import CodeEditorField from './CodeEditorField';
 import FormFooter from '../pipelines-details/multi-column-field/FormFooter';
 import { FlexForm, FormBody } from './form-utils';
 import SyncedEditorField from './SyncedEditorField';
 import PipelineQuickSearch from '../task-quicksearch/PipelineQuickSearch';
 import { useOverlay } from '@openshift-console/dynamic-plugin-sdk';
+import './PipelineBuilderForm.scss';
 
 type PipelineBuilderFormProps = FormikProps<PipelineBuilderFormikValues> & {
   existingPipeline: PipelineKind;
@@ -94,7 +94,7 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
   };
   const onTaskSelection = (
     task: PipelineTask,
-    resource: TaskKind,
+    resource: TaskKind | PipelineKind,
     isFinallyTask: boolean,
   ) => {
     const builderNodes = isFinallyTask ? formData.finallyTasks : formData.tasks;
@@ -134,7 +134,17 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
   };
 
   const onUpdateTasks = (updatedTaskGroup, op) => {
-    updateTasks(applyChange(updatedTaskGroup, op, namespace));
+    const changes = applyChange(updatedTaskGroup, op, namespace);
+    const resource = (op.data as any)?.resource;
+    if (resource) {
+      const updatedTaskResources = appendExternalResource(
+        taskResources,
+        resource,
+        namespace,
+      );
+      setFieldValue('taskResources', updatedTaskResources, false);
+    }
+    updateTasks(changes);
   };
 
   const closeSidebarAndHandleReset = useCallback(() => {
@@ -225,8 +235,7 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
         panelContent={
           selectedTask ? (
             <DrawerPanelContent>
-              <TaskSidebar
-                // Intentional remount when selection changes
+              <ResourceSidebar
                 key={
                   selectedTask?.resource?.metadata?.name +
                   selectedTask?.taskIndex +
@@ -285,6 +294,8 @@ const PipelineBuilderForm: FC<PipelineBuilderFormProps> = (props) => {
                     setIsOpen={(open) => setMenuOpen(open)}
                     onUpdateTasks={onUpdateTasks}
                     taskGroup={taskGroup}
+                    pipelines={taskResources.namespacedPipelines}
+                    pipelinesLoaded={taskResources.tasksLoaded}
                   />
                   <SyncedEditorField
                     noMargin

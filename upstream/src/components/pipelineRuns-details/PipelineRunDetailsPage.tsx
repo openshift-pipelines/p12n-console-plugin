@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useCallback, useMemo } from 'react';
-import { ResourceStatus } from '@openshift-console/dynamic-plugin-sdk';
+import { NavPage, ResourceStatus } from '@openshift-console/dynamic-plugin-sdk';
 import { PipelineRunModel } from '../../models';
 import { LoadingBox } from '../status/status-box';
 import DetailsPage from '../details-page/DetailsPage';
@@ -8,12 +8,15 @@ import {
   BreadcrumbItem,
   Content,
   ContentVariants,
+  Flex,
+  FlexItem,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { navFactory } from '../utils/horizontal-nav';
 import PipelineRunDetails from './PipelineRunDetails';
+import PipelineRunChildPipelineRunsList from './PipelineRunChildPipelineRunsList';
 import ResourceYAMLEditorViewOnly from '../yaml-editor/ResourceYAMLEditorViewOnly';
 import {
   chainsSignedAnnotation,
@@ -21,7 +24,11 @@ import {
   RESOURCE_LOADED_FROM_RESULTS_ANNOTATION,
   PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL,
 } from '../../consts';
-import { ArchiveIcon, MulticlusterIcon } from '@patternfly/react-icons';
+import {
+  ArchiveIcon,
+  MulticlusterIcon,
+  AutomationIcon as PipelineInPipelineIcon,
+} from '@patternfly/react-icons';
 import SignedBadgeIcon from '../../images/SignedBadge';
 import Status from '../status/Status';
 import {
@@ -35,6 +42,7 @@ import { usePipelineRuns } from '../hooks/useTaskRuns';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import { LazyActionMenu } from '@openshift-console/dynamic-plugin-sdk-internal';
 import { ActionMenuVariant } from '@openshift-console/dynamic-plugin-sdk-internal/lib/api/internal-types';
+import { isPipelineInPipelineRun } from '../utils/pipeline-utils';
 
 type PipelineRunDetailsPageProps = {
   name: string;
@@ -68,14 +76,16 @@ const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
 
   const resourceTitleFunc = useMemo((): string | JSX.Element => {
     return (
-      <div className="pipelinerun-details-page pf-v6-l-flex pf-v6-l-gap-md pf-v6-u-align-items-center">
-        {pipelineRun?.metadata?.name}{' '}
+      <Flex className="pipelinerun-details-page">
+        <FlexItem className="pf-v6-u-mr-sm">
+          {pipelineRun?.metadata?.name}
+        </FlexItem>
         {pipelineRun?.metadata?.annotations?.[chainsSignedAnnotation] ===
           'true' && (
           <Tooltip content={t('Signed')}>
-            <div className="opp-pipeline-run-details__signed-indicator">
+            <FlexItem className="opp-pipeline-run-details__signed-indicator pf-v6-u-mr-sm">
               <SignedBadgeIcon width="18" height="18" />
-            </div>
+            </FlexItem>
           </Tooltip>
         )}
         {(pipelineRun?.metadata?.annotations?.[
@@ -84,25 +94,69 @@ const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
           pipelineRun?.metadata?.annotations?.[
             RESOURCE_LOADED_FROM_RESULTS_ANNOTATION
           ] === 'true') && (
-          <Tooltip content={t('Archived in Tekton results')}>
-            <ArchiveIcon className="pipelinerun-details-page__results-indicator" />
-          </Tooltip>
+          <FlexItem className="pf-v6-u-mr-sm">
+            <Tooltip content={t('Archived in Tekton results')}>
+              <ArchiveIcon className="pipelinerun-details-page__results-indicator" />
+            </Tooltip>
+          </FlexItem>
         )}
         {pipelineRun?.spec?.managedBy ===
           PIPELINE_RUN_MANAGED_BY_KUEUE_LABEL && (
-          <Tooltip content={t('Multicluster Pipeline Run')}>
-            <MulticlusterIcon className="pipelinerun-details-page__results-indicator" />
-          </Tooltip>
+          <FlexItem className="pf-v6-u-mr-sm">
+            <Tooltip content={t('Multicluster Pipeline Run')}>
+              <MulticlusterIcon className="pipelinerun-details-page__results-indicator" />
+            </Tooltip>
+          </FlexItem>
         )}
-        <ResourceStatus>
-          <Status
-            status={pipelineRunFilterReducer(pipelineRun)}
-            title={pipelineRunTitleFilterReducer(pipelineRun)}
-          />
-        </ResourceStatus>
-      </div>
+        {isPipelineInPipelineRun(pipelineRun) && (
+          <FlexItem className="pf-v6-u-mr-sm">
+            <Tooltip content={t('Pipeline in Pipeline Run')}>
+              <PipelineInPipelineIcon className="opp-pipeline-run-list__results-indicator" />
+            </Tooltip>
+          </FlexItem>
+        )}
+        <FlexItem>
+          <ResourceStatus additionalClassNames="pf-v6-u-p-0">
+            <Status
+              status={pipelineRunFilterReducer(pipelineRun)}
+              title={pipelineRunTitleFilterReducer(pipelineRun)}
+            />
+          </ResourceStatus>
+        </FlexItem>
+      </Flex>
     );
   }, [pipelineRun]);
+
+  const pages = useMemo((): NavPage[] => {
+    const navPages: NavPage[] = [
+      navFactory.details(PipelineRunDetails),
+      navFactory.editYaml(ResourceYAMLEditorViewOnly),
+      {
+        href: 'parameters',
+        name: t('Parameters'),
+        component: (pageProps) => (
+          <PipelineRunParametersForm obj={pipelineRun} {...pageProps} />
+        ),
+      },
+      {
+        href: 'logs',
+        name: t('Logs'),
+        component: PipelineRunLogsWithActiveTask,
+      },
+      navFactory.events(PipelineRunEvents),
+    ];
+
+    if (isPipelineInPipelineRun(pipelineRun)) {
+      navPages.push({
+        href: 'pipeline-runs',
+        name: t('PipelineRuns'),
+        component: PipelineRunChildPipelineRunsList,
+      });
+    }
+
+    return navPages;
+  }, [pipelineRun, t]);
+
   if (!pipelineRunLoaded) {
     return <LoadingBox />;
   }
@@ -129,23 +183,7 @@ const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
           name: t('PipelineRun details'),
         },
       ]}
-      pages={[
-        navFactory.details(PipelineRunDetails),
-        navFactory.editYaml(ResourceYAMLEditorViewOnly),
-        {
-          href: 'parameters',
-          name: t('Parameters'),
-          component: (pageProps) => (
-            <PipelineRunParametersForm obj={pipelineRun} {...pageProps} />
-          ),
-        },
-        {
-          href: 'logs',
-          name: t('Logs'),
-          component: PipelineRunLogsWithActiveTask,
-        },
-        navFactory.events(PipelineRunEvents),
-      ]}
+      pages={pages}
       customActionMenu={customActionMenu}
     />
   );

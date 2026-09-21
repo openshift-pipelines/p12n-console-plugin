@@ -16,12 +16,17 @@ import {
   convertPipelineToBuilderForm,
 } from './utils';
 import { validationSchema } from './validation-utils';
-import { DocumentTitle, k8sCreate, k8sUpdate } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  DocumentTitle,
+  k8sCreate,
+  k8sUpdate,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { returnValidPipelineModel } from '../utils/pipeline-utils';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import { useNavigate, useParams } from 'react-router';
 
 import './PipelineBuilderPage.scss';
+import { useAlphaApiFields } from '../hooks/useAlphaApiFields';
 
 type PipelineBuilderPageProps = {
   existingPipeline?: PipelineKind;
@@ -32,6 +37,7 @@ const PipelineBuilderPage: FC<PipelineBuilderPageProps> = (props) => {
   const navigate = useNavigate();
   const { ns } = useParams();
   const { existingPipeline } = props;
+  const [isAlphaEnabled] = useAlphaApiFields();
 
   const initialValues: PipelineBuilderFormYamlValues = {
     editorType: EditorType.Form,
@@ -41,8 +47,10 @@ const PipelineBuilderPage: FC<PipelineBuilderPageProps> = (props) => {
       ...(convertPipelineToBuilderForm(existingPipeline) || {}),
     },
     taskResources: {
+      clusterResolverPipelines: [],
       clusterResolverTasks: [],
       namespacedTasks: [],
+      namespacedPipelines: [],
       tasksLoaded: false,
     },
   };
@@ -98,14 +106,12 @@ const PipelineBuilderPage: FC<PipelineBuilderPageProps> = (props) => {
 
   return (
     <div className="odc-pipeline-builder-page">
-      <DocumentTitle>
-        {t('Pipeline builder')}
-      </DocumentTitle>
+      <DocumentTitle>{t('Pipeline builder')}</DocumentTitle>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         onReset={() => navigate(-1)}
-        validationSchema={validationSchema(t)}
+        validationSchema={validationSchema(t, isAlphaEnabled)}
       >
         {(formikProps) => (
           <PipelineBuilderForm

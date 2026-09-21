@@ -52,6 +52,8 @@ export type PipelineTask = {
   runAfter?: string[];
   taskRef?: PipelineTaskRef;
   taskSpec?: TektonTaskSpec;
+  pipelineRef?: PipelineTaskRef;
+  pipelineSpec?: PipelineSpec;
   when?: WhenExpression[];
   workspaces?: PipelineTaskWorkspace[];
 };
@@ -90,4 +92,6 @@ export type PipelineBuilderTaskResources = {
   namespacedTasks: TaskKind[];
   clusterResolverTasks: TaskKind[];
   tasksLoaded: boolean;
+  clusterResolverPipelines?: PipelineKind[];
+  namespacedPipelines?: PipelineKind[];
 };

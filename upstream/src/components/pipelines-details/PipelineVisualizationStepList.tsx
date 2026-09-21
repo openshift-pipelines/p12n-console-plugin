@@ -4,15 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { StepStatus } from './pipeline-step-utils';
 import { StatusIcon } from './StatusIcon';
 import { getRunStatusColor } from '../utils/pipeline-augment';
-import { ComputedStatus } from '../../types';
+import { ComputedStatus, PipelineTask } from '../../types';
 import './PipelineVisualizationStepList.scss';
 
 export interface PipelineVisualizationStepListProps {
   isSpecOverview: boolean;
   taskName: string;
-  steps: StepStatus[];
+  steps: StepStatus[] | PipelineTask[];
   isFinallyTask?: boolean;
   hideHeader?: boolean;
+  isPipelineTask?: boolean;
 }
 
 const TooltipColoredStatusIcon = ({ status }) => {
@@ -48,7 +49,14 @@ const TooltipColoredStatusIcon = ({ status }) => {
 
 export const PipelineVisualizationStepList: FC<
   PipelineVisualizationStepListProps
-> = ({ isSpecOverview, taskName, steps, isFinallyTask, hideHeader }) => {
+> = ({
+  isSpecOverview,
+  taskName,
+  steps,
+  isFinallyTask,
+  hideHeader,
+  isPipelineTask = false,
+}) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <div className="odc-pipeline-visualization-step-list">
@@ -59,41 +67,38 @@ export const PipelineVisualizationStepList: FC<
       )}
       {isFinallyTask && (
         <div className="odc-pipeline-visualization-step-list__task-type">
-          {t('Finally task')}
+          {isPipelineTask ? t('Finally Pipeline') : t('Finally Task')}
         </div>
       )}
-      {steps.map(({ duration, name, status }) => {
-        return (
-          <div
-            className={classNames(
-              'odc-pipeline-visualization-step-list__step',
-              {
-                'odc-pipeline-visualization-step-list__step--task-run':
-                  !isSpecOverview,
-              },
-            )}
-            key={name}
-          >
-            {!isSpecOverview ? (
-              <div className="odc-pipeline-visualization-step-list__icon">
-                <TooltipColoredStatusIcon status={status} />
+      {!!steps?.length &&
+        steps.map(({ duration, name, status }) => {
+          return (
+            <div
+              className={classNames(
+                'odc-pipeline-visualization-step-list__step',
+                {
+                  'odc-pipeline-visualization-step-list__step--task-run':
+                    !isSpecOverview,
+                },
+              )}
+              key={name}
+            >
+              {!isSpecOverview && !isPipelineTask && (
+                <div className="odc-pipeline-visualization-step-list__icon">
+                  <TooltipColoredStatusIcon status={status} />
+                </div>
+              )}
+              <div className="odc-pipeline-visualization-step-list__name">
+                {name}
               </div>
-            ) : (
-              <span className="odc-pipeline-visualization-step-list__bullet">
-                &bull;
-              </span>
-            )}
-            <div className="odc-pipeline-visualization-step-list__name">
-              {name}
+              {!isSpecOverview && (
+                <div className="odc-pipeline-visualization-step-list__duration">
+                  {duration}
+                </div>
+              )}
             </div>
-            {!isSpecOverview && (
-              <div className="odc-pipeline-visualization-step-list__duration">
-                {duration}
-              </div>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 };
