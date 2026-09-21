@@ -1,5 +1,6 @@
 import { FormikErrors, FormikValues } from 'formik';
 import {
+  PipelineKind,
   PipelineTask,
   TaskKind,
   TektonParam,
@@ -32,11 +33,11 @@ export type PipelineBuilderListTask = PipelineBuilderTaskBase;
 
 export type PipelineBuilderLoadingTask = PipelineBuilderTaskBase & {
   isFinallyTask: boolean;
-  resource: TaskKind;
-  taskRef: {
-    kind: string;
-    name: string;
-  };
+  resource: TaskKind | PipelineKind;
+  taskRef?: PipelineTask['taskRef'];
+  pipelineRef?: PipelineTask['pipelineRef'];
+  taskSpec?: PipelineTask['taskSpec'];
+  pipelineSpec?: PipelineTask['pipelineSpec'];
 };
 
 export type PipelineBuilderTaskGrouping = {
@@ -50,6 +51,8 @@ export type PipelineBuilderTaskGrouping = {
 export type PipelineBuilderTaskResources = {
   namespacedTasks: TaskKind[];
   clusterResolverTasks: TaskKind[];
+  clusterResolverPipelines?: PipelineKind[];
+  namespacedPipelines?: PipelineKind[];
   tasksLoaded: boolean;
 };
 
@@ -84,7 +87,7 @@ export type PipelineBuilderFormikStatus = {
 
 export type SelectTaskCallback = (
   task: PipelineTask,
-  taskResource: TaskKind,
+  taskResource: TaskKind | PipelineKind,
   isFinallyTask: boolean,
 ) => void;
 
@@ -110,7 +113,7 @@ export type UpdateOperationAddData = UpdateOperationBaseData & {
 };
 export type UpdateOperationConvertToTaskData = UpdateOperationBaseData & {
   name: string;
-  resource: TaskKind;
+  resource: TaskKind | PipelineKind;
   runAfter?: string[];
 };
 export type UpdateOperationConvertToFinallyTaskData = {
@@ -119,14 +122,14 @@ export type UpdateOperationConvertToFinallyTaskData = {
 
 export type UpdateOperationConvertToLoadingTaskData = {
   name: string;
-  resource: TaskKind;
+  resource: TaskKind | PipelineKind;
   runAfter?: string[];
   isFinallyTask: boolean;
 };
 
 export type UpdateOperationFixInvalidTaskListData = UpdateOperationBaseData & {
   existingName: string;
-  resource: TaskKind;
+  resource: TaskKind | PipelineKind;
   runAfter?: string[];
 };
 export type UpdateOperationDeleteListTaskData = UpdateOperationBaseData & {

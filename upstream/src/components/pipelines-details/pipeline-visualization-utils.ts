@@ -22,6 +22,7 @@ import {
 import {
   appendPipelineRunStatus,
   getPipelineTasks,
+  isPipelineInPipelineTask,
 } from '../utils/pipeline-utils';
 import {
   AddNodeDirection,
@@ -387,6 +388,7 @@ export const getGraphDataModel = (
     spec: {},
   },
   taskRuns: TaskRunKind[],
+  childPipelineRuns: PipelineRunKind[],
 ): {
   graph: GraphModel;
   nodes: PipelineMixedNodeModel[];
@@ -396,7 +398,9 @@ export const getGraphDataModel = (
     return null;
   }
 
-  const taskList = _.flatten(getPipelineTasks(pipeline, pipelineRun, taskRuns));
+  const taskList = _.flatten(
+    getPipelineTasks(pipeline, pipelineRun, taskRuns, childPipelineRuns),
+  );
 
   const dag = new DAG();
   taskList?.forEach((task: PipelineTask) => {
@@ -486,6 +490,9 @@ export const getGraphDataModel = (
       if (!taskKind || taskKind === 'Task' || taskKind === 'task') {
         return NodeType.TASK_NODE;
       }
+      if (isPipelineInPipelineTask(task) || taskKind === 'Pipeline') {
+        return NodeType.PIPELINE_NODE;
+      }
       if (taskKind === 'ApprovalTask') {
         return NodeType.APPROVAL_TASK_NODE;
       }
@@ -520,6 +527,7 @@ export const getGraphDataModel = (
     pipeline,
     pipelineRun,
     taskRuns,
+    childPipelineRuns,
     true,
   );
 

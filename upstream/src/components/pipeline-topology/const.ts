@@ -1,6 +1,6 @@
 import * as dagre from 'dagre';
 
-export const NODE_SEPARATION_HORIZONTAL = 10;
+export const NODE_SEPARATION_HORIZONTAL = 15;
 export const NODE_SEPARATION_VERTICAL = 20;
 export const DROP_SHADOW_SPACING = 5;
 export const BUILDER_NODE_ADD_RADIUS = 9;
@@ -27,6 +27,7 @@ export const GRAPH_MIN_WIDTH = 300;
 export const GRAPH_MAX_HEIGHT_PERCENT = 45;
 
 export enum NodeType {
+  PIPELINE_NODE = 'pipeline-task', // for pipeline in pipelines
   TASK_NODE = 'task',
   CUSTOM_TASK_NODE = 'custom-task',
   APPROVAL_TASK_NODE = 'approval-task',
@@ -80,7 +81,7 @@ const DAGRE_SHARED_PROPS: dagre.GraphLabel = {
   edgesep: 50,
   ranker: 'longest-path',
   rankdir: 'LR',
-  marginx: 20,
+  marginx: 30,
   marginy: 20,
 };
 export const DAGRE_VIEWER_PROPS: dagre.GraphLabel = {

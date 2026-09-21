@@ -11,7 +11,10 @@ import RemoveNodeDecorator from './RemoveNodeDecorator';
 import { KebabOption, NewTaskNodeCallback } from './types';
 import { TaskKind } from '../../types';
 import { getReferenceForModel } from '../pipelines-overview/utils';
-import { getResourceModelFromTaskKind, getTaskName } from '../utils/pipeline-augment';
+import {
+  getResourceModelFromTaskKind,
+  getTaskName,
+} from '../utils/pipeline-augment';
 import { ResourceIcon } from '@openshift-console/dynamic-plugin-sdk';
 import { truncateMiddle } from './truncate-middle';
 
@@ -22,7 +25,7 @@ const taskToOption = (
   callback: NewTaskNodeCallback,
 ): KeyedKebabOption => {
   const { kind } = task;
-  const name = getTaskName(task)
+  const name = getTaskName(task);
 
   return {
     key: `${name}-${kind}`,
@@ -42,6 +45,7 @@ const TaskList: FC<any> = ({
   width,
   height,
   listOptions,
+  pipelineListOptions = [],
   unselectedText,
   onRemoveTask,
   onNewTask,
@@ -53,10 +57,11 @@ const TaskList: FC<any> = ({
   const [hover, hoverRef] = useHover();
 
   const options = _.sortBy(
-    listOptions.map((task) => taskToOption(task, onNewTask)),
+    listOptions?.map((task) => taskToOption(task, onNewTask)),
     (o) => o.label,
   );
-  const unselectedTaskText = unselectedText || t('Add task');
+  const hasAnyOptions = options?.length > 0 || pipelineListOptions?.length > 0;
+  const unselectedTaskText = unselectedText || t('Add');
 
   const truncatedTaskText = useMemo(
     () =>
@@ -91,12 +96,12 @@ const TaskList: FC<any> = ({
         <rect
           ref={triggerRef}
           className={classnames('odc-task-list-node__trigger-background', {
-            'is-disabled': options.length === 0,
+            'is-disabled': !hasAnyOptions,
           })}
           width={width}
           height={height}
         />
-        {options.length === 0 ? (
+        {!hasAnyOptions ? (
           <text
             className="odc-task-list-node__trigger-disabled"
             x={width / 2}
