@@ -162,11 +162,11 @@
       "taskRunActionsProvider": "./utils/taskRun-actions-provider.tsx"
     },
     "dependencies": {
-      "@console/pluginAPI": ">=4.15"
+      "@console/pluginAPI": ">=4.22"
     }
   },
   "dependencies": {
-    "@babel/runtime": "latest",
+    "@babel/runtime": "^8.0.0",
     "@gitbeaker/rest": "^43.0.0",
     "@patternfly/react-drag-drop": "^6.0.0",
     "@types/express": "^4.17.18",
