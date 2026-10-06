@@ -1,6 +1,5 @@
-import type { FC } from 'react';
-import { useState } from 'react';
-import { Flex, FlexItem, Grid, GridItem } from '@patternfly/react-core';
+import * as React from 'react';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import {
   formatPrometheusDuration,
   parsePrometheusDuration,
@@ -13,6 +12,7 @@ import {
   useQueryParams,
 } from '../pipelines-overview/utils';
 import { PipelineKind } from '../../types';
+import './PipelinesMetrics.scss';
 import PipelineRunsStatusCardK8s from '../pipelines-overview/PipelineRunsStatusCardK8s';
 import PipelineRunsNumbersChartK8s from '../pipelines-overview/PipelineRunsNumbersChartK8s';
 import PipelineRunsDurationCardK8s from '../pipelines-overview/PipelineRunsDurationCardK8s';
@@ -23,12 +23,16 @@ type PipelinesMetricsPageProps = {
   obj: PipelineKind;
 };
 
-const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
+const PipelinesMetricsPageK8s: React.FC<PipelinesMetricsPageProps> = ({
+  obj,
+}) => {
   const {
     metadata: { namespace, name: parentName },
   } = obj;
-  const [timespan, setTimespan] = useState(parsePrometheusDuration('1d'));
-  const [interval, setInterval] = useState(parsePrometheusDuration('30s'));
+  const [timespan, setTimespan] = React.useState(parsePrometheusDuration('1d'));
+  const [interval, setInterval] = React.useState(
+    parsePrometheusDuration('30s'),
+  );
 
   useQueryParams({
     key: 'refreshinterval',
@@ -52,10 +56,10 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
 
   return (
     <>
-      <div className="pf-v6-u-mt-md pf-v6-u-mx-md">
+      <div className="k8s-overview-info-alert">
         <K8sDataLimitationAlert />
       </div>
-      <Flex className="pf-v6-u-mt-md pf-v6-u-ml-md">
+      <Flex className="pipelines-metrix-dropdown">
         <FlexItem>
           <TimeRangeDropdown timespan={timespan} setTimespan={setTimespan} />
         </FlexItem>
@@ -64,7 +68,7 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
         </FlexItem>
       </Flex>
 
-      <div className="pf-v6-u-p-md">
+      <div className="pipelines-metrics__background">
         <PipelineRunsStatusCardK8s
           timespan={timespan}
           domain={{ y: [0, 100] }}
@@ -74,12 +78,10 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
           interval={interval}
         />
 
-        <Grid hasGutter className="pf-v6-u-mt-md">
-          <GridItem
-            span={12}
-            md={6}
-            lg={4}
-            className="pf-v6-u-display-flex pf-v6-u-min-width pf-v6-u-w-100"
+        <Flex>
+          <FlexItem
+            className="pipelines-metrics__cards"
+            grow={{ default: 'grow' }}
           >
             <PipelineRunsNumbersChartK8s
               namespace={namespace}
@@ -87,13 +89,12 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
               timespan={timespan}
               interval={interval}
               domain={{ y: [0, 500] }}
+              width={400}
             />
-          </GridItem>
-          <GridItem
-            span={12}
-            md={6}
-            lg={4}
-            className="pf-v6-u-display-flex pf-v6-u-min-width pf-v6-u-w-100"
+          </FlexItem>
+          <FlexItem
+            className="pipelines-metrics__cards"
+            grow={{ default: 'grow' }}
           >
             <PipelinesAverageDurationK8s
               timespan={timespan}
@@ -102,12 +103,10 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
               parentName={parentName}
               interval={interval}
             />
-          </GridItem>
-          <GridItem
-            span={12}
-            md={12}
-            lg={4}
-            className="pf-v6-u-display-flex pf-v6-u-min-width pf-v6-u-w-100"
+          </FlexItem>
+          <FlexItem
+            className="pipelines-metrics__cards"
+            grow={{ default: 'grow' }}
           >
             <PipelineRunsDurationCardK8s
               namespace={namespace}
@@ -115,8 +114,8 @@ const PipelinesMetricsPageK8s: FC<PipelinesMetricsPageProps> = ({ obj }) => {
               timespan={timespan}
               interval={interval}
             />
-          </GridItem>
-        </Grid>
+          </FlexItem>
+        </Flex>
       </div>
     </>
   );

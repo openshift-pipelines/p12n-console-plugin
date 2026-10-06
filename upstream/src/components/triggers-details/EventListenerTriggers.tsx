@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import * as _ from 'lodash';
 import { getEventListenerTriggerBindingNames } from '../utils/triggers';
 import {
@@ -12,13 +12,12 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import { TriggerTemplateModel } from '../../models';
 import DynamicResourceLinkList from './DynamicResourceLinkList';
-import './EventListenerTriggers.scss';
 
 interface EventListenerTriggersProps {
   obj: EventListenerKind;
 }
 
-const EventListenerTriggers: FC<EventListenerTriggersProps> = ({
+const EventListenerTriggers: React.FC<EventListenerTriggersProps> = ({
   obj,
 }) => {
   const namespace = obj?.metadata.namespace;

@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import * as React from 'react';
 import _ from 'lodash';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +11,10 @@ import {
   ChartGroup,
   ChartThemeColor,
   ChartVoronoiContainer,
-} from '@patternfly/react-charts/victory';
-import { Card, CardBody, CardTitle, Alert } from '@patternfly/react-core';
+} from '@patternfly/react-charts';
+import { Alert, Card, CardBody, CardTitle } from '@patternfly/react-core';
 import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { Loading } from '../Loading';
+import { LoadingInline } from '../Loading';
 import {
   formatDate,
   getDropDownDate,
@@ -67,15 +66,7 @@ const getChartData = (
   return chartData;
 };
 
-const BOTTOM_PAD_DEFAULT = 35;
-const BOTTOM_PAD_ROTATED = 55;
-const BOTTOM_PAD_LABEL = 15;
-const CHART_BODY_TOP_OFFSET = 10;
-const CHART_BODY_MIN_HEIGHT = 50;
-const CHART_BODY_MAX_HEIGHT = 100;
-const CHART_ASPECT_RATIO = 5;
-
-const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
+const PipelinesAverageDuration: React.FC<PipelinesAverageDurationProps> = ({
   timespan,
   domain,
   bordered,
@@ -86,11 +77,11 @@ const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
-  const [data, setData] = useState<SummaryResponse>();
-  const [loaded, setLoaded] = useState(false);
+  const [data, setData] = React.useState<SummaryResponse>();
+  const [loaded, setLoaded] = React.useState(false);
   const [pipelineAverageDurationError, setPipelineAverageDurationError] =
-    useState<string | undefined>();
-  const abortControllerRef = useRef<AbortController>();
+    React.useState<string | undefined>();
+  const abortControllerRef = React.useRef<AbortController>();
   const startTimespan = timespan - parsePrometheusDuration('1d');
   const endDate = new Date(Date.now()).setHours(0, 0, 0, 0);
   const startDate = new Date(Date.now() - startTimespan).setHours(0, 0, 0, 0);
@@ -99,24 +90,18 @@ const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
     x: domainX || [startDate, endDate],
     y: domainY || undefined,
   };
-  const [chartWidth, setChartWidth] = useState(0);
-  const chartContainerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setChartWidth(node.clientWidth);
-    }
-  }, []);
 
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setLoaded(false);
     setPipelineAverageDurationError(undefined);
     setData(undefined);
@@ -225,78 +210,43 @@ const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
   }
 
   let xAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)', fontSize: 12 },
   };
   const yAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)', fontSize: 12 },
   };
-  let bottomPad: number;
   if (tickValues.length > 7) {
     xAxisStyle = {
       tickLabels: {
-        fill: 'var(--pf-t--global--text--color--regular)',
+        fill: 'var(--pf-v5-global--Color--100)',
         angle: 320,
         fontSize: 10,
         textAnchor: 'end',
         verticalAnchor: 'end',
       },
     };
-    bottomPad = BOTTOM_PAD_ROTATED;
-  } else {
-    bottomPad = BOTTOM_PAD_DEFAULT;
   }
-  if (showLabel) bottomPad += BOTTOM_PAD_LABEL;
-  const chartBodyHeight = Math.max(
-    CHART_BODY_MIN_HEIGHT,
-    Math.min(
-      CHART_BODY_MAX_HEIGHT,
-      Math.round(chartWidth / CHART_ASPECT_RATIO),
-    ),
-  );
-  const chartHeight = CHART_BODY_TOP_OFFSET + chartBodyHeight + bottomPad;
 
   return (
     <>
       <Card
-        className={classNames(
-          'pipeline-overview__min-width-full pipeline-overview__overflow-hidden pf-v6-u-display-flex pf-v6-u-flex-direction-column',
-          {
-            'pipeline-overview__number-of-plr-card':
-              !pipelineAverageDurationError,
-            'card-border': bordered,
-            'pf-v6-u-h-100': !pipelineAverageDurationError,
-          },
-        )}
+        className={classNames('pipeline-overview__number-of-plr-card', {
+          'card-border': bordered,
+        })}
       >
         <CardTitle className="pipeline-overview__number-of-plr-card__title">
           <span>{t('Average duration')}</span>
         </CardTitle>
-        <CardBody
-          className={classNames({
-            'pf-v6-u-flex-1 pipeline-overview__min-height-0 pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-justify-content-flex-end pf-v6-u-align-items-flex-start pf-v6-u-p-0':
-              !pipelineAverageDurationError,
-          })}
-        >
+        <CardBody className="pipeline-overview__number-of-plr-card__body">
           {pipelineAverageDurationError ? (
             <Alert
               variant="danger"
               isInline
               title={t('Unable to load average duration')}
-              className="pf-v6-u-mb-md pf-v6-u-mt-lg"
+              className="pf-v5-u-my-lg pf-v5-u-ml-lg"
             />
           ) : (
-            <div
-              ref={chartContainerRef}
-              className={`pf-v6-u-w-100 ${
-                chartWidth > 0 ? 'pf-v6-u-h-100' : ''
-              }`}
-            >
+            <div className="pipeline-overview__number-of-plr-card__bar-chart-div">
               {loaded ? (
                 <Chart
                   containerComponent={
@@ -308,13 +258,12 @@ const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
                   scale={{ x: 'time', y: 'linear' }}
                   domain={domainValue}
                   domainPadding={{ x: [30, 25] }}
-                  height={chartHeight}
-                  width={chartWidth}
+                  height={145}
+                  width={400}
                   padding={{
                     top: 10,
-                    bottom: bottomPad,
+                    bottom: 55,
                     left: 50,
-                    right: 50,
                   }}
                   themeColor={ChartThemeColor.blue}
                 >
@@ -334,8 +283,8 @@ const PipelinesAverageDuration: FC<PipelinesAverageDurationProps> = ({
                   </ChartGroup>
                 </Chart>
               ) : (
-                <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pf-v6-u-justify-content-center pf-v6-u-h-100 pf-v6-u-p-md pf-v6-u-p-0-on-md">
-                  <Loading isInline={true} />
+                <div className="pipeline-overview__number-of-plr-card__loading pf-v5-u-h-100">
+                  <LoadingInline />
                 </div>
               )}
             </div>

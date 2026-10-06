@@ -1,5 +1,5 @@
 import { ListPageHeader } from '@openshift-console/dynamic-plugin-sdk';
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TriggerBindingModel } from '../../models';
 import TriggerBindingsList from './TriggerBindingsList';
@@ -10,7 +10,7 @@ type TriggerBindingsListPageProps = {
   hideNameLabelFilters?: boolean;
 };
 
-const TriggerBindingsListPage: FC<TriggerBindingsListPageProps> = (
+const TriggerBindingsListPage: React.FC<TriggerBindingsListPageProps> = (
   props,
 ) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

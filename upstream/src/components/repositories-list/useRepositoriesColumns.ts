@@ -1,26 +1,27 @@
-import {
-  K8sResourceCommon,
-  TableColumn,
-} from '@openshift-console/dynamic-plugin-sdk';
+import { TableColumn } from '@openshift-console/dynamic-plugin-sdk';
+import { sortable } from '@patternfly/react-table';
 import { useTranslation } from 'react-i18next';
-const useRepositoriesColumns = (
-  namespace,
-): TableColumn<K8sResourceCommon>[] => {
+import { RepositoryKind } from '../../types';
+import { repositoriesTableColumnClasses } from './RepositoriesRow';
+
+const useRepositoriesColumns = (namespace): TableColumn<RepositoryKind>[] => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const columns = [
+  return [
     {
       id: 'name',
       title: t('Name'),
       sort: 'metadata.name',
-      props: { width: 15, isStickyColumn: true, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[0] },
     },
     ...(!namespace
       ? [
           {
-            id: 'namespace',
             title: t('Namespace'),
             sort: 'metadata.namespace',
-            props: { width: 10, modifier: 'nowrap' },
+            transforms: [sortable],
+            props: { className: repositoriesTableColumnClasses[1] },
+            id: 'namespace',
           },
         ]
       : []),
@@ -28,40 +29,45 @@ const useRepositoriesColumns = (
       id: 'event-type',
       title: t('Event type'),
       sort: 'spec.event_type',
-      props: { width: 5, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[2] },
     },
     {
       id: 'last-run',
       title: t('Last run'),
-      props: { width: 15, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[3] },
     },
     {
       id: 'task-status',
       title: t('Task status'),
-      props: { width: 15, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[4] },
     },
     {
       id: 'last-run-status',
       title: t('Last run status'),
-      props: { width: 10, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[5] },
     },
     {
       id: 'last-runtime',
       title: t('Last run time'),
-      props: { width: 15, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[6] },
     },
     {
       id: 'last-run-duration',
       title: t('Last run duration'),
-      props: { width: 10, modifier: 'nowrap' },
+      transforms: [sortable],
+      props: { className: repositoriesTableColumnClasses[7] },
     },
     {
       id: 'kebab-menu',
       title: '',
-      props: { width: 5 },
+      props: { className: repositoriesTableColumnClasses[8] },
     },
   ];
-  return columns;
 };
 
 export default useRepositoriesColumns;

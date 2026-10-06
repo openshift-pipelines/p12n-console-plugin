@@ -1,9 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>konflux-ci/mintmaker//config/renovate/renovate.json"],
+  "branchPrefix": "osp-mintmaker/",
   "enabledManagers": ["tekton", "dockerfile", "rpm-lockfile", "npm"],
   "addLabels": ["approved", "lgtm", "konflux", "mintmaker"],
-  "ignorePaths": ["upstream/**"],
   "autoApprove": true,
   "packageRules": [
     {

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import * as _ from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import { referenceForOwnerRef } from '../utils/k8s-utils';
 
-export const OwnerReferences: FC<OwnerReferencesProps> = ({
+export const OwnerReferences: React.FC<OwnerReferencesProps> = ({
   resource,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

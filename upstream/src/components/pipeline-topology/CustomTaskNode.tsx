@@ -1,12 +1,11 @@
-import type { FC } from 'react';
-import { useRef, useMemo, memo } from 'react';
+import * as React from 'react';
 import cx from 'classnames';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import { Tooltip } from '@patternfly/react-core';
 import QuestionCircleIcon from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
-import { t_chart_color_black_500 as customTaskColor } from "@patternfly/react-tokens/dist/js/t_chart_color_black_500";
+import { global_palette_black_500 as customTaskColor } from '@patternfly/react-tokens/dist/js/global_palette_black_500';
 import {
   observer,
   Node,
@@ -54,7 +53,7 @@ interface CustomTaskProps {
 
 const FILTER_ID = 'SvgTaskDropShadowFilterId';
 
-const CustomTaskComponent: FC<CustomTaskProps> = ({
+const CustomTaskComponent: React.FC<CustomTaskProps> = ({
   pipelineRunName,
   namespace,
   task,
@@ -67,8 +66,8 @@ const CustomTaskComponent: FC<CustomTaskProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const showStatusState = !!pipelineRunName;
   const visualName = name || _.get(task, ['metadata', 'name'], '');
-  const nameRef = useRef();
-  const pillRef = useRef();
+  const nameRef = React.useRef();
+  const pillRef = React.useRef();
 
   const path = `${resourcePathFromModel(
     CustomRunModelV1Beta1,
@@ -77,7 +76,7 @@ const CustomTaskComponent: FC<CustomTaskProps> = ({
   )}`;
   const enableLogLink = !!path;
   const [hover, hoverRef] = useHover();
-  const truncatedVisualName = useMemo(
+  const truncatedVisualName = React.useMemo(
     () =>
       truncateMiddle(visualName, {
         length: showStatusState ? 11 : 14,
@@ -164,7 +163,7 @@ const CustomTaskComponent: FC<CustomTaskProps> = ({
   );
 };
 
-const CustomTaskNode: FC<CustomTaskNodeProps> = ({
+const CustomTaskNode: React.FC<CustomTaskNodeProps> = ({
   element,
   disableTooltip,
 }) => {
@@ -201,4 +200,4 @@ const CustomTaskNode: FC<CustomTaskNodeProps> = ({
   return taskComponent;
 };
 
-export default memo(observer(CustomTaskNode));
+export default React.memo(observer(CustomTaskNode));

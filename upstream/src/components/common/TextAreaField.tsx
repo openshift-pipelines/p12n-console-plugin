@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -53,4 +53,4 @@ const TextAreaField = (
   );
 };
 
-export default forwardRef(TextAreaField);
+export default React.forwardRef(TextAreaField);

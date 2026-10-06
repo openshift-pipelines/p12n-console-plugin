@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { StepStatus } from './pipeline-step-utils';
@@ -46,7 +46,7 @@ const TooltipColoredStatusIcon = ({ status }) => {
   return icon;
 };
 
-export const PipelineVisualizationStepList: FC<
+export const PipelineVisualizationStepList: React.FC<
   PipelineVisualizationStepListProps
 > = ({ isSpecOverview, taskName, steps, isFinallyTask, hideHeader }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

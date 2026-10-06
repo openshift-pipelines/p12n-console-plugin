@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { configure, render, screen } from '@testing-library/react';
 import { mockPipelinesJSON } from '../../utils/__tests__/pipeline-test-data';
 import PipelineVisualization from '../PipelineVisualization';

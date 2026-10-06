@@ -1,9 +1,9 @@
-import type { FC, ReactElement } from 'react';
+import * as React from 'react';
 import { SVGProps } from 'react';
 
-const TimeoutApprovalTaskIcon: FC<SVGProps<SVGSVGElement>> = (
+const TimeoutApprovalTaskIcon: React.FC<SVGProps<SVGSVGElement>> = (
   props,
-): ReactElement => {
+): React.ReactElement => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

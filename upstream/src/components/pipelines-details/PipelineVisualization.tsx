@@ -1,4 +1,4 @@
-import type { FC, ReactElement } from 'react';
+import * as React from 'react';
 import { Alert } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { PipelineKind, PipelineRunKind, TaskRunKind } from '../../types';
@@ -13,13 +13,13 @@ interface PipelineTopologyVisualizationProps {
   taskRuns?: TaskRunKind[];
 }
 
-const PipelineVisualization: FC<PipelineTopologyVisualizationProps> = ({
+const PipelineVisualization: React.FC<PipelineTopologyVisualizationProps> = ({
   pipeline,
   pipelineRun,
   taskRuns,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  let content: ReactElement;
+  let content: React.ReactElement;
   const model = getGraphDataModel(pipeline, pipelineRun, taskRuns);
 
   if (!model || (model.nodes.length === 0 && model.edges.length === 0)) {

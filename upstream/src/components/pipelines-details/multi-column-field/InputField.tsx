@@ -1,5 +1,4 @@
-import type { Ref, RefAttributes, ForwardRefExoticComponent } from 'react';
-import { forwardRef } from 'react';
+import * as React from 'react';
 import {
   TextInput,
   TextInputProps,
@@ -15,7 +14,7 @@ const renderFunction = (
     type = TextInputTypes.text,
     ...baseProps
   }: BaseInputFieldProps & Omit<TextInputProps, 'type' | 'validated'>,
-  ref: Ref<HTMLInputElement>,
+  ref: React.Ref<HTMLInputElement>,
 ) => (
   <BaseInputField type={type} {...baseProps}>
     {(props) => (
@@ -25,8 +24,8 @@ const renderFunction = (
 );
 
 renderFunction.displayName = 'InputField';
-const InputField: ForwardRefExoticComponent<
-  BaseInputFieldProps & RefAttributes<HTMLInputElement>
-> = forwardRef(renderFunction);
+const InputField: React.ForwardRefExoticComponent<
+  BaseInputFieldProps & React.RefAttributes<HTMLInputElement>
+> = React.forwardRef(renderFunction);
 
 export default InputField;

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import type { FunctionComponent, ReactElement, ReactNode, FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flex, FlexItem, Tab, Title } from '@patternfly/react-core';
 import {
@@ -26,11 +26,10 @@ const sidebarScrollTop = () => {
 
 type Tab = {
   name: string;
-  component: FunctionComponent<{}> | ReactElement;
+  component: React.FunctionComponent<{}> | React.ReactElement;
 };
 
-const ResourceSidebarWrapper: FC<{
-  children?: ReactNode;
+const ResourceSidebarWrapper: React.FC<{
   label: string;
   toggleSidebar: () => void;
 }> = (props) => {
@@ -56,14 +55,14 @@ const ResourceSidebarWrapper: FC<{
   );
 };
 
-const ResourceSchema: FC<{ kindObj: K8sKind; schema: any }> = ({
+const ResourceSchema: React.FC<{ kindObj: K8sKind; schema: any }> = ({
   kindObj,
   schema,
 }) => (
   <ExploreType kindObj={kindObj} schema={schema} scrollTop={sidebarScrollTop} />
 );
 
-const ResourceSamples: FC<{
+const ResourceSamples: React.FC<{
   samples: Sample[];
   loadSampleYaml: LoadSampleYaml;
   downloadSampleYaml: DownloadSampleYaml;
@@ -77,7 +76,7 @@ const ResourceSamples: FC<{
   />
 );
 
-const ResourceSnippets: FC<{
+const ResourceSnippets: React.FC<{
   snippets: Sample[];
   insertSnippetYaml(id: string, yaml: string, reference: string);
 }> = ({ snippets, insertSnippetYaml }) => (
@@ -87,7 +86,7 @@ const ResourceSnippets: FC<{
   />
 );
 
-export const ResourceSidebar: FC<{
+export const ResourceSidebar: React.FC<{
   kindObj: K8sKind;
   downloadSampleYaml: DownloadSampleYaml;
   schema: any;
@@ -163,7 +162,7 @@ export const ResourceSidebar: FC<{
             samples,
             snippets,
           }}
-          additionalClassNames="pf-v6-u-my-md"
+          additionalClassNames="pf-v5-u-my-md"
         />
       ) : (
         <ResourceSchema schema={schema} kindObj={kindObj} />

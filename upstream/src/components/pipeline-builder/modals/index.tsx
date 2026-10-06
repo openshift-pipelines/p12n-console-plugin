@@ -1,17 +1,16 @@
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-import { t_chart_global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/t_chart_global_warning_color_100';
+import { global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/global_warning_color_100';
 import ModalContent from './ModalContent';
-import { OverlayComponent } from '@openshift-console/dynamic-plugin-sdk';
+import { ModalComponent } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/ModalProvider';
 import {
-  Modal,
-  ModalHeader,
   ModalBody,
-  ModalFooter,
-  Button,
-  ModalVariant,
-  ButtonVariant,
-} from '@patternfly/react-core';
+  ModalComponentProps,
+  ModalSubmitFooter,
+  ModalTitle,
+  ModalWrapper,
+} from '../../modals/modal';
 
 import './ModalContent.scss';
 
@@ -22,18 +21,23 @@ type RemoveModalProps = {
   onRemove: ModalCallback;
 };
 
-const RemoveTaskModal: OverlayComponent<RemoveModalProps> = ({ taskName, closeOverlay, onRemove }) => {
+const RemoveTaskModal: ModalComponent<
+  RemoveModalProps & ModalComponentProps
+> = ({ taskName, closeModal, onRemove }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
   const onSubmit = (e) => {
     onRemove();
-    closeOverlay();
+    closeModal();
     e.preventDefault();
   };
 
   return (
-    <Modal isOpen onClose={closeOverlay} variant={ModalVariant.small}>
-      <ModalHeader title={t('Remove task')} />
+    <ModalWrapper onClose={closeModal}>
+      <form onSubmit={onSubmit} name="form" className="modal-content">
+        <ModalTitle className="pipelines-remove-task-header">
+          {t('Remove task')}
+        </ModalTitle>
         <ModalBody>
           <ModalContent
             icon={<ExclamationTriangleIcon color={warningColor.value} />}
@@ -45,15 +49,15 @@ const RemoveTaskModal: OverlayComponent<RemoveModalProps> = ({ taskName, closeOv
             })}
           />
         </ModalBody>
-        <ModalFooter>
-          <Button variant={ButtonVariant.secondary} onClick={closeOverlay}>
-            {t('Cancel')}
-          </Button>
-          <Button type="submit" variant={ButtonVariant.danger} onClick={onSubmit}>
-            {t('Confirm')}
-          </Button>
-        </ModalFooter>
-    </Modal>
+        <ModalSubmitFooter
+          inProgress={false}
+          submitText={t('Confirm')}
+          cancel={closeModal}
+          cancelText={t('Cancel')}
+          submitDanger
+        />
+      </form>
+    </ModalWrapper>
   );
 };
 

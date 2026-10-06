@@ -9,6 +9,7 @@ import {
   getLabelValue,
 } from '../repository-utils';
 import { mockRepository } from './repository-mock';
+import React from 'react';
 
 describe('repository-util', () => {
   it('should return latest pipelineRun name', () => {

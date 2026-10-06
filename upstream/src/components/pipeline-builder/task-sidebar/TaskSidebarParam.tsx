@@ -1,5 +1,4 @@
-import type { FC, ComponentProps } from 'react';
-import { useCallback } from 'react';
+import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { SelectedBuilderTask, TektonParam } from '../../../types';
 import { PipelineBuilderFormikValues } from '../types';
@@ -19,7 +18,7 @@ type TaskSidebarParamProps = {
   selectedData?: SelectedBuilderTask;
 };
 
-const TaskSidebarParam: FC<TaskSidebarParamProps> = (props) => {
+const TaskSidebarParam: React.FC<TaskSidebarParamProps> = (props) => {
   const { setFieldValue } = useFormikContext<PipelineBuilderFormikValues>();
   const { hasParam, name, resourceParam, selectedData } = props;
   const autoCompleteOptions = useBuilderParams(selectedData);
@@ -29,7 +28,7 @@ const TaskSidebarParam: FC<TaskSidebarParamProps> = (props) => {
   const resourceParamName = resourceParam.name;
   const fieldName = `${name}.value`;
 
-  const setValue = useCallback(
+  const setValue = React.useCallback(
     (value: string) => {
       if (hasParam) {
         setFieldValue(fieldName, value);
@@ -41,7 +40,7 @@ const TaskSidebarParam: FC<TaskSidebarParamProps> = (props) => {
   );
 
   const textAreaSettings: Omit<
-    ComponentProps<typeof TextAreaField>,
+    React.ComponentProps<typeof TextAreaField>,
     'name'
   > = {
     rows: 1,

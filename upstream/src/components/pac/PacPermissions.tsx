@@ -1,18 +1,17 @@
-import type { FC } from 'react';
-import { useState } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   ExpandableSection,
   Grid,
   GridItem,
-  Content,
-  ContentVariants,
+  Text,
+  TextVariants,
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 
-const PacPermissions: FC = () => {
+const PacPermissions: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
   return (
     <ExpandableSection
       toggleText={t('See GitHub permissions')}
@@ -25,7 +24,7 @@ const PacPermissions: FC = () => {
             label={t('Repository Permissions:')}
             fieldId="repo-permissions"
           >
-            <Content component={ContentVariants.small}>
+            <Text component={TextVariants.small}>
               {t('Checks: Read & Write')}
               <br />
               {t('Contents: Read & Write')}
@@ -39,7 +38,7 @@ const PacPermissions: FC = () => {
               {t('Organization plan: Readonly')}
               <br />
               {t('Pull requests: Read & Write')}
-            </Content>
+            </Text>
           </FormGroup>
         </GridItem>
         <GridItem>
@@ -47,11 +46,11 @@ const PacPermissions: FC = () => {
             label={t('Organization permissions:')}
             fieldId="org-permissions"
           >
-            <Content component={ContentVariants.small}>
+            <Text component={TextVariants.small}>
               {t('Members: Readonly')}
               <br />
               {t('Plan: Readonly')}
-            </Content>
+            </Text>
           </FormGroup>
         </GridItem>
         <GridItem>
@@ -59,7 +58,7 @@ const PacPermissions: FC = () => {
             label={t('Subscribe to events:')}
             fieldId="event-subscriptions"
           >
-            <Content component={ContentVariants.small}>
+            <Text component={TextVariants.small}>
               {t('Commit comment')}
               <br />
               {t('Issue comment')}
@@ -71,7 +70,7 @@ const PacPermissions: FC = () => {
               {t('Pull request review comment')}
               <br />
               {t('Push')}
-            </Content>
+            </Text>
           </FormGroup>
         </GridItem>
       </Grid>

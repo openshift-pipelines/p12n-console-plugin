@@ -5,7 +5,7 @@ import {
   k8sUpdate,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { GITHUB_BASE_URL } from '../../../consts';
 import { TaskModel, TaskModelV1Beta1 } from '../../../models';
 import { ArtifactHubTask, ArtifactHubTaskDetails } from '../../../types';
@@ -48,16 +48,17 @@ export const useGetArtifactHubTasks = (
   hasPermission: boolean,
   isDevConsoleProxyAvailable?: boolean,
 ): ApiResult<ArtifactHubTask[]> => {
-  const [resultData, setResult] = useState<ArtifactHubTask[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [loadedError, setLoadedError] = useState<string>();
+  const [resultData, setResult] = React.useState<ArtifactHubTask[]>([]);
+  const [loaded, setLoaded] = React.useState(false);
+  const [loadedError, setLoadedError] = React.useState<string>();
 
-  useEffect(() => {
+  React.useEffect(() => {
     let mounted = true;
 
     const fetchTasks = async () => {
       try {
         if (!hasPermission) {
+          setResult([]);
           setLoaded(true);
           return;
         }
@@ -104,6 +105,11 @@ export const createArtifactHubTask = (
   isDevConsoleProxyAvailable?: boolean,
   customName?: string,
 ) => {
+  if (!url || typeof url !== 'string') {
+    return Promise.reject(
+      new Error('ArtifactHub task content URL is missing or invalid'),
+    );
+  }
   const fetchTask = async (): Promise<K8sResourceKind> => {
     if (isDevConsoleProxyAvailable) {
       const yamlPath = url.startsWith(GITHUB_BASE_URL)
@@ -152,6 +158,9 @@ export const updateArtifactHubTask = async (
   version: string,
   isDevConsoleProxyAvailable?: boolean,
 ) => {
+  if (!url || typeof url !== 'string') {
+    throw new Error('ArtifactHub task content URL is missing or invalid');
+  }
   const fetchTask = async (): Promise<K8sResourceKind> => {
     if (isDevConsoleProxyAvailable) {
       const yamlPath = url.startsWith(GITHUB_BASE_URL)
@@ -202,6 +211,6 @@ export const fetchArtifactHubTasks = async (
     return data.packages || [];
   } catch (error) {
     console.warn('Error searching Artifact Hub tasks:', error);
-    throw error;
+    return [];
   }
 };

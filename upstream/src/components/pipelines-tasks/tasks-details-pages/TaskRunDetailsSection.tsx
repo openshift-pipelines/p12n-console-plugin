@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Grid, GridItem, Title } from '@patternfly/react-core';
 
@@ -11,13 +11,13 @@ export interface TaskRunDetailsSectionProps {
   taskRun: TaskRunKind;
 }
 
-const TaskRunDetailsSection: FC<TaskRunDetailsSectionProps> = ({
+const TaskRunDetailsSection: React.FC<TaskRunDetailsSectionProps> = ({
   taskRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <>
-      <Title headingLevel="h2" className="pf-v6-u-mb-md">
+      <Title headingLevel="h2" className="pf-v5-u-mb-md">
         {t('{{taskRunLabel}} details', {
           taskRunLabel: t(TaskRunModel.labelKey),
         })}

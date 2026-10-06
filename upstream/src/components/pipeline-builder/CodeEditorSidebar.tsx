@@ -1,5 +1,4 @@
-import type { MutableRefObject, FC } from 'react';
-import { useCallback } from 'react';
+import * as React from 'react';
 import { JSONSchema7 } from 'json-schema';
 import { Range, Selection } from 'monaco-editor';
 import MonacoEditor from 'react-monaco-editor';
@@ -9,7 +8,7 @@ import { downloadYaml } from './yaml-download-utils';
 import { ResourceSidebar } from './sidebars/resource-sidebar';
 
 type CodeEditorSidebarProps = {
-  editorRef: MutableRefObject<MonacoEditor>;
+  editorRef: React.MutableRefObject<MonacoEditor>;
   model?: K8sKind;
   samples?: Sample[];
   schema?: JSONSchema7;
@@ -19,7 +18,7 @@ type CodeEditorSidebarProps = {
   toggleSidebar: () => void;
 };
 
-const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({
+const CodeEditorSidebar: React.FC<CodeEditorSidebarProps> = ({
   editorRef,
   model,
   samples,
@@ -31,7 +30,7 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({
 }) => {
   const editor = editorRef.current?.editor;
 
-  const insertYamlContent = useCallback(
+  const insertYamlContent = React.useCallback(
     (id = 'default', yamlContent = '', kind) => {
       const yaml = sanitizeYamlContent
         ? sanitizeYamlContent(id, yamlContent, kind)
@@ -73,7 +72,7 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({
     [editor, sanitizeYamlContent],
   );
 
-  const replaceYamlContent = useCallback(
+  const replaceYamlContent = React.useCallback(
     (id = 'default', yamlContent = '', kind: string) => {
       const yaml = sanitizeYamlContent
         ? sanitizeYamlContent(id, yamlContent, kind)
@@ -83,7 +82,7 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({
     [editor, sanitizeYamlContent],
   );
 
-  const downloadYamlContent = useCallback(
+  const downloadYamlContent = React.useCallback(
     (id = 'default', yamlContent = '', kind: string) => {
       try {
         const yaml = sanitizeYamlContent

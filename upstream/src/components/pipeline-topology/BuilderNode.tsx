@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { TooltipPosition } from '@patternfly/react-core';
 import {
   Node,
@@ -22,7 +22,7 @@ type BuilderNodeProps = {
   element: Node<NodeModel, BuilderNodeModelData>;
 };
 
-const BuilderNode: FC<BuilderNodeProps> = ({ element }) => {
+const BuilderNode: React.FC<BuilderNodeProps> = ({ element }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [showAdd, hoverRef] = useHover();
   const { width, height } = element.getBounds();

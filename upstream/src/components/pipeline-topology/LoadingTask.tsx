@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useRef, useMemo } from 'react';
+import * as React from 'react';
 import { Tooltip } from '@patternfly/react-core';
 import { BUILDER_NODE_ADD_RADIUS } from './const';
 import InstallingNodeDecorator from './InstallingNodeDecorator';
@@ -14,9 +13,9 @@ type LoadingTaskProps = {
   name: string;
 };
 
-const LoadingTask: FC<LoadingTaskProps> = ({ width, height, name }) => {
-  const textRef = useRef();
-  const truncatedName = useMemo(
+const LoadingTask: React.FC<LoadingTaskProps> = ({ width, height, name }) => {
+  const textRef = React.useRef();
+  const truncatedName = React.useMemo(
     () => truncateMiddle(name, { length: 10, truncateEnd: true }),
     [name],
   );

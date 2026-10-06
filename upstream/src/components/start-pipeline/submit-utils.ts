@@ -67,7 +67,6 @@ export const submitTrigger = async (
   pipeline: PipelineKind,
   formValues: AddTriggerFormValues,
   currentUser: string,
-  launchOverlay?: any,
 ): Promise<K8sResourceKind[]> => {
   const { triggerBinding } = formValues;
   const thisNamespace = pipeline.metadata.namespace;
@@ -118,7 +117,7 @@ export const submitTrigger = async (
     return Promise.reject(err);
   }
 
-  exposeRoute(eventListener.metadata.name, thisNamespace, launchOverlay);
+  exposeRoute(eventListener.metadata.name, thisNamespace);
 
   return Promise.resolve(resources);
 };

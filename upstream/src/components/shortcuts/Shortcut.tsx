@@ -1,11 +1,11 @@
-import type { ReactNode, HTMLAttributes, FC } from 'react';
+import * as React from 'react';
 import { MouseIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import './Shortcut.scss';
 
 interface ShortcutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   alt?: boolean;
   click?: boolean;
   ctrl?: boolean;
@@ -18,7 +18,7 @@ interface ShortcutProps {
   dragNdrop?: boolean;
 }
 
-export const ShortcutCommand: FC<HTMLAttributes<HTMLSpanElement>> = ({ children }) => (
+export const ShortcutCommand: React.FC = ({ children }) => (
   <span className="ocs-shortcut__command">
     <kbd className="co-kbd">{children}</kbd>
   </span>
@@ -26,7 +26,7 @@ export const ShortcutCommand: FC<HTMLAttributes<HTMLSpanElement>> = ({ children 
 
 export const isMac = window.navigator.platform.includes('Mac');
 
-const Shortcut: FC<ShortcutProps> = ({
+const Shortcut: React.FC<ShortcutProps> = ({
   children,
   alt,
   click,

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import * as React from 'react';
 import { useFormikContext } from 'formik';
 import * as _ from 'lodash';
 import { TaskKind } from '../../../types';
@@ -101,12 +101,12 @@ const useTasksProvider: ExtensionHook<CatalogItem[]> = (): [
     taskResources: { namespacedTasks, clusterResolverTasks, tasksLoaded },
   } = values;
 
-  const tektonTasks = useMemo(
+  const tektonTasks = React.useMemo(
     () => _.filter([...namespacedTasks, ...clusterResolverTasks]),
     [namespacedTasks, clusterResolverTasks],
   );
 
-  const normalizedTektonTasks = useMemo(
+  const normalizedTektonTasks = React.useMemo(
     () => normalizeTektonTasks(tektonTasks),
     [tektonTasks],
   );

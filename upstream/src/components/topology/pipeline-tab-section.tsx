@@ -1,5 +1,6 @@
 import { GraphElement } from '@patternfly/react-topology';
 
+import React from 'react';
 import TopologySideBarTabSection from '../side-bar/TopologySideBarTabSection';
 import PipelinesOverview from '../pipeline-overview/PipelineOverview';
 import { DetailsTabSectionExtensionHook } from '@openshift-console/dynamic-plugin-sdk';

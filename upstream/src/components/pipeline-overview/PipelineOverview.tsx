@@ -1,9 +1,8 @@
-import type { FC } from 'react';
-import { useState, useEffect } from 'react';
-import { Flex, FlexItem, List, ListItem } from '@patternfly/react-core';
+import * as React from 'react';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {
   isPipelineNotStarted,
   removePipelineNotStarted,
@@ -32,7 +31,7 @@ type PipelinesOverviewProps = {
   };
 };
 
-const PipelinesOverview: FC<PipelinesOverviewProps> = ({
+const PipelinesOverview: React.FC<PipelinesOverviewProps> = ({
   item: {
     pipelines: [pipeline],
     pipelineRuns,
@@ -42,11 +41,11 @@ const PipelinesOverview: FC<PipelinesOverviewProps> = ({
     metadata: { name, namespace },
   } = pipeline;
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [showAlert, setShowAlert] = useState(
+  const [showAlert, setShowAlert] = React.useState(
     isPipelineNotStarted(name, namespace),
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     setShowAlert(isPipelineNotStarted(name, namespace));
   }, [name, namespace]);
 
@@ -73,8 +72,8 @@ const PipelinesOverview: FC<PipelinesOverviewProps> = ({
           </Link>
         )}
       </SidebarSectionHeading>
-      <List isPlain>
-        <ListItem>
+      <ul className="list-group">
+        <li className="list-group-item pipeline-overview">
           <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
             <FlexItem>
               <ResourceLink
@@ -98,11 +97,11 @@ const PipelinesOverview: FC<PipelinesOverviewProps> = ({
               )}
             </FlexItem>
           </Flex>
-        </ListItem>
+        </li>
         {_.take(pipelineRuns, MAX_VISIBLE).map((pr) => (
           <PipelineRunItem key={pr.metadata.uid} pipelineRun={pr} />
         ))}
-      </List>
+      </ul>
       <TriggersOverview pipeline={pipeline} />
     </div>
   );

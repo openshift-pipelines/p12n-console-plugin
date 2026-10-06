@@ -1,35 +1,42 @@
-import { useCallback } from 'react';
-import { Button, Modal, ModalHeader, ModalVariant, ModalBody, ModalFooter } from '@patternfly/react-core';
+import * as React from 'react';
+import { ActionGroup, Button } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { OverlayComponent } from '@openshift-console/dynamic-plugin-sdk';
+import { YellowExclamationTriangleIcon } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  createModalLauncher,
+  ModalBody,
+  ModalComponentProps,
+  ModalFooter,
+  ModalTitle,
+} from './modal';
+import { HandlePromiseProps, withHandlePromise } from './promise-component';
 
-import { useOverlay } from '@openshift-console/dynamic-plugin-sdk';
-
-export const ModalErrorContent : OverlayComponent<ErrorModalProps> = (props) => {
+export const ModalErrorContent = withHandlePromise<ErrorModalProps>((props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const { error, title, closeOverlay } = props;
+  const { error, title, cancel } = props;
   const titleText = title || t('Error');
   return (
-    <Modal isOpen onClose={closeOverlay} variant={ModalVariant.small}>
-      <ModalHeader title={titleText} titleIconVariant="warning"/>
+    <div className="modal-content">
+      <ModalTitle>
+        <YellowExclamationTriangleIcon className="co-icon-space-r" />{' '}
+        {titleText}
+      </ModalTitle>
       <ModalBody>{error}</ModalBody>
-      <ModalFooter>
-        <Button type="button" variant="primary" onClick={closeOverlay}>
-          {t('OK')}
-        </Button>
+      <ModalFooter inProgress={false} errorMessage="">
+        <ActionGroup className="pf-v5-c-form pf-v5-c-form__actions--right pf-v5-c-form__group--no-top-margin">
+          <Button type="button" variant="primary" onClick={cancel}>
+            {t('OK')}
+          </Button>
+        </ActionGroup>
       </ModalFooter>
-    </Modal>
+    </div>
   );
-};
+});
 
-export const useErrorModal = () => {
-  const launchOverlay = useOverlay();
-  return useCallback((props: ErrorModalProps) => launchOverlay<ErrorModalProps>(ModalErrorContent, props)
-  , [launchOverlay]);
-};
+export const errorModal = createModalLauncher(ModalErrorContent);
 
 export type ErrorModalProps = {
   error: string;
   title?: string;
-  cancel?: () => void;
-};
+} & ModalComponentProps &
+  HandlePromiseProps;

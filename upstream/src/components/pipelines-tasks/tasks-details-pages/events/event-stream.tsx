@@ -1,5 +1,4 @@
-import type { FC, ComponentType, CSSProperties } from 'react';
-import { Component, useState, useCallback, useEffect } from 'react';
+import * as React from 'react';
 import * as _ from 'lodash-es';
 import {
   AutoSizer,
@@ -23,7 +22,7 @@ const measurementCache = new CellMeasurerCache({
   minHeight: 120,
 });
 
-class SysEvent extends Component<SysEventProps> {
+class SysEvent extends React.Component<SysEventProps> {
   shouldComponentUpdate(nextProps: SysEventProps) {
     if (this.props.event.lastTimestamp !== nextProps.event.lastTimestamp) {
       // Timestamps can be modified because events can be combined.
@@ -76,18 +75,18 @@ class SysEvent extends Component<SysEventProps> {
   }
 }
 
-export const EventStreamList: FC<EventStreamListProps> = ({
+export const EventStreamList: React.FC<EventStreamListProps> = ({
   events,
   className,
   EventComponent,
 }) => {
-  const [list, setList] = useState(null);
-  const onResize = useCallback(() => measurementCache.clearAll(), []);
-  useEffect(() => {
+  const [list, setList] = React.useState(null);
+  const onResize = React.useCallback(() => measurementCache.clearAll(), []);
+  React.useEffect(() => {
     onResize();
     list?.recomputeRowHeights();
   }, [list, events, onResize]);
-  const rowRenderer = useCallback(
+  const rowRenderer = React.useCallback(
     ({ index, style, key, parent }) => (
       <CellMeasurer
         cache={measurementCache}
@@ -150,7 +149,7 @@ export const EventStreamList: FC<EventStreamListProps> = ({
 
 type EventStreamListProps = {
   events: EventKind[];
-  EventComponent: ComponentType<EventComponentProps>;
+  EventComponent: React.ComponentType<EventComponentProps>;
   className?: string;
 };
 
@@ -159,11 +158,11 @@ export type EventComponentProps = {
 };
 
 type SysEventProps = {
-  EventComponent: ComponentType<EventComponentProps>;
+  EventComponent: React.ComponentType<EventComponentProps>;
   event: EventKind;
   onLoad: () => void;
   onEntered: () => void;
-  style: CSSProperties;
+  style: React.CSSProperties;
   index: number;
   className?: string;
 };

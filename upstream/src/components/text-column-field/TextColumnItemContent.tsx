@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   Flex,
   FlexItem,
@@ -45,7 +45,7 @@ const DEFAULT_CHILDREN = (
   );
 };
 
-const TextColumnItemContent: FC<TextColumnItemContentProps> = ({
+const TextColumnItemContent: React.FC<TextColumnItemContentProps> = ({
   name,
   dndEnabled,
   children = DEFAULT_CHILDREN,
@@ -74,7 +74,7 @@ const TextColumnItemContent: FC<TextColumnItemContentProps> = ({
     <div ref={previewDropRef} style={{ opacity }}>
       <Flex
         alignItems={{ default: 'alignItemsFlexStart' }}
-        style={{ marginBottom: "var(--pf-t--global--spacer--sm)" }}
+        style={{ marginBottom: 'var(--pf-v5-global--spacer--sm)' }}
       >
         {dndEnabled && (
           <FlexItem style={{ cursor: 'move' }}>
@@ -96,7 +96,7 @@ const TextColumnItemContent: FC<TextColumnItemContentProps> = ({
                 tooltipDeleteRow || t('plugin__pipelines-console-plugin~Remove')
               }
             >
-              <Button icon={<MinusCircleIcon />}
+              <Button
                 aria-label={
                   tooltipDeleteRow ||
                   t('plugin__pipelines-console-plugin~Remove')
@@ -113,7 +113,9 @@ const TextColumnItemContent: FC<TextColumnItemContentProps> = ({
                     onChange(values);
                   }
                 }}
-               />
+              >
+                <MinusCircleIcon />
+              </Button>
             </Tooltip>
           </FlexItem>
         )}

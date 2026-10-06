@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { Children } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -19,7 +18,7 @@ import { MultiColumnFieldProps } from './types';
 import { useFormikValidationFix } from './formik-validation-fix';
 import SecondaryStatus from './SecondaryStatus';
 
-const MultiColumnField: FC<MultiColumnFieldProps> = ({
+const MultiColumnField: React.FC<MultiColumnFieldProps> = ({
   children,
   name,
   label,
@@ -41,7 +40,7 @@ const MultiColumnField: FC<MultiColumnFieldProps> = ({
 }) => {
   const { values } = useFormikContext<FormikValues>();
   const fieldValue = _.get(values, name, []);
-  const totalFieldCount: gridItemSpanValueShape = Children.count(
+  const totalFieldCount: gridItemSpanValueShape = React.Children.count(
     children,
   ) as gridItemSpanValueShape;
   const fieldSpans = spans || getSpans(totalFieldCount);

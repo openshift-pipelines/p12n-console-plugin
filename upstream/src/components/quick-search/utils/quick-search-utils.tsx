@@ -1,4 +1,4 @@
-import type { SyntheticEvent } from 'react';
+import * as React from 'react';
 import { CatalogItem } from '@openshift-console/dynamic-plugin-sdk';
 import { keywordCompare } from '../../catalog/catalog-utils';
 import { removeQueryArgument } from '../../utils/router';
@@ -8,10 +8,10 @@ export const quickSearch = (items: CatalogItem[], query: string) => {
 };
 
 export const handleCta = async (
-  e: SyntheticEvent,
+  e: React.SyntheticEvent,
   item: CatalogItem,
   closeModal: () => void,
-  navigate: (path: string) => void,
+  history,
   callbackProps: { [key: string]: any } = {},
 ) => {
   e.preventDefault();
@@ -19,10 +19,10 @@ export const handleCta = async (
   if (callback) {
     closeModal();
     await callback({
-      ...callbackProps,
       selectedVersion: item.data?.version ?? item.data?.task?.version,
       selectedItem: item,
+      ...callbackProps,
     });
     removeQueryArgument('catalogSearch');
-  } else navigate(href);
+  } else history.push(href);
 };

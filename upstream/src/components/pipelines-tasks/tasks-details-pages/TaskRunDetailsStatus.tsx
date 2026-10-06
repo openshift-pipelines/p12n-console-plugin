@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DescriptionList,
@@ -26,7 +26,7 @@ export interface TaskRunDetailsStatusProps {
   taskRun: TaskRunKind;
 }
 
-const TaskRunDetailsStatus: FC<TaskRunDetailsStatusProps> = ({
+const TaskRunDetailsStatus: React.FC<TaskRunDetailsStatusProps> = ({
   taskRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

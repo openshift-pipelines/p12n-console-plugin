@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ export interface MultiColumnFieldFooterProps {
   onAdd: () => void;
 }
 
-const MultiColumnFieldFooter: FC<MultiColumnFieldFooterProps> = ({
+const MultiColumnFieldFooter: React.FC<MultiColumnFieldFooterProps> = ({
   addLabel,
   disableAddRow = false,
   tooltipAddRow,

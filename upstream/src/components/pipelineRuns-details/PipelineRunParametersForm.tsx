@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { PageSection } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import * as _ from 'lodash';
@@ -10,7 +10,7 @@ export interface PipelineRunParametersFormProps {
   obj: K8sResourceKind;
 }
 
-const PipelineRunParametersForm: FC<PipelineRunParametersFormProps> = ({
+const PipelineRunParametersForm: React.FC<PipelineRunParametersFormProps> = ({
   obj,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -22,9 +22,9 @@ const PipelineRunParametersForm: FC<PipelineRunParametersFormProps> = ({
       <Formik initialValues={initialValues} onSubmit={null}>
         {() => (
           <PageSection
-            hasBodyWrapper={false}
+            variant="light"
             isFilled
-            className="pipelines-console-plugin__page-section-width pf-v6-u-p-0 pipelines-console-plugin__background-transparent"
+            className="pipelines-console-plugin__page-section-width pf-v5-u-p-0 pipelines-console-plugin__background-transparent"
           >
             <PipelineRunParameters
               fieldName="parameters"

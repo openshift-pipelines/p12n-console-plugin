@@ -1,4 +1,4 @@
-import type { ReactNode, SetStateAction, Dispatch, FC } from 'react';
+import * as React from 'react';
 import { Modal, ModalVariant } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { DetailsRendererFunction } from './QuickSearchDetails';
@@ -17,13 +17,13 @@ interface QuickSearchModalProps {
   searchPlaceholder: string;
   viewContainer?: HTMLElement;
   limitItemCount?: number;
-  icon?: ReactNode;
+  icon?: React.ReactNode;
   detailsRenderer?: DetailsRendererFunction;
   callback?: TaskSearchCallback;
-  setFailedTasks?: Dispatch<SetStateAction<string[]>>;
+  setFailedTasks?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const QuickSearchModal: FC<QuickSearchModalProps> = ({
+const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   isOpen,
   namespace,
   closeModal,
@@ -44,12 +44,14 @@ const QuickSearchModal: FC<QuickSearchModalProps> = ({
 
   return viewContainer ? (
     <Modal
-      className="pipelines-ocs-quick-search-modal"
+      className="ocs-quick-search-modal"
       variant={ModalVariant.medium}
       aria-label={t('Quick search')}
       isOpen={isOpen}
+      showClose={false}
       position="top"
       positionOffset="15%"
+      hasNoBodyWrapper
       appendTo={viewContainer}
     >
       <QuickSearchModalBody

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { TektonResource } from '../../../types';
@@ -19,7 +19,7 @@ interface ResourceLink {
   resource: string;
 }
 
-const TaskSidebarResource: FC<TaskSidebarResourceProps> = (props) => {
+const TaskSidebarResource: React.FC<TaskSidebarResourceProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { getFieldMeta, setFieldValue } =
     useFormikContext<PipelineBuilderFormikValues>();

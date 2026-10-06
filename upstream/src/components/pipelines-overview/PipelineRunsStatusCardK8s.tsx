@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useMemo, useEffect } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { DomainPropType, DomainTuple } from 'victory-core';
@@ -13,7 +12,7 @@ import {
   ChartLegend,
   ChartLine,
   ChartVoronoiContainer,
-} from '@patternfly/react-charts/victory';
+} from '@patternfly/react-charts';
 import {
   Alert,
   Card,
@@ -26,7 +25,7 @@ import {
 import { chart_color_black_200 as othersColor } from '@patternfly/react-tokens/dist/js/chart_color_black_200';
 import { chart_color_black_500 as cancelledColor } from '@patternfly/react-tokens/dist/js/chart_color_black_500';
 import { chart_color_green_400 as successColor } from '@patternfly/react-tokens/dist/js/chart_color_green_400';
-import { t_chart_global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/t_chart_global_danger_color_100';
+import { global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
 import { chart_color_blue_300 as runningColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_300';
 import {
   formatDate,
@@ -35,6 +34,7 @@ import {
   parsePrometheusDuration,
   monthYear,
 } from './dateTime';
+import './PipelinesOverview.scss';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
@@ -49,7 +49,7 @@ import {
   adjustToStartOfWeek,
 } from '../pipelines-metrics/utils';
 import { getTotalPipelineRuns, isMatchingFirstTickValue } from './utils';
-import { Loading } from '../Loading';
+import { LoadingInline } from '../Loading';
 
 interface PipelinesRunsStatusCardProps {
   timespan?: number;
@@ -221,7 +221,7 @@ const transformPrometheusResultToSummary = (
   return finalResult;
 };
 
-const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
+const PipelineRunsStatusCardK8s: React.FC<PipelinesRunsStatusCardProps> = ({
   timespan,
   domain,
   bordered,
@@ -238,7 +238,7 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
     x: domainX || [startDate, endDate],
     y: domainY || undefined,
   };
-  const [pipelineRunsStatusError, setPipelineRunsStatusError] = useState<
+  const [pipelineRunsStatusError, setPipelineRunsStatusError] = React.useState<
     string | null
   >(null);
   const [
@@ -310,14 +310,14 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
 
   const [tickValues, type] = getXaxisValues(timespan);
 
-  const totalPipelineRuns = useMemo(() => {
+  const totalPipelineRuns = React.useMemo(() => {
     if (totalPipelineRunsError) {
       return [];
     }
     return getTotalPipelineRuns(totalPipelineRunsData, tickValues, type);
   }, [totalPipelineRunsData, tickValues, type, totalPipelineRunsError]);
 
-  const promQueryToSummaryResponse = useMemo(() => {
+  const promQueryToSummaryResponse = React.useMemo(() => {
     if (runSuccessRatioError) {
       return [];
     }
@@ -439,21 +439,15 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
   }
 
   let xAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)' },
   };
   const yAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)' },
   };
   if (tickValues?.length > 7) {
     xAxisStyle = {
       tickLabels: {
-        fill: 'var(--pf-t--global--text--color--regular)',
+        fill: 'var(--pf-v5-global--Color--100)',
         angle: 320,
         fontSize: 10,
         textAnchor: 'end',
@@ -477,7 +471,7 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
     othersColor.value,
   ];
 
-  const donutDataObjK8s = useMemo(() => {
+  const donutDataObjK8s = React.useMemo(() => {
     if (totalPipelineRunsError || runSuccessRatioError) {
       return;
     }
@@ -514,7 +508,7 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
     };
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const hasNonAbortError =
       (runSuccessRatioError && runSuccessRatioError.name !== 'AbortError') ||
       (totalPipelineRunsError && totalPipelineRunsError.name !== 'AbortError');
@@ -534,7 +528,7 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
           'card-border': bordered,
         })}
       >
-        <CardTitle>
+        <CardTitle className="pipeline-overview__pipelinerun-status-card__title">
           <span>
             {t('PipelineRun status')}{' '}
             <Popover
@@ -556,91 +550,76 @@ const PipelineRunsStatusCardK8s: FC<PipelinesRunsStatusCardProps> = ({
             </Popover>
           </span>
         </CardTitle>
-        <CardBody className="pf-v6-u-pt-0 pf-v6-u-pb-sm">
+        <CardBody className="pipeline-overview__pipelinerun-status-card__title">
           {pipelineRunsStatusError ? (
             <Alert
               variant="danger"
               isInline
               title={t('Unable to load PipelineRun status')}
-              className="pf-v6-u-mb-md"
+              className="pf-v5-u-mb-md"
             />
           ) : (
-            <Grid className="pf-v6-u-align-items-center">
+            <Grid>
               <GridItem xl2={4} xl={12} lg={12} md={12} sm={12}>
-                <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pipeline-overview__chart-area">
-                  {loadingRunSuccessRatioData ? (
-                    <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pf-v6-u-justify-content-center pf-v6-u-w-100">
-                      <Loading isInline={true} />
-                    </div>
-                  ) : (
-                    <div>
-                      <ChartDonut
-                        constrainToVisibleArea={true}
-                        data={donutDataK8s}
-                        labels={({ datum }) => `${datum.x}: ${datum.y}%`}
-                        legendData={legendData}
-                        colorScale={colorScale}
-                        legendOrientation="vertical"
-                        legendPosition="right"
-                        height={200}
-                        padding={{
-                          bottom: 30,
-                          right: 140, // Adjusted to accommodate legend
-                          top: 20,
-                        }}
-                        legendComponent={
-                          <ChartLegend
-                            data={legendData}
-                            style={{
-                              labels: {
-                                fill: 'var(--pf-t--global--text--color--regular)',
-                                fontSize: 14,
-                              },
-                            }}
-                          />
-                        }
-                        subTitle={t('Succeeded')}
-                        subTitleComponent={
-                          <ChartLabel
-                            style={{
-                              fill: 'var(--pf-t--global--text--color--subtle)',
+                {loadingRunSuccessRatioData ? (
+                  <LoadingInline />
+                ) : (
+                  <div className="pipeline-overview__pipelinerun-status-card__donut-chart-div">
+                    <ChartDonut
+                      constrainToVisibleArea={true}
+                      data={donutDataK8s}
+                      labels={({ datum }) => `${datum.x}: ${datum.y}%`}
+                      legendData={legendData}
+                      colorScale={colorScale}
+                      legendOrientation="vertical"
+                      legendPosition="right"
+                      padding={{
+                        bottom: 30,
+                        right: 140, // Adjusted to accommodate legend
+                        top: 20,
+                      }}
+                      legendComponent={
+                        <ChartLegend
+                          data={legendData}
+                          style={{
+                            labels: {
+                              fill: 'var(--pf-v5-global--Color--100)',
                               fontSize: 14,
-                            }}
-                          />
-                        }
-                        title={
-                          typeof donutDataObjK8s !== 'undefined'
-                            ? `${donutDataObjK8s?.succeeded}/${totalPipelineRuns}`
-                            : ''
-                        }
-                        titleComponent={
-                          <ChartLabel
-                            style={{
-                              fill: 'var(--pf-t--global--text--color--regular)',
-                              fontSize: 24,
-                            }}
-                          />
-                        }
-                        width={350}
-                      />
-                    </div>
-                  )}
-                </div>
+                            },
+                          }}
+                        />
+                      }
+                      subTitle={t('Succeeded')}
+                      subTitleComponent={
+                        <ChartLabel
+                          style={{
+                            fill: 'var(--pf-v5-global--Color--400)',
+                            fontSize: 14,
+                          }}
+                        />
+                      }
+                      title={
+                        typeof donutDataObjK8s !== 'undefined'
+                          ? `${donutDataObjK8s?.succeeded}/${totalPipelineRuns}`
+                          : ''
+                      }
+                      titleComponent={
+                        <ChartLabel
+                          style={{
+                            fill: 'var(--pf-v5-global--Color--100)',
+                            fontSize: 24,
+                          }}
+                        />
+                      }
+                      width={350}
+                    />
+                  </div>
+                )}
               </GridItem>
               <GridItem xl2={8} xl={12} lg={12} md={12} sm={12}>
-                <div
-                  className={classNames(
-                    'pf-v6-u-display-flex pf-v6-u-h-100 pf-v6-u-w-100 pipeline-overview__chart-area',
-                    {
-                      'pf-v6-u-align-items-flex-end':
-                        !loadingTotalPipelineRunsData,
-                      'pf-v6-u-align-items-center pf-v6-u-justify-content-center':
-                        loadingTotalPipelineRunsData,
-                    },
-                  )}
-                >
+                <div className="pipeline-overview__pipelinerun-status-card__bar-chart-div">
                   {loadingTotalPipelineRunsData ? (
-                    <Loading isInline={true} />
+                    <LoadingInline />
                   ) : (
                     <Chart
                       containerComponent={

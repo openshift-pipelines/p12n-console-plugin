@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { FormikProps, FormikValues } from 'formik';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import { FlexForm, FormBody } from '../pipeline-builder/form-utils';
 import FormFooter from '../pipelines-details/multi-column-field/FormFooter';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 type RepositoryFormProps = FormikProps<FormikValues & RepositoryFormValues>;
 
@@ -22,7 +22,7 @@ type RepositoryFormExtendedProps = RepositoryFormProps & {
   isSubmittingForm: boolean;
 };
 
-export const RepositoryForm: FC<RepositoryFormExtendedProps> = ({
+export const RepositoryForm: React.FC<RepositoryFormExtendedProps> = ({
   values,
   status,
   isSubmitting,

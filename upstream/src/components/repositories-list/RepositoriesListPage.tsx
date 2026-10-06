@@ -1,5 +1,5 @@
 import { ListPageHeader } from '@openshift-console/dynamic-plugin-sdk';
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { RepositoryModel } from '../../models';
 import RepositoriesList from './RepositoriesList';
@@ -10,7 +10,7 @@ type RepositoriesListPageProps = {
   hideTextFilter?: boolean;
 };
 
-const RepositoriesListPage: FC<RepositoriesListPageProps> = (props) => {
+const RepositoriesListPage: React.FC<RepositoriesListPageProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { namespace, hideTextFilter } = props;
   return (

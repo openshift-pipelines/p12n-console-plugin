@@ -22,7 +22,8 @@ import {
   getRunStatusColor,
   getTaskStatus,
   pipelineRefExists,
-  shouldHidePipelineRunStopOrCancel,
+  shouldHidePipelineRunCancel,
+  shouldHidePipelineRunStop,
   TaskStatus,
   totalPipelineRunCustomTasks,
   totalPipelineRunTasks,
@@ -204,26 +205,40 @@ describe('PipelineAugment test correct task status state is pulled from pipeline
       expect(taskCount).toEqual(expectedTaskCount);
     });
 
-    it('should not hide the pipelinerun stop or cancel action ', () => {
+    it('should not hide the pipelinerun stop action ', () => {
       const pipelineRun =
         pipelineTestData[PipelineExampleNames.EMBEDDED_TASK_SPEC_MOCK_APP]
           .pipelineRuns[DataState.IN_PROGRESS];
-      expect(shouldHidePipelineRunStopOrCancel(pipelineRun)).toEqual(false);
+      expect(shouldHidePipelineRunStop(pipelineRun, [])).toEqual(false);
     });
 
-    it('should hide the pipelinerun stop or cancel action for succeeded run', () => {
+    it('should hide the pipelinerun stop action ', () => {
       const pipelineRun =
         pipelineTestData[PipelineExampleNames.EMBEDDED_TASK_SPEC_MOCK_APP]
           .pipelineRuns[DataState.SUCCESS];
-      expect(shouldHidePipelineRunStopOrCancel(pipelineRun)).toEqual(true);
+      expect(shouldHidePipelineRunStop(pipelineRun, [])).toEqual(true);
     });
 
-    it('should hide the pipelinerun stop or cancel action for stopped run', () => {
+    it('should hide the pipelinerun cancel action ', () => {
+      const pipelineRun =
+        pipelineTestData[PipelineExampleNames.EMBEDDED_TASK_SPEC_MOCK_APP]
+          .pipelineRuns[DataState.SUCCESS];
+      expect(shouldHidePipelineRunCancel(pipelineRun, [])).toEqual(true);
+    });
+
+    it('should not hide the pipelinerun cancel action ', () => {
+      const pipelineRun =
+        pipelineTestData[PipelineExampleNames.EMBEDDED_TASK_SPEC_MOCK_APP]
+          .pipelineRuns[DataState.IN_PROGRESS];
+      expect(shouldHidePipelineRunCancel(pipelineRun, [])).toEqual(false);
+    });
+
+    it('should hide the pipelinerun cancel action ', () => {
       const pipelineRun =
         pipelineTestData[PipelineExampleNames.SIMPLE_PIPELINE].pipelineRuns[
           DataState.PIPELINE_RUN_STOPPED
         ];
-      expect(shouldHidePipelineRunStopOrCancel(pipelineRun)).toEqual(true);
+      expect(shouldHidePipelineRunCancel(pipelineRun, [])).toEqual(true);
     });
   });
 

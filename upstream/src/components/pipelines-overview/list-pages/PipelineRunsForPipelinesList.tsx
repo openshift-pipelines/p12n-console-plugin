@@ -1,20 +1,21 @@
-import type { FC } from 'react';
-import { useMemo } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
-import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
+import { EmptyState, EmptyStateVariant } from '@patternfly/react-core';
+import { sortable } from '@patternfly/react-table';
+import {
+  TableColumn,
+  VirtualizedTable,
+  useActiveColumns,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   SummaryProps,
   sortByNumbers,
   sortByProperty,
   sortByTimestamp,
   sortTimeStrings,
+  listPageTableColumnClasses as tableColumnClasses,
 } from '../utils';
-import {
-  getPipelineRunsForPipelinesDataViewRows,
-  tableColumnInfo,
-} from './PipelineRunsForPipelinesRow';
-import { ALL_NAMESPACES_KEY } from '../../../consts';
+import PipelineRunsForPipelinesRow from './PipelineRunsForPipelinesRow';
 
 type PipelineRunsForPipelinesListProps = {
   summaryData: SummaryProps[];
@@ -23,60 +24,57 @@ type PipelineRunsForPipelinesListProps = {
   hideLastRunTime?: boolean;
 };
 
-const PipelineRunsForPipelinesList: FC<PipelineRunsForPipelinesListProps> = ({
-  summaryData,
-  summaryDataFiltered,
-  loaded,
-  hideLastRunTime,
-}) => {
+const PipelineRunsForPipelinesList: React.FC<
+  PipelineRunsForPipelinesListProps
+> = ({ summaryData, summaryDataFiltered, loaded, hideLastRunTime }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [activeNamespace] = useActiveNamespace();
+  const EmptyMsg = () => (
+    <EmptyState variant={EmptyStateVariant.lg}>
+      {t('No PipelineRuns found')}
+    </EmptyState>
+  );
 
-  const columns = useMemo(() => {
-    const cols = [
+  const plrColumns = React.useMemo<TableColumn<SummaryProps>[]>(() => {
+    const columns: TableColumn<SummaryProps>[] = [
       {
-        id: tableColumnInfo[0].id,
+        id: 'pipelineName',
         title: t('Pipeline'),
         sort: (summary, direction: 'asc' | 'desc') =>
           sortByProperty(summary, 'pipelineName', direction),
-        props: {
-          modifier: 'nowrap',
-          isStickyColumn: true,
-          hasRightBorder: true,
-          stickyMinWidth: '0',
-        },
+        transforms: [sortable],
+        props: { className: tableColumnClasses[0] },
       },
-      ...(activeNamespace === ALL_NAMESPACES_KEY
-        ? [
-            {
-              id: tableColumnInfo[1].id,
-              title: t('Project'),
-              sort: (summary, direction: 'asc' | 'desc') =>
-                sortByProperty(summary, 'namespace', direction),
-              props: { modifier: 'nowrap' },
-            },
-          ]
-        : []),
       {
-        id: tableColumnInfo[2].id,
+        id: 'namespace',
+        title: t('Project'),
+        sort: (summary, direction: 'asc' | 'desc') =>
+          sortByProperty(summary, 'namespace', direction),
+        transforms: [sortable],
+        props: { className: tableColumnClasses[1] },
+      },
+      {
+        id: 'total',
         title: t('Total Pipelineruns'),
         sort: 'total',
-        props: { modifier: 'nowrap' },
+        transforms: [sortable],
+        props: { className: tableColumnClasses[2] },
       },
       {
-        id: tableColumnInfo[3].id,
+        id: 'totalDuration',
         title: t('Total duration'),
         sort: (summary, direction: 'asc' | 'desc') =>
           sortTimeStrings(summary, 'total_duration', direction),
-        props: { modifier: 'nowrap' },
+        transforms: [sortable],
+        props: { className: tableColumnClasses[3] },
       },
       {
-        id: tableColumnInfo[4].id,
+        id: 'avgDuration',
         title: t('Average duration'),
         sort: (summary, direction: 'asc' | 'desc') =>
           sortTimeStrings(summary, 'avg_duration', direction),
+        transforms: [sortable],
         props: {
-          modifier: 'nowrap',
+          className: tableColumnClasses[4],
           info: {
             tooltip: t(
               'An average of the time taken to run PipelineRuns. The trending shown is based on the time range selected. This metric does not show runs that are running or pending.',
@@ -86,12 +84,13 @@ const PipelineRunsForPipelinesList: FC<PipelineRunsForPipelinesListProps> = ({
         },
       },
       {
-        id: tableColumnInfo[5].id,
+        id: 'successRate',
         title: t('Success rate'),
         sort: (summary, direction: 'asc' | 'desc') =>
           sortByNumbers(summary, 'succeeded', direction),
+        transforms: [sortable],
         props: {
-          modifier: 'nowrap',
+          className: tableColumnClasses[5],
           info: {
             tooltip: t(
               'Success rate measure the % of successfully completed pipeline runs in relation to the total number of pipeline runs',
@@ -101,31 +100,44 @@ const PipelineRunsForPipelinesList: FC<PipelineRunsForPipelinesListProps> = ({
         },
       },
     ];
-
     if (!hideLastRunTime) {
-      cols.push({
-        id: tableColumnInfo[6].id,
+      columns.push({
+        id: 'lastRunTime',
         title: t('Last run time'),
         sort: (summary, direction: 'asc' | 'desc') =>
           sortByTimestamp(summary, 'last_runtime', direction),
-        props: { modifier: 'nowrap' },
+        transforms: [sortable],
+        props: { className: tableColumnClasses[6] },
       });
     }
 
-    return cols;
-  }, [hideLastRunTime, activeNamespace]);
+    return columns;
+  }, [t, hideLastRunTime]);
+
+  const [columns] = useActiveColumns({
+    columns: plrColumns,
+    showNamespaceOverride: false,
+    columnManagementID: '',
+  });
+
+  const isEmptyData =
+    (!summaryDataFiltered || summaryDataFiltered.length === 0) &&
+    (!summaryData || summaryData.length === 0);
+
+  if (loaded && isEmptyData) {
+    return <EmptyMsg />;
+  }
 
   return (
-    <ConsoleDataView<SummaryProps>
-      label={t('PipelineRuns')}
+    <VirtualizedTable
       columns={columns}
+      Row={PipelineRunsForPipelinesRow}
       data={summaryDataFiltered || summaryData}
       loaded={loaded}
       loadError={false}
-      getDataViewRows={getPipelineRunsForPipelinesDataViewRows}
-      customRowData={{ hideLastRunTime }}
-      hideColumnManagement
-      hideNameLabelFilters
+      unfilteredData={summaryData}
+      EmptyMsg={EmptyMsg}
+      rowData={{ hideLastRunTime }}
     />
   );
 };

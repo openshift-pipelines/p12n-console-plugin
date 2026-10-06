@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useMemo, useEffect } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { CheckIcon } from '@patternfly/react-icons';
@@ -17,15 +16,14 @@ import { SummaryProps, getTotalPipelineRuns } from './utils';
 import { PipelineModel, RepositoryModel } from '../../models';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 
+import './PipelineRunsTotalCard.scss';
 import { MetricsQueryPrefix, PipelineQuery } from '../pipelines-metrics/utils';
 import {
   usePipelineMetricsForAllNamespacePoll,
   usePipelineMetricsForNamespacePoll,
 } from '../pipelines-metrics/hooks';
 import { getXaxisValues } from './dateTime';
-import { Loading } from '../Loading';
-
-import './PipelinesOverview.scss';
+import { LoadingInline } from '../Loading';
 
 interface PipelinesRunsDurationProps {
   namespace: string;
@@ -35,14 +33,14 @@ interface PipelinesRunsDurationProps {
   bordered?: boolean;
 }
 
-const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
+const PipelineRunsTotalCardK8s: React.FC<PipelinesRunsDurationProps> = ({
   namespace,
   timespan,
   interval,
   bordered,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [pipelineRunsTotalError, setPipelineRunsTotalError] = useState<
+  const [pipelineRunsTotalError, setPipelineRunsTotalError] = React.useState<
     string | null
   >(null);
   const [
@@ -68,14 +66,14 @@ const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
         });
   const [tickValues, type] = getXaxisValues(timespan);
 
-  const totalPipelineRuns = useMemo(() => {
+  const totalPipelineRuns = React.useMemo(() => {
     if (totalPipelineRunsError) {
       return '-';
     }
     return getTotalPipelineRuns(totalPipelineRunsData, tickValues, type);
   }, [totalPipelineRunsData, tickValues, type, totalPipelineRunsError]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const hasNonAbortError =
       totalPipelineRunsError && totalPipelineRunsError.name !== 'AbortError';
     setPipelineRunsTotalError(
@@ -88,7 +86,7 @@ const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
   return (
     <>
       <Card
-        className={classNames('pf-v6-u-h-100', {
+        className={classNames('pipeline-overview__totals-card', {
           'card-border': bordered,
         })}
       >
@@ -102,14 +100,17 @@ const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
               variant="danger"
               isInline
               title={t('Unable to load total runs')}
-              className="pf-v6-u-mb-md"
+              className="pf-v5-u-mb-md"
             />
           ) : (
             <>
-              <Grid hasGutter>
-                <GridItem span={9} className="pf-v6-u-mb-sm">
+              <Grid hasGutter className="pipeline-overview__totals-card__grid">
+                <GridItem span={9}>
                   <span>
-                    <Label variant="outline" className="pf-v6-u-mr-sm">
+                    <Label
+                      variant="outline"
+                      className="pipeline-overview__totals-card__label"
+                    >
                       {PipelineModel.abbr}
                     </Label>
                     {t('Runs in pipelines')}
@@ -117,19 +118,18 @@ const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
-                  {loadingTotalPipelineRunsData ? (
-                    <Loading isInline={true} />
-                  ) : (
-                    '-'
-                  )}
+                  {loadingTotalPipelineRunsData ? <LoadingInline /> : '-'}
                 </GridItem>
               </Grid>
-              <Grid hasGutter className="pf-v6-u-mb-sm">
+              <Grid hasGutter className="pipeline-overview__totals-card__grid">
                 <GridItem span={9}>
                   <span>
-                    <Label variant="outline" className="pf-v6-u-mr-sm">
+                    <Label
+                      variant="outline"
+                      className="pipeline-overview__totals-card__repo-label"
+                    >
                       {RepositoryModel.abbr}
                     </Label>
                     {t('Runs in repositories')}
@@ -137,28 +137,24 @@ const PipelineRunsTotalCardK8s: FC<PipelinesRunsDurationProps> = ({
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
-                  {loadingTotalPipelineRunsData ? (
-                    <Loading isInline={true} />
-                  ) : (
-                    '-'
-                  )}
+                  {loadingTotalPipelineRunsData ? <LoadingInline /> : '-'}
                 </GridItem>
               </Grid>
-              <Grid hasGutter className="pf-v6-u-mb-sm">
+              <Grid hasGutter>
                 <GridItem span={9}>
                   <span>
-                    <CheckIcon className="pipeline-overview__totals-card__icon pf-v6-u-ml-sm pf-v6-u-mr-sm" />
+                    <CheckIcon className="pipeline-overview__totals-card__icon" />
                     {t('Total runs')}
                   </span>
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
                   {loadingTotalPipelineRunsData ? (
-                    <Loading isInline={true} />
+                    <LoadingInline />
                   ) : (
                     totalPipelineRuns
                   )}

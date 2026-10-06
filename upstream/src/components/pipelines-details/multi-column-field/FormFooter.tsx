@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   ActionGroup,
   Alert,
@@ -34,7 +34,7 @@ export interface FormFooterProps {
   shadow?: boolean;
 }
 
-const FormFooter: FC<FormFooterProps> = ({
+const FormFooter: React.FC<FormFooterProps> = ({
   handleSubmit,
   handleReset,
   handleCancel,
@@ -89,7 +89,7 @@ const FormFooter: FC<FormFooterProps> = ({
               )}
           </Alert>
         )}
-        <ActionGroup className="pf-v6-c-form pf-v6-c-form__group--no-top-margin pf-v6-u-mt-0">
+        <ActionGroup className="pf-v5-c-form pf-v5-c-form__group--no-top-margin pf-v5-u-mt-0">
           {!hideSubmit && (
             <Button
               type={handleSubmit ? 'button' : 'submit'}
@@ -127,7 +127,7 @@ const FormFooter: FC<FormFooterProps> = ({
               type="button"
               data-test-id="download-button"
               variant={ButtonVariant.secondary}
-              className="pf-v6-c-button--align-right hidden-sm hidden-xs"
+              className="pf-v5-c-button--align-right hidden-sm hidden-xs"
               onClick={handleDownload}
               icon={<DownloadIcon />}
             >

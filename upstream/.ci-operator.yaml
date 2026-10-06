@@ -1,4 +1,4 @@
 build_root_image:
-  name: console-plugin-cypress
+  name: console-plugin-test-cypress
   namespace: ci
-  tag: node22-yarn4
+  tag: node20-yarn4

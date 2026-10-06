@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import type { MutableRefObject } from 'react';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import * as React from 'react';
 import { CursorPosition, insertIntoValue } from './autoCompleteUtils';
 
 type ElementType = HTMLInputElement | HTMLTextAreaElement;
@@ -43,9 +42,9 @@ const PARAM_REFERENCE_CHARS = PARAM_REFERENCE.split('');
  * Tracks open state + manages keystrokes to open.
  */
 const useOpenMenuKeyWatcher = (): MenuKeyWatcherHook => {
-  const [isOpen, setOpen] = useState<boolean>(false);
+  const [isOpen, setOpen] = React.useState<boolean>(false);
 
-  const shouldOpen = useCallback<ShouldOpenCallback>(
+  const shouldOpen = React.useCallback<ShouldOpenCallback>(
     (event) => {
       const { key, code, ctrlKey } = event;
 
@@ -81,7 +80,7 @@ const useOpenMenuKeyWatcher = (): MenuKeyWatcherHook => {
   return {
     isOpen,
     shouldOpen,
-    closeMenu: useCallback(() => setOpen(false), []),
+    closeMenu: React.useCallback(() => setOpen(false), []),
   };
 };
 
@@ -92,10 +91,10 @@ const useFilterOptions = (options: string[]): FilterOptionsHook => {
   type FilterMap = { [singleValue: string]: string };
 
   const [filteredOptions, setFilteredOptions] =
-    useState<string[]>(options);
-  const filterMappings = useRef<FilterMap>({});
+    React.useState<string[]>(options);
+  const filterMappings = React.useRef<FilterMap>({});
 
-  useEffect(() => {
+  React.useEffect(() => {
     filterMappings.current = options.reduce(
       (acc: FilterMap, option: string, idx: number) => {
         const optionPartMap = option
@@ -118,7 +117,7 @@ const useFilterOptions = (options: string[]): FilterOptionsHook => {
     );
   }, [options]);
 
-  const setFilter: SetFilterOptions = useCallback(
+  const setFilter: SetFilterOptions = React.useCallback(
     (newFilterValue: string) => {
       if (!newFilterValue) {
         setFilteredOptions(options);
@@ -144,20 +143,20 @@ const useFilterOptions = (options: string[]): FilterOptionsHook => {
  * Listens to the node in various ways to prefer functions of AutoComplete.
  */
 const useNodeListener = (
-  cursorPosition: MutableRefObject<CursorPosition>,
+  cursorPosition: React.MutableRefObject<CursorPosition>,
   menuOptions: MenuKeyWatcherHook,
   filterOptions: FilterOptionsHook,
   setFocusingOptions: (isFocusing: boolean) => void,
   closeCleanup: () => void,
-): [MutableRefObject<ElementType>, (node: ElementType) => void] => {
-  const [node, setNode] = useState<ElementType>(null);
-  const nodeRef = useRef<ElementType>(null);
+): [React.MutableRefObject<ElementType>, (node: ElementType) => void] => {
+  const [node, setNode] = React.useState<ElementType>(null);
+  const nodeRef = React.useRef<ElementType>(null);
   nodeRef.current = node;
 
   const { isOpen, shouldOpen } = menuOptions;
   const [, setFilter] = filterOptions;
 
-  const onKeyCallback = useCallback(
+  const onKeyCallback = React.useCallback(
     (e) => {
       const applyFilterAtCursor = () => {
         const filterValue = nodeRef.current.value.substring(
@@ -196,7 +195,7 @@ const useNodeListener = (
     [isOpen, setFilter, shouldOpen, closeCleanup, cursorPosition],
   );
 
-  const focusDropdownCallback = useCallback(
+  const focusDropdownCallback = React.useCallback(
     (e) => {
       if (!isOpen) return;
 
@@ -209,7 +208,7 @@ const useNodeListener = (
     [isOpen, setFocusingOptions],
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (node) {
       node.addEventListener('keydown', focusDropdownCallback);
       node.addEventListener('keyup', onKeyCallback);
@@ -233,15 +232,15 @@ const useAutoComplete = (
   autoCompleteValues: string[],
   onAutoComplete: SetAutoCompleteCallback,
 ): AutoCompleteHook => {
-  const cursorPosition = useRef<CursorPosition>([0, 0]);
-  const [focusingOptions, setFocusingOptions] = useState<boolean>(false);
+  const cursorPosition = React.useRef<CursorPosition>([0, 0]);
+  const [focusingOptions, setFocusingOptions] = React.useState<boolean>(false);
   const menuOptions = useOpenMenuKeyWatcher();
   const filterOptions = useFilterOptions(autoCompleteValues);
 
   const { isOpen, closeMenu } = menuOptions;
   const [options, setFilter] = filterOptions;
 
-  const closeCleanup = useCallback(() => {
+  const closeCleanup = React.useCallback(() => {
     closeMenu();
     setFilter('');
     setFocusingOptions(false);
@@ -256,7 +255,7 @@ const useAutoComplete = (
     closeCleanup,
   );
 
-  const insertAutoComplete = useCallback(
+  const insertAutoComplete = React.useCallback(
     (newValue: string) => {
       // Look for the PARAM_REFERENCE prefix to see if we need to add it
       const leftCapturePoint =

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DescriptionList,
@@ -16,7 +16,7 @@ type RunDetailErrorLogProps = {
   pipelineRunName?: string;
 };
 
-const RunDetailsErrorLog: FC<RunDetailErrorLogProps> = ({
+const RunDetailsErrorLog: React.FC<RunDetailErrorLogProps> = ({
   logDetails,
   namespace,
   isResourceManagedByKueue,

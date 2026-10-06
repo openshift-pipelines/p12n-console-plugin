@@ -1,5 +1,4 @@
-import type { ReactNode, FC } from 'react';
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { Alert, Button, AlertActionCloseButton } from '@patternfly/react-core';
 import cx from 'classnames';
 import { useField, useFormikContext, FormikValues } from 'formik';
@@ -21,7 +20,7 @@ export type SanitizeToYAML = (preFormData: string) => string;
 
 type EditorContext<SanitizeTo> = {
   name: string;
-  editor: ReactNode;
+  editor: React.ReactNode;
   isDisabled?: boolean;
   sanitizeTo?: SanitizeTo;
   label?: string;
@@ -36,7 +35,7 @@ type SyncedEditorFieldProps = {
   noMargin?: boolean;
 };
 
-const SyncedEditorField: FC<SyncedEditorFieldProps> = ({
+const SyncedEditorField: React.FC<SyncedEditorFieldProps> = ({
   name,
   formContext,
   yamlContext,
@@ -44,7 +43,7 @@ const SyncedEditorField: FC<SyncedEditorFieldProps> = ({
   noMargin = false,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [editorType, setEditorType] = useState<EditorType>(
+  const [editorType, setEditorType] = React.useState<EditorType>(
     (localStorage.getItem(LOCAL_STORAGE_KEY_EDITOR_TYPE) as EditorType) ||
       EditorType.Form,
   );
@@ -55,10 +54,10 @@ const SyncedEditorField: FC<SyncedEditorFieldProps> = ({
   const formData = _.get(values, formContext.name);
   const yamlData: string = _.get(values, yamlContext.name);
 
-  const [yamlWarning, setYAMLWarning] = useState<boolean>(false);
+  const [yamlWarning, setYAMLWarning] = React.useState<boolean>(false);
   const [sanitizeToCallback, setSanitizeToCallback] =
-    useState<FormErrorCallback>(undefined);
-  const [disabledFormAlert, setDisabledFormAlert] = useState<boolean>(
+    React.useState<FormErrorCallback>(undefined);
+  const [disabledFormAlert, setDisabledFormAlert] = React.useState<boolean>(
     formContext.isDisabled,
   );
 
@@ -134,14 +133,14 @@ const SyncedEditorField: FC<SyncedEditorFieldProps> = ({
     setStatus({ submitError: '' });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     setDisabledFormAlert(formContext.isDisabled);
     if (field.value !== editorType) {
       setFieldValue(name, editorType);
     }
   }, [editorType, field.value, formContext.isDisabled, name, setFieldValue]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Sync formData when yamlData changes (while in YAML mode)
     if (editorType === EditorType.YAML && yamlData) {
       const syncFormDataFromYaml = async () => {

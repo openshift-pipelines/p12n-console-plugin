@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import type { FC, Ref } from 'react';
-import { useState, useCallback } from 'react';
+import * as React from 'react';
 import {
   Dropdown,
   DropdownItem,
@@ -11,6 +10,8 @@ import {
 import { IntervalOptions } from './utils';
 import { formatPrometheusDuration, parsePrometheusDuration } from './dateTime';
 
+import './PipelinesOverview.scss';
+
 const OFF_KEY = 'OFF_KEY';
 
 type Props = {
@@ -19,13 +20,13 @@ type Props = {
   id?: string;
 };
 
-const IntervalDropdown: FC<Props> = ({ id, interval, setInterval }) => {
-  const [isOpen, setValue] = useState(false);
-  const toggleIsOpen = useCallback(() => setValue((v) => !v), []);
-  const setClosed = useCallback(() => setValue(false), []);
+const IntervalDropdown: React.FC<Props> = ({ id, interval, setInterval }) => {
+  const [isOpen, setValue] = React.useState(false);
+  const toggleIsOpen = React.useCallback(() => setValue((v) => !v), []);
+  const setClosed = React.useCallback(() => setValue(false), []);
   const intervalOptions = IntervalOptions();
 
-  const onChange = useCallback(
+  const onChange = React.useCallback(
     (v: string) =>
       setInterval(v === OFF_KEY ? null : parsePrometheusDuration(v)),
     [setInterval],
@@ -35,11 +36,11 @@ const IntervalDropdown: FC<Props> = ({ id, interval, setInterval }) => {
     interval === null ? OFF_KEY : formatPrometheusDuration(interval);
 
   return (
-    (<Dropdown
+    <Dropdown
       isOpen={isOpen}
       onSelect={setClosed}
       onOpenChange={(isOpen: boolean) => setValue(isOpen)}
-      toggle={(toggleRef: Ref<MenuToggleElement>) => (
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}
           onClick={toggleIsOpen}
@@ -49,6 +50,7 @@ const IntervalDropdown: FC<Props> = ({ id, interval, setInterval }) => {
           {intervalOptions[selectedKey]}
         </MenuToggle>
       )}
+      className="pipeline-overview__variable-dropdown"
     >
       <DropdownList>
         {_.map(intervalOptions, (name, key) => (
@@ -61,7 +63,7 @@ const IntervalDropdown: FC<Props> = ({ id, interval, setInterval }) => {
           </DropdownItem>
         ))}
       </DropdownList>
-    </Dropdown>)
+    </Dropdown>
   );
 };
 

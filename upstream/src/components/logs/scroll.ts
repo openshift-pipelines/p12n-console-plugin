@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import * as React from 'react';
 
 export enum ScrollDirection {
   scrollingUp = 'scrolling-up',
@@ -27,10 +27,10 @@ export const getScrollDirection = (
 };
 
 export const useScrollDirection = (): [ScrollDirection, (event) => void] => {
-  const scrollPosition = useRef<number>(null);
+  const scrollPosition = React.useRef<number>(null);
   const [scrollDirection, setScrollDirection] =
-    useState<ScrollDirection>(null);
-  const handleScroll = useCallback(
+    React.useState<ScrollDirection>(null);
+  const handleScroll = React.useCallback(
     (event) => {
       const { scrollHeight, scrollTop, clientHeight } = event.target;
       if (scrollPosition.current !== null) {

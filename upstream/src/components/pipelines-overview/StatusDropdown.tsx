@@ -1,5 +1,4 @@
-import type { Ref } from 'react';
-import { useState, useCallback } from 'react';
+import * as React from 'react';
 import {
   Dropdown,
   DropdownItem,
@@ -11,17 +10,17 @@ import { map } from 'lodash';
 import { StatusOptions } from './utils';
 
 const StatusDropdown = () => {
-  const [isOpen, setValue] = useState(false);
-  const toggleIsOpen = useCallback(() => setValue((v) => !v), []);
-  const setClosed = useCallback(() => setValue(false), []);
+  const [isOpen, setValue] = React.useState(false);
+  const toggleIsOpen = React.useCallback(() => setValue((v) => !v), []);
+  const setClosed = React.useCallback(() => setValue(false), []);
   const statusOptions = StatusOptions();
   return (
-    (<div className="form-group">
+    <div className="form-group">
       <div>
         <Dropdown
           isOpen={isOpen}
           onOpenChange={(isOpen: boolean) => setValue(isOpen)}
-          toggle={(toggleRef: Ref<MenuToggleElement>) => (
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
             <MenuToggle ref={toggleRef} onClick={toggleIsOpen}>
               {'All statuses'}
             </MenuToggle>
@@ -42,7 +41,7 @@ const StatusDropdown = () => {
           </DropdownList>
         </Dropdown>
       </div>
-    </div>)
+    </div>
   );
 };
 

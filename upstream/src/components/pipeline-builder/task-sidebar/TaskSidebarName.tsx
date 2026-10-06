@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -23,7 +22,7 @@ type TaskSidebarNameProps = {
   taskName: string;
 };
 
-const TaskSidebarName: FC<TaskSidebarNameProps> = (props) => {
+const TaskSidebarName: React.FC<TaskSidebarNameProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { name, onChange, taskName } = props;
   const { setStatus, status, values } =
@@ -38,10 +37,10 @@ const TaskSidebarName: FC<TaskSidebarNameProps> = (props) => {
     statusPath,
     {},
   );
-  const [interimName, setInterimName] = useState(
+  const [interimName, setInterimName] = React.useState(
     nameError ?? initialName,
   );
-  const [validating, setValidating] = useState(null);
+  const [validating, setValidating] = React.useState(null);
   const isValid = !errorMessage;
   const reservedNames: string[] = [...tasks, ...finallyTasks]
     .map(({ name: usedName }) => usedName)

@@ -1,5 +1,4 @@
-import type { ReactNode, ReactElement, FC } from 'react';
-import { Children, cloneElement } from 'react';
+import * as React from 'react';
 import {
   Tooltip,
   Button,
@@ -26,8 +25,8 @@ export interface MultiColumnFieldRowProps
   extends Omit<RowRendererProps, 'fieldName'> {
   name: string;
   rowIndex: number;
-  children?: ReactNode;
-  rowRenderer?: (row: RowRendererProps) => ReactNode;
+  children?: React.ReactNode;
+  rowRenderer?: (row: RowRendererProps) => React.ReactNode;
 }
 
 const DEFAULT_ROW_RENDERER = ({
@@ -39,12 +38,12 @@ const DEFAULT_ROW_RENDERER = ({
   disableDeleteRow,
   tooltipDeleteRow,
   onDelete,
-}): ReactNode => {
+}): React.ReactNode => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
-    (<div className="odc-multi-column-field__row" data-test={`row ${fieldName}`}>
+    <div className="odc-multi-column-field__row" data-test={`row ${fieldName}`}>
       <Grid>
-        {Children.map(children, (child: ReactElement, i) => {
+        {React.Children.map(children, (child: React.ReactElement, i) => {
           let newProps = child.props;
           if (complexFields[i]) {
             newProps = { ...newProps, namePrefix: fieldName };
@@ -55,18 +54,18 @@ const DEFAULT_ROW_RENDERER = ({
             };
           }
           return (
-            (<GridItem span={spans[i]} key={fieldName}>
+            <GridItem span={spans[i]} key={fieldName}>
               <div className="odc-multi-column-field__col">
-                {cloneElement(child, newProps)}
+                {React.cloneElement(child, newProps)}
               </div>
-            </GridItem>)
+            </GridItem>
           );
         })}
       </Grid>
       {!isReadOnly && (
         <div className={'odc-multi-column-field__col--button'}>
           <Tooltip content={tooltipDeleteRow || t('Remove')}>
-            <Button icon={<MinusCircleIcon />}
+            <Button
               data-test="delete-row"
               aria-label={tooltipDeleteRow || t('Remove')}
               variant={ButtonVariant.plain}
@@ -74,15 +73,17 @@ const DEFAULT_ROW_RENDERER = ({
               isInline
               onClick={!disableDeleteRow ? onDelete : undefined}
               isAriaDisabled={disableDeleteRow}
-             />
+            >
+              <MinusCircleIcon />
+            </Button>
           </Tooltip>
         </div>
       )}
-    </div>)
+    </div>
   );
 };
 
-const MultiColumnFieldRow: FC<MultiColumnFieldRowProps> = ({
+const MultiColumnFieldRow: React.FC<MultiColumnFieldRowProps> = ({
   name,
   rowIndex,
   onDelete,

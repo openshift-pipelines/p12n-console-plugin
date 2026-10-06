@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import * as React from 'react';
 import * as _ from 'lodash';
 
 export const useDeepCompareMemoize = <T = any>(value: T, stringify?: boolean): T => {
-  const ref = useRef<T>();
+  const ref = React.useRef<T>();
 
   if (
     stringify

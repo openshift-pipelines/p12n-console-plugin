@@ -1,5 +1,4 @@
-import type { FC, Ref } from 'react';
-import { useState } from 'react';
+import * as React from 'react';
 import {
   Divider,
   Dropdown,
@@ -21,13 +20,13 @@ type TaskSidebarHeaderProps = {
   taskResource: TaskKind;
 };
 
-const TaskSidebarHeader: FC<TaskSidebarHeaderProps> = ({
+const TaskSidebarHeader: React.FC<TaskSidebarHeaderProps> = ({
   removeThisTask,
   taskResource,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const onToggleClick = () => {
     setIsOpen(!isOpen);
@@ -38,7 +37,7 @@ const TaskSidebarHeader: FC<TaskSidebarHeaderProps> = ({
   };
 
   return (
-    (<div className="opp-task-sidebar-header">
+    <div className="opp-task-sidebar-header">
       <Title headingLevel="h2" className="opp-task-sidebar-header__title">
         <div className="co-m-pane__name co-resource-item">
           <PipelineResourceRef
@@ -53,7 +52,7 @@ const TaskSidebarHeader: FC<TaskSidebarHeaderProps> = ({
             isOpen={isOpen}
             onSelect={onSelect}
             onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
-            toggle={(toggleRef: Ref<MenuToggleElement>) => (
+            toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
               <MenuToggle
                 ref={toggleRef}
                 onClick={onToggleClick}
@@ -75,7 +74,7 @@ const TaskSidebarHeader: FC<TaskSidebarHeaderProps> = ({
         <TaskSidebarShortcuts />
       </div>
       <Divider className="co-divider" />
-    </div>)
+    </div>
   );
 };
 

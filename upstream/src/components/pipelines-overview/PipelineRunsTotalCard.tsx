@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { CheckIcon } from '@patternfly/react-icons';
@@ -19,10 +18,10 @@ import { PipelineModel, RepositoryModel } from '../../models';
 import { getResultsSummary } from '../utils/summary-api';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { getDropDownDate } from './dateTime';
-import { Loading } from '../Loading';
+import { LoadingInline } from '../Loading';
 import { DataType, FLAGS } from '../../types';
 
-import './PipelinesOverview.scss';
+import './PipelineRunsTotalCard.scss';
 
 interface PipelinesRunsDurationProps {
   namespace: string;
@@ -32,7 +31,7 @@ interface PipelinesRunsDurationProps {
   bordered?: boolean;
 }
 
-const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
+const PipelinesRunsTotalCard: React.FC<PipelinesRunsDurationProps> = ({
   namespace,
   timespan,
   interval,
@@ -41,22 +40,22 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
 
-  const [totalRun, setTotalRun] = useState(0);
-  const [plrRun, setPlrRun] = useState(0);
-  const [repoRun, setRepoRun] = useState(0);
-  const [loaded, setLoaded] = useState(false);
-  const [pipelineRunsTotalError, setPipelineRunsTotalError] = useState<
+  const [totalRun, setTotalRun] = React.useState(0);
+  const [plrRun, setPlrRun] = React.useState(0);
+  const [repoRun, setRepoRun] = React.useState(0);
+  const [loaded, setLoaded] = React.useState(false);
+  const [pipelineRunsTotalError, setPipelineRunsTotalError] = React.useState<
     string | undefined
   >();
-  const abortControllerRefPipeline = useRef<AbortController>();
-  const abortControllerRefRepo = useRef<AbortController>();
-  const abortControllerRefAll = useRef<AbortController>();
+  const abortControllerRefPipeline = React.useRef<AbortController>();
+  const abortControllerRefRepo = React.useRef<AbortController>();
+  const abortControllerRefAll = React.useRef<AbortController>();
 
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     setLoaded(false);
     setPipelineRunsTotalError(undefined);
     // Clear stale data when namespace or timespan changes
@@ -65,7 +64,7 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
     setRepoRun(0);
   }, [namespace, timespan]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       abortControllerRefPipeline.current?.abort();
       abortControllerRefRepo.current?.abort();
@@ -152,7 +151,7 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
   return (
     <>
       <Card
-        className={classNames('pf-v6-u-h-100', {
+        className={classNames('pipeline-overview__totals-card', {
           'card-border': bordered,
         })}
       >
@@ -166,14 +165,17 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
               variant="danger"
               isInline
               title={t('Unable to load total runs')}
-              className="pf-v6-u-mb-md"
+              className="pf-v5-u-mb-md"
             />
           ) : (
             <>
-              <Grid hasGutter>
-                <GridItem span={9} className="pf-v6-u-mb-sm">
+              <Grid hasGutter className="pipeline-overview__totals-card__grid">
+                <GridItem span={9}>
                   <span>
-                    <Label variant="outline" className="pf-v6-u-mr-sm">
+                    <Label
+                      variant="outline"
+                      className="pipeline-overview__totals-card__label"
+                    >
                       {PipelineModel.abbr}
                     </Label>
                     {t('Runs in pipelines')}
@@ -181,15 +183,18 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
-                  {loaded ? plrRun : <Loading isInline={true} />}
+                  {loaded ? plrRun : <LoadingInline />}
                 </GridItem>
               </Grid>
-              <Grid hasGutter className="pf-v6-u-mb-sm">
+              <Grid hasGutter className="pipeline-overview__totals-card__grid">
                 <GridItem span={9}>
                   <span>
-                    <Label variant="outline" className="pf-v6-u-mr-sm">
+                    <Label
+                      variant="outline"
+                      className="pipeline-overview__totals-card__repo-label"
+                    >
                       {RepositoryModel.abbr}
                     </Label>
                     {t('Runs in repositories')}
@@ -197,23 +202,23 @@ const PipelinesRunsTotalCard: FC<PipelinesRunsDurationProps> = ({
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
-                  {loaded ? repoRun : <Loading isInline={true} />}
+                  {loaded ? repoRun : <LoadingInline />}
                 </GridItem>
               </Grid>
-              <Grid hasGutter className="pf-v6-u-mb-sm">
+              <Grid hasGutter>
                 <GridItem span={9}>
                   <span>
-                    <CheckIcon className="pipeline-overview__totals-card__icon pf-v6-u-ml-sm pf-v6-u-mr-sm" />
+                    <CheckIcon className="pipeline-overview__totals-card__icon" />
                     {t('Total runs')}
                   </span>
                 </GridItem>
                 <GridItem
                   span={3}
-                  className="pf-v6-u-text-align-end pipeline-overview__chart-color-blue"
+                  className="pipeline-overview__totals-card__value"
                 >
-                  {loaded ? totalRun : <Loading isInline={true} />}
+                  {loaded ? totalRun : <LoadingInline />}
                 </GridItem>
               </Grid>
             </>

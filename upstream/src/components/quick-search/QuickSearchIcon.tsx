@@ -1,9 +1,9 @@
-import type { HTMLProps, FC, ReactElement } from 'react';
-import { t_chart_color_black_100 as globalWhite } from "@patternfly/react-tokens/dist/js/t_chart_color_black_100";
+import * as React from 'react';
+import { global_palette_white as globalWhite } from '@patternfly/react-tokens/dist/js/global_palette_white';
 
-const QuickSearchIcon: FC<HTMLProps<SVGElement>> = ({
+const QuickSearchIcon: React.FC<React.HTMLProps<SVGElement>> = ({
   style,
-}): ReactElement => {
+}): React.ReactElement => {
   return (
     <svg
       viewBox="0 0 80 80"

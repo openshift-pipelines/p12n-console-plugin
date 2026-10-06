@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import IntervalDropdown from './RefreshIntervalDropdown';
 
@@ -7,7 +7,7 @@ interface RefreshDropdownProps {
   setInterval: (v: number) => void;
 }
 
-const RefreshDropdown: FC<RefreshDropdownProps> = ({
+const RefreshDropdown: React.FC<RefreshDropdownProps> = ({
   interval,
   setInterval,
 }) => {

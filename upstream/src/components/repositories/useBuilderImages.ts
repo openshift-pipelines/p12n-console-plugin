@@ -3,7 +3,7 @@ import {
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
-import { useMemo } from 'react';
+import * as React from 'react';
 import { isBuilder, normalizeBuilderImages } from './imagestream-utils';
 import { NormalizedBuilderImages } from './types';
 
@@ -16,12 +16,12 @@ export const useBuilderImages = (): [NormalizedBuilderImages, boolean, any] => {
   };
   const [imageStreams, loaded, loadedError] =
     useK8sWatchResource<K8sResourceKind[]>(resourceSelector);
-  const builderImageStreams = useMemo(
+  const builderImageStreams = React.useMemo(
     () => _.filter(imageStreams, isBuilder),
     [imageStreams],
   );
 
-  const normalizedBuilderImages = useMemo(
+  const normalizedBuilderImages = React.useMemo(
     () => normalizeBuilderImages(builderImageStreams),
     [builderImageStreams],
   );

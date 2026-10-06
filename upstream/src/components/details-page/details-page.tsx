@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ComponentType, FC, ReactNode } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as _ from 'lodash-es';
 import { Button, DescriptionList } from '@patternfly/react-core';
@@ -31,13 +31,13 @@ export const pluralize = (
 };
 
 export const detailsPage = <T extends Record<string, any>>(
-  Component: ComponentType<T>,
+  Component: React.ComponentType<T>,
 ) =>
-  (function DetailsPage(props: T) {
+  function DetailsPage(props: T) {
     return <Component {...props} />;
-  });
+  };
 
-export const ResourceSummary: FC<ResourceSummaryProps> = ({
+export const ResourceSummary: React.FC<ResourceSummaryProps> = ({
   children,
   resource,
   customPathName,
@@ -125,22 +125,20 @@ export const ResourceSummary: FC<ResourceSummaryProps> = ({
         >
           {canUpdate ? (
             <Button
-              icon={
-                <PencilAltIcon className="co-icon-space-l pf-v6-c-button-icon--plain" />
-              }
               data-test="edit-annotations"
               type="button"
               isInline
               onClick={annotationsModalLauncher}
               variant="link"
             >
-              {t('{{value}} annotation', {
-                value: _.size(metadata.annotations),
+              {t('{{count}} annotation', {
+                count: _.size(metadata.annotations),
               })}
+              <PencilAltIcon className="co-icon-space-l pf-v5-c-button-icon--plain" />
             </Button>
           ) : (
-            t('{{value}} annotation', {
-              value: _.size(metadata.annotations),
+            t('{{count}} annotation', {
+              count: _.size(metadata.annotations),
             })
           )}
         </DetailsItem>
@@ -174,7 +172,7 @@ export type ResourceSummaryProps = {
   canUpdateResource?: boolean;
   podSelector?: string;
   nodeSelector?: string;
-  children?: ReactNode;
+  children?: React.ReactNode;
   customPathName?: string;
   model?: K8sModel;
 };

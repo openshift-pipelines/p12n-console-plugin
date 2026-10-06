@@ -1,4 +1,4 @@
-import type { ReactNode, FC } from 'react';
+import * as React from 'react';
 import { BanIcon } from '@patternfly/react-icons/dist/esm/icons/ban-icon';
 import { ClipboardListIcon } from '@patternfly/react-icons/dist/esm/icons/clipboard-list-icon';
 import { HourglassHalfIcon } from '@patternfly/react-icons/dist/esm/icons/hourglass-half-icon';
@@ -19,7 +19,7 @@ import {
 
 export type StatusProps = StatusComponentProps & {
   status: string;
-  children?: ReactNode;
+  children?: React.ReactNode;
 };
 
 /**
@@ -36,7 +36,7 @@ export type StatusProps = StatusComponentProps & {
  * <Status status='Warning' />
  * ```
  */
-const Status: FC<StatusProps> = ({
+const Status: React.FC<StatusProps> = ({
   status,
   title,
   children,

@@ -1,5 +1,5 @@
 import { SearchInput } from '@patternfly/react-core';
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 type SearchInputProps = {
@@ -8,7 +8,7 @@ type SearchInputProps = {
   searchText: string;
 };
 
-const SearchInputField: FC<SearchInputProps> = ({
+const SearchInputField: React.FC<SearchInputProps> = ({
   pageFlag,
   handleNameChange,
   searchText,
@@ -17,6 +17,7 @@ const SearchInputField: FC<SearchInputProps> = ({
   return (
     <SearchInput
       value={searchText}
+      className="pipeline-overview__search-input"
       placeholder={
         pageFlag === 1
           ? t('Search by pipeline name')

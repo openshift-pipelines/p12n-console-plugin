@@ -1,70 +1,135 @@
 import {
-  K8sGroupVersionKind,
   K8sResourceCommon,
   useFlag,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { useEffect, useRef, useState } from 'react';
-import { FLAGS, TektonResultsOptions } from '../../types';
-import { useDeepCompareMemoize } from '../utils/common-utils';
-import { fetchAllTektonResultsPages } from '../utils/tekton-results';
+import * as React from 'react';
+import {
+  FLAGS,
+  PipelineRunKind,
+  RecordsList,
+  TaskRunKind,
+  TektonResultsOptions,
+} from '../../types';
+import { getPipelineRuns, getTaskRuns } from '../utils/tekton-results';
 
-export const useTRRuns = <Kind extends K8sResourceCommon>(
+export type GetNextPage = () => void | undefined;
+
+const useTRRuns = <Kind extends K8sResourceCommon>(
+  getRuns: (
+    namespace: string,
+    options?: TektonResultsOptions,
+    nextPageToken?: string,
+    isDevConsoleProxyAvailable?: boolean,
+  ) => Promise<[Kind[], RecordsList]>,
   namespace: string,
-  groupVersionKind: K8sGroupVersionKind,
   options?: TektonResultsOptions,
-  isTektonResultEnabled?: boolean,
-  skipFetch?: boolean,
-  refetchKey?: number,
-): [Kind[], boolean, Error | undefined] => {
+  refreshKey?: string,
+): [Kind[], boolean, unknown, GetNextPage] => {
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
-  const fetchedRef = useRef(false);
-  const [results, setResults] = useState<[Kind[], boolean, Error | undefined]>([
-    [],
-    false,
-    undefined,
-  ]);
-  const stableOptions = useDeepCompareMemoize(options);
-  const stableGVK = useDeepCompareMemoize(groupVersionKind);
+  const [nextPageToken, setNextPageToken] = React.useState<string>(null);
 
-  useEffect(() => {
-    const fetchResults = async () => {
+  const [result, setResult] = React.useState<
+    [Kind[], boolean, unknown, GetNextPage]
+  >([[], false, undefined, undefined]);
+
+  // reset token if namespace or options change
+  React.useEffect(() => {
+    setNextPageToken(null);
+  }, [namespace, options]);
+
+  // eslint-disable-next-line consistent-return
+  React.useEffect(() => {
+    let disposed = false;
+    (async () => {
       try {
-        const generator = fetchAllTektonResultsPages<Kind>(
+        const tkPipelineRuns = await getRuns(
           namespace,
-          stableGVK,
+          options,
+          nextPageToken,
           isDevConsoleProxyAvailable,
-          '',
-          stableOptions,
         );
-        for await (const data of generator) {
-          if (fetchedRef.current) break;
-          setResults([data, true, undefined]);
-        }
-        if (!fetchedRef.current) {
-          fetchedRef.current = true;
+        if (!disposed) {
+          const token =
+            tkPipelineRuns[1].nextPageToken ||
+            tkPipelineRuns[1].next_page_token;
+          setResult((cur) => [
+            nextPageToken
+              ? [...cur[0], ...tkPipelineRuns[0]]
+              : tkPipelineRuns[0],
+            true,
+            undefined,
+            token
+              ? (() => {
+                  // ensure we can only call this once
+                  let executed = false;
+                  return () => {
+                    if (!disposed && !executed) {
+                      executed = true;
+                      // trigger the update
+                      setNextPageToken(token);
+                      return true;
+                    }
+                    return false;
+                  };
+                })()
+              : undefined,
+          ]);
         }
       } catch (e) {
-        if (!fetchedRef.current) {
-          fetchedRef.current = true;
-          setResults([[], true, e]);
+        if (!disposed) {
+          if (nextPageToken) {
+            setResult((cur) => [cur[0], cur[1], e, undefined]);
+          } else {
+            setResult([[], false, e, undefined]);
+          }
         }
       }
-    };
-    !skipFetch && isTektonResultEnabled && fetchResults();
+    })();
     return () => {
-      fetchedRef.current = false;
+      disposed = true;
     };
-  }, [
-    namespace,
-    stableGVK,
-    isDevConsoleProxyAvailable,
-    stableOptions,
-    skipFetch,
-    isTektonResultEnabled,
-    refetchKey, // the only purpose is to refetch data from TR after deletion / pruning
-  ]);
-  if (!isTektonResultEnabled) {
-    return [[], true, undefined];
-  }
-  return results;
+  }, [namespace, options, nextPageToken, getRuns, refreshKey]);
+  return result;
 };
+
+export const useTRPipelineRuns = (
+  namespace: string,
+  options?: TektonResultsOptions,
+  refreshKey?: string,
+): [PipelineRunKind[], boolean, unknown, GetNextPage] =>
+  useTRRuns<PipelineRunKind>(getPipelineRuns, namespace, options, refreshKey);
+
+export const useTRTaskRuns = (
+  namespace: string,
+  options?: TektonResultsOptions,
+  refreshKey?: string,
+): [TaskRunKind[], boolean, unknown, GetNextPage] =>
+  useTRRuns<TaskRunKind>(getTaskRuns, namespace, options, refreshKey);
+
+// export const useTRTaskRunLog = (
+//   namespace: string,
+//   taskRunName: string,
+// ): [string, boolean, unknown] => {
+//   const [result, setResult] = React.useState<[string, boolean, unknown]>([null, false, undefined]);
+//   React.useEffect(() => {
+//     let disposed = false;
+//     if (namespace && taskRunName) {
+//       (async () => {
+//         try {
+//           const log = await getTaskRunLog(namespace, taskRunName);
+//           if (!disposed) {
+//             setResult([log, true, undefined]);
+//           }
+//         } catch (e) {
+//           if (!disposed) {
+//             setResult([null, false, e]);
+//           }
+//         }
+//       })();
+//     }
+//     return () => {
+//       disposed = true;
+//     };
+//   }, [namespace, taskRunName]);
+//   return result;
+// };

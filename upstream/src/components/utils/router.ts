@@ -1,16 +1,35 @@
+import { createBrowserHistory, createMemoryHistory, History } from 'history';
 import * as _ from 'lodash-es';
 
-const replaceUrl = (url: string) => {
-  window.history.replaceState(window.history.state, '', url);
-};
+let createHistory;
 
-export const history = {
-  push: (url: string) => {
-    window.history.pushState(window.history.state, '', url);
-  },
-  replace: replaceUrl,
-  back: () => window.history.back(),
-};
+try {
+  if (process.env.NODE_ENV === 'test') {
+    // Running in node. Can't use browser history
+    createHistory = createMemoryHistory;
+  } else {
+    createHistory = createBrowserHistory;
+  }
+} catch (unused) {
+  createHistory = createBrowserHistory;
+}
+
+export const history: History = createHistory({
+  basename: (window as any).SERVER_FLAGS.basePath,
+});
+
+const removeBasePath = (url = '/') =>
+  _.startsWith(url, (window as any).SERVER_FLAGS.basePath)
+    ? url.slice((window as any).SERVER_FLAGS.basePath.length - 1)
+    : url;
+
+// Monkey patch history to slice off the base path
+(history as any).__replace__ = history.replace;
+history.replace = (url: string) =>
+  (history as any).__replace__(removeBasePath(url));
+
+(history as any).__push__ = history.push;
+history.push = (url: string) => (history as any).__push__(removeBasePath(url));
 
 export const getQueryArgument = (arg: string) =>
   new URLSearchParams(window.location.search).get(arg);
@@ -20,7 +39,7 @@ export const setQueryArgument = (k: string, v: string) => {
   if (params.get(k) !== v) {
     params.set(k, v);
     const url = new URL(window.location.href);
-    replaceUrl(`${url.pathname}?${params.toString()}${url.hash}`);
+    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
   }
 };
 
@@ -35,7 +54,7 @@ export const setQueryArguments = (newParams: { [k: string]: string }) => {
   });
   if (update) {
     const url = new URL(window.location.href);
-    replaceUrl(`${url.pathname}?${params.toString()}${url.hash}`);
+    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
   }
 };
 
@@ -50,7 +69,7 @@ export const setAllQueryArguments = (newParams: { [k: string]: string }) => {
   });
   if (update) {
     const url = new URL(window.location.href);
-    replaceUrl(`${url.pathname}?${params.toString()}${url.hash}`);
+    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
   }
 };
 
@@ -59,7 +78,7 @@ export const removeQueryArgument = (k: string) => {
   if (params.has(k)) {
     params.delete(k);
     const url = new URL(window.location.href);
-    replaceUrl(`${url.pathname}?${params.toString()}${url.hash}`);
+    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
   }
 };
 
@@ -74,7 +93,7 @@ export const removeQueryArguments = (...keys: string[]) => {
   });
   if (update) {
     const url = new URL(window.location.href);
-    replaceUrl(`${url.pathname}?${params.toString()}${url.hash}`);
+    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
   }
 };
 

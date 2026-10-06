@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter } from 'react-router-dom';
 import { SVGDefsProvider } from '@patternfly/react-topology';
 import { useAccessReview } from '@openshift-console/dynamic-plugin-sdk';
 import { ConnectedPipelineRunDecorator } from '../PipelineRunDecorator';
@@ -23,7 +23,7 @@ jest.mock('../../../start-pipeline/StartPipelineModal', () => () => (
 ));
 
 jest.mock('react-dnd', () => ({
-  DndProvider: ({ children }: { children: ReactNode }) => children,
+  DndProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 jest.mock('react-dnd-html5-backend', () => ({
   NativeTypes: {

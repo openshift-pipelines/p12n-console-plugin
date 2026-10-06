@@ -1,36 +1,47 @@
-import type { FC } from 'react';
+import * as React from 'react';
+import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import {
   EmptyState,
+  EmptyStateHeader,
+  EmptyStateIcon,
   EmptyStateVariant,
 } from '@patternfly/react-core';
 import BanIcon from '@patternfly/react-icons/dist/esm/icons/ban-icon';
-import { DocumentTitle } from '@openshift-console/dynamic-plugin-sdk';
 
-export const ErrorPage404: FC = () => {
+export const ErrorPage404: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <div>
-      <DocumentTitle>
-        {t('Page Not Found (404)')}
-      </DocumentTitle>
-      <EmptyState  headingLevel="h4"   titleText={t('Page Not Found (404)')} variant={EmptyStateVariant.lg}>
-        </EmptyState>
+      <Helmet>
+        <title>{t('Page Not Found (404)')}</title>
+      </Helmet>
+      <EmptyState variant={EmptyStateVariant.lg}>
+        <EmptyStateHeader
+          titleText={t('Page Not Found (404)')}
+          headingLevel="h4"
+        />
+      </EmptyState>
     </div>
   );
 };
 
-export const AccessDenied: FC = () => {
+export const AccessDenied: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <div>
-      <DocumentTitle>
-        {t('Access Denied')}
-      </DocumentTitle>
-      <EmptyState  headingLevel="h4" icon={BanIcon}  titleText={t(
+      <Helmet>
+        <title>{t('Access Denied')}</title>
+      </Helmet>
+      <EmptyState variant={EmptyStateVariant.lg}>
+        <EmptyStateHeader
+          titleText={t(
             "You don't have access to this section due to cluster policy",
-          )} variant={EmptyStateVariant.lg}>
-        </EmptyState>
+          )}
+          headingLevel="h4"
+          icon={<EmptyStateIcon icon={BanIcon} />}
+        />
+      </EmptyState>
     </div>
   );
 };

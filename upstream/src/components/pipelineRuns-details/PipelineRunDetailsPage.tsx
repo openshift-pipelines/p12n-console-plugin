@@ -1,16 +1,20 @@
-import type { FC } from 'react';
-import { useCallback, useMemo } from 'react';
-import { ResourceStatus } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  k8sCreate,
+  k8sPatch,
+  ResourceStatus,
+  useDeleteModal,
+} from '@openshift-console/dynamic-plugin-sdk';
+import * as React from 'react';
 import { PipelineRunModel } from '../../models';
 import { LoadingBox } from '../status/status-box';
 import DetailsPage from '../details-page/DetailsPage';
 import {
   BreadcrumbItem,
-  Content,
-  ContentVariants,
+  Text,
+  TextVariants,
   Tooltip,
 } from '@patternfly/react-core';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import { useTranslation } from 'react-i18next';
 import { navFactory } from '../utils/horizontal-nav';
 import PipelineRunDetails from './PipelineRunDetails';
@@ -24,6 +28,7 @@ import {
 import { ArchiveIcon, MulticlusterIcon } from '@patternfly/react-icons';
 import SignedBadgeIcon from '../../images/SignedBadge';
 import Status from '../status/Status';
+import { ComputedStatus } from '../../types';
 import {
   pipelineRunFilterReducer,
   pipelineRunTitleFilterReducer,
@@ -31,44 +36,127 @@ import {
 import PipelineRunParametersForm from './PipelineRunParametersForm';
 import { PipelineRunLogsWithActiveTask } from './PipelineRunLogs';
 import PipelineRunEvents from './PipelineRunEvents';
-import { usePipelineRuns } from '../hooks/useTaskRuns';
-import { getReferenceForModel } from '../pipelines-overview/utils';
-import { LazyActionMenu } from '@openshift-console/dynamic-plugin-sdk-internal';
-import { ActionMenuVariant } from '@openshift-console/dynamic-plugin-sdk-internal/lib/api/internal-types';
+import { returnValidPipelineRunModel } from '../utils/pipeline-utils';
+import { getPipelineRunData, resourcePathFromModel } from '../utils/utils';
+import { errorModal } from '../modals/error-modal';
+import {
+  isResourceLoadedFromTR,
+  tektonResultsFlag,
+} from '../utils/common-utils';
+import { useNavigate } from 'react-router-dom-v5-compat';
+import {
+  shouldHidePipelineRunCancel,
+  shouldHidePipelineRunStop,
+} from '../utils/pipeline-augment';
+import {
+  getTaskRunsOfPipelineRun,
+  usePipelineRun,
+  useTaskRuns,
+} from '../hooks/useTaskRuns';
+import { useGetActiveUser } from '../hooks/hooks';
 
 type PipelineRunDetailsPageProps = {
   name: string;
   namespace: string;
 };
 
-const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
+const PipelineRunDetailsPage: React.FC<PipelineRunDetailsPageProps> = ({
   name,
   namespace,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [pipelineRuns, k8sLoaded, trLoaded] = usePipelineRuns(namespace, {
-    name,
-    limit: 1,
+  const navigate = useNavigate();
+  const [pipelineRun, pipelineRunLoaded] = usePipelineRun(namespace, name);
+  const plrStatus = pipelineRunFilterReducer(pipelineRun);
+  const pipelineRunFinished =
+    plrStatus !== ComputedStatus.Running &&
+    plrStatus !== ComputedStatus.Pending &&
+    plrStatus !== ComputedStatus.Cancelling;
+  const [taskRuns] = useTaskRuns(namespace, name, {
+    pipelineRunFinished,
+    pipelineRunManagedBy: pipelineRun?.spec?.managedBy,
   });
-  const pipelineRun = pipelineRuns?.[0];
-  /* this needs decoupling */
-  const pipelineRunLoaded = k8sLoaded || trLoaded;
+  const PLRTasks = getTaskRunsOfPipelineRun(taskRuns, name);
+  const currentUser = useGetActiveUser();
 
-  const customActionMenu = useCallback((_kindObj, obj) => {
-    const reference = getReferenceForModel(PipelineRunModel);
-    const context = { [reference]: obj };
-    return (
-      <LazyActionMenu
-        context={context}
-        variant={ActionMenuVariant.DROPDOWN}
-        label={t('Actions')}
-      />
-    );
-  }, []);
+  const reRunAction = () => {
+    const { pipelineRef, pipelineSpec } = pipelineRun.spec;
+    if (
+      namespace &&
+      (pipelineRef?.name || pipelineSpec || pipelineRef?.resolver)
+    ) {
+      k8sCreate({
+        model: returnValidPipelineRunModel(pipelineRun),
+        data: getPipelineRunData(null, currentUser, pipelineRun),
+      }).then((plr) => {
+        navigate(
+          resourcePathFromModel(
+            PipelineRunModel,
+            plr.metadata.name,
+            plr.metadata.namespace,
+          ),
+        );
+      });
+    } else {
+      errorModal({
+        error: t(
+          'Invalid PipelineRun configuration, unable to start Pipeline.',
+        ),
+      });
+    }
+  };
 
-  const resourceTitleFunc = useMemo((): string | JSX.Element => {
+  const cancelAction = () => {
+    k8sPatch({
+      model: PipelineRunModel,
+      resource: {
+        metadata: {
+          name,
+          namespace,
+        },
+      },
+      data: [
+        {
+          op: 'replace',
+          path: `/spec/status`,
+          value: 'CancelledRunFinally',
+        },
+      ],
+    });
+  };
+
+  const stopAction = () => {
+    k8sPatch({
+      model: PipelineRunModel,
+      resource: {
+        metadata: { name, namespace },
+      },
+      data: [
+        {
+          op: 'replace',
+          path: `/spec/status`,
+          value: 'StoppedRunFinally',
+        },
+      ],
+    });
+  };
+
+  const message = (
+    <p>
+      {t(
+        'This action will delete resource from k8s but still the resource can be fetched from Tekton Results',
+      )}
+    </p>
+  );
+
+  const launchDeleteModal =
+    !isResourceLoadedFromTR(pipelineRun) && tektonResultsFlag(pipelineRun)
+      ? useDeleteModal(pipelineRun, undefined, message)
+      : useDeleteModal(pipelineRun);
+
+  const resourceTitleFunc = React.useMemo((): string | JSX.Element => {
     return (
-      <div className="pipelinerun-details-page pf-v6-l-flex pf-v6-l-gap-md pf-v6-u-align-items-center">
+      <div className="pipelinerun-details-page pf-v5-l-flex pf-v5-l-gap-md pf-v5-u-align-items-center">
         {pipelineRun?.metadata?.name}{' '}
         {pipelineRun?.metadata?.annotations?.[chainsSignedAnnotation] ===
           'true' && (
@@ -110,15 +198,13 @@ const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
     <DetailsPage
       obj={pipelineRun}
       headTitle={name}
-      title={
-        <Content component={ContentVariants.h1}>{resourceTitleFunc}</Content>
-      }
+      title={<Text component={TextVariants.h1}>{resourceTitleFunc}</Text>}
       model={PipelineRunModel}
       breadcrumbs={[
         <BreadcrumbItem key="app-link" component="div">
           <Link
             data-test="breadcrumb-link"
-            className="pf-v6-c-breadcrumb__link"
+            className="pf-v5-c-breadcrumb__link"
             to={`/pipelines/ns/${namespace}/pipeline-runs`}
           >
             {t('PipelineRuns')}
@@ -146,7 +232,41 @@ const PipelineRunDetailsPage: FC<PipelineRunDetailsPageProps> = ({
         },
         navFactory.events(PipelineRunEvents),
       ]}
-      customActionMenu={customActionMenu}
+      actions={[
+        {
+          key: 'rerun-pipelineRun',
+          label: t('Rerun'),
+          onClick: () => reRunAction(),
+        },
+        {
+          key: 'stop-pipelineRun',
+          label: t('Stop'),
+          tooltipProps: {
+            content: t(
+              'Let the running tasks complete, then execute finally tasks',
+            ),
+          },
+          onClick: () => stopAction(),
+          hidden: shouldHidePipelineRunStop(pipelineRun, PLRTasks),
+        },
+        {
+          key: 'cancel-pipelineRun',
+          label: t('Cancel'),
+          tooltipProps: {
+            content: t(
+              'Interrupt any executing non finally tasks, then execute finally tasks',
+            ),
+          },
+          onClick: () => cancelAction(),
+          hidden: shouldHidePipelineRunCancel(pipelineRun, PLRTasks),
+        },
+        {
+          key: 'delete-pipelineRun',
+          label: t('Delete PipelineRun'),
+          onClick: () => launchDeleteModal(),
+          isDisabled: isResourceLoadedFromTR(pipelineRun),
+        },
+      ]}
     />
   );
 };

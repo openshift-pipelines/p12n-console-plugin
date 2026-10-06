@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { TriggerTemplateKind } from '../../types';
 import { useTriggerTemplateEventListenerNames } from '../utils/triggers';
 import { EventListenerModel } from '../../models';
@@ -8,7 +8,7 @@ type TriggerTemplateEventListenersProps = {
   obj: TriggerTemplateKind;
 };
 
-const TriggerTemplateEventListeners: FC<
+const TriggerTemplateEventListeners: React.FC<
   TriggerTemplateEventListenersProps
 > = ({ obj }) => {
   const namespace = obj?.metadata.namespace;

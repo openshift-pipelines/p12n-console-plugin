@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { BitbucketIcon } from '@patternfly/react-icons/dist/js/icons';
 import { GitAltIcon } from '@patternfly/react-icons/dist/js/icons';
 import { GithubIcon } from '@patternfly/react-icons/dist/js/icons';

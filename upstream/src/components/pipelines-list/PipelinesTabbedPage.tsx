@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   NamespaceBar,
@@ -27,7 +27,7 @@ import {
 } from '../multi-tab-list/multi-tab-list-page-types';
 import { MultiTabListPage } from '../multi-tab-list';
 import AllProjectsPage from '../projects-list/AllProjectsPage';
-import { useLocation, useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router-dom-v5-compat';
 import { ApprovalTasksList } from '../approval-tasks';
 import { useK8sGet } from '../hooks/use-k8sGet-hook';
 import { SecretKind } from '../../types';
@@ -38,7 +38,7 @@ type PageContentsProps = {
   perspective: string;
 };
 
-export const PageContents: FC<PageContentsProps> = ({
+export const PageContents: React.FC<PageContentsProps> = ({
   namespace,
   perspective,
 }) => {
@@ -128,7 +128,7 @@ export const PageContents: FC<PageContentsProps> = ({
   );
 };
 
-const PipelinesTabbedPage: FC = () => {
+const PipelinesTabbedPage: React.FC = () => {
   const { ns } = useParams();
   const location = useLocation();
   const perspective = location?.pathname.includes('dev-pipelines')

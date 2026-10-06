@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import * as React from 'react';
 import { PipelineRunKind } from '../../types';
 
 const SCAN_OUTPUT_SUFFIX = 'SCAN_OUTPUT';
@@ -45,7 +45,7 @@ export const getPipelineRunVulnerabilities = (
 export const usePipelineRunVulnerabilities = (
   pipelineRun: PipelineRunKind,
 ): ScanResults =>
-  useMemo(() => {
+  React.useMemo(() => {
     if (!pipelineRun) {
       return null;
     }

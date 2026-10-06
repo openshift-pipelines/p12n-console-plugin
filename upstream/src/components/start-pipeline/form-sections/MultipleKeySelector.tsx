@@ -1,9 +1,11 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   TextInputTypes,
   Button,
   FormGroup,
   Tooltip,
+  Flex,
+  FlexItem,
 } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/esm/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
@@ -23,7 +25,7 @@ interface MultipleKeySelectorProps {
   tooltip?: string;
 }
 
-const MultipleKeySelector: FC<MultipleKeySelectorProps> = ({
+const MultipleKeySelector: React.FC<MultipleKeySelectorProps> = ({
   name,
   keys,
   addString,
@@ -49,33 +51,33 @@ const MultipleKeySelector: FC<MultipleKeySelectorProps> = ({
                 const fieldKey = `${name}.${index}.${item.key}`;
                 return (
                   <div
-                    className="form-group odc-multiple-key-selector__item "
+                    className="form-group odc-multiple-key-selector__item"
                     key={fieldKey}
                   >
-                    <div className="pf-v6-l-flex pf-v6-u-w-100">
-                      <div className="pf-v6-u-flex-1">
+                    <Flex direction={{ default: 'column', lg: 'row' }}>
+                      <FlexItem grow={{ default: 'grow' }}>
                         <DropdownField
                           name={`${name}.${index}.key`}
                           title={t('Select a key')}
                           items={keys}
                           fullWidth
                         />
-                      </div>
-                      <div className="pf-v6-u-flex-1">
+                      </FlexItem>
+                      <FlexItem grow={{ default: 'grow' }}>
                         <InputField
                           name={`${name}.${index}.path`}
                           type={TextInputTypes.text}
                           placeholder={t('Enter a path')}
                         />
-                      </div>
-                      <div className="pf-v6-u-flex-shrink-0">
-                        <Tooltip content={tooltip || t('Remove')}>
-                          <MinusCircleIcon
-                            aria-hidden="true"
-                            onClick={() => remove(index)}
-                          />
-                        </Tooltip>
-                      </div>
+                      </FlexItem>
+                    </Flex>
+                    <div className="odc-multiple-key-selector__deleteButton">
+                      <Tooltip content={tooltip || t('Remove')}>
+                        <MinusCircleIcon
+                          aria-hidden="true"
+                          onClick={() => remove(index)}
+                        />
+                      </Tooltip>
                     </div>
                   </div>
                 );

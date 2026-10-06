@@ -1,33 +1,25 @@
-import { useMemo } from 'react';
-import { Formik, FormikProps } from 'formik';
+import * as React from 'react';
+import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import {
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Form,
-  Alert,
-  Skeleton,
-} from '@patternfly/react-core';
 import { AddTriggerFormValues, PipelineKind } from '../../types';
+import { ModalComponentProps, ModalWrapper } from '../modals/modal';
 import { convertPipelineToModalData } from './utils';
-import { OverlayComponent } from '@openshift-console/dynamic-plugin-sdk';
+import ModalStructure from '../modals/ModalStructure';
+import { ModalComponent } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/ModalProvider';
 import { useGetActiveUser, usePipelinePVC } from '../hooks/hooks';
 import { TRIGGER_BINDING_EMPTY } from '../../consts';
 import AddTriggerForm from './AddTriggerForm';
 import { submitTrigger } from './submit-utils';
 import { addTriggerSchema } from './validation-utils';
-import { useOverlay } from '@openshift-console/dynamic-plugin-sdk';
+import LoadingModal from '../modals/LoadingModal';
 
-export type AddTriggerModalProps = {
+type AddTriggerModalProps = ModalComponentProps & {
   pipeline: PipelineKind;
 };
 
-const AddTriggerModal: OverlayComponent<AddTriggerModalProps> = ({
+const AddTriggerModal: ModalComponent<AddTriggerModalProps> = ({
   pipeline,
-  closeOverlay,
+  closeModal,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const currentUser = useGetActiveUser();
@@ -35,23 +27,22 @@ const AddTriggerModal: OverlayComponent<AddTriggerModalProps> = ({
     pipeline.metadata?.name,
     pipeline.metadata?.namespace,
   );
-  const launchOverlay = useOverlay();
 
-  const initialValues: AddTriggerFormValues = useMemo(() => {
-    if (!pipelinePVCLoaded) return;
-    return {
-      ...convertPipelineToModalData(pipeline, pipelinePVC?.metadata?.name),
-      triggerBinding: {
-        name: TRIGGER_BINDING_EMPTY,
-        resource: null,
-      },
-    };
-  }, [pipeline, pipelinePVC, pipelinePVCLoaded]);
+  if (!pipelinePVCLoaded) {
+    return <LoadingModal onClose={closeModal} />;
+  }
+  const initialValues: AddTriggerFormValues = {
+    ...convertPipelineToModalData(pipeline, pipelinePVC?.metadata?.name),
+    triggerBinding: {
+      name: TRIGGER_BINDING_EMPTY,
+      resource: null,
+    },
+  };
 
   const handleSubmit = (values: AddTriggerFormValues, actions) => {
-    return submitTrigger(pipeline, values, currentUser, launchOverlay)
+    return submitTrigger(pipeline, values, currentUser)
       .then(() => {
-        closeOverlay();
+        closeModal();
       })
       .catch((error) => {
         actions.setStatus({
@@ -61,82 +52,27 @@ const AddTriggerModal: OverlayComponent<AddTriggerModalProps> = ({
   };
 
   return (
-    <Modal
-      variant="large"
-      isOpen
-      onClose={closeOverlay}
-      className="opp-start-pipeline-modal"
+    <ModalWrapper
+      className="modal-lg opp-start-pipeline-modal"
+      onClose={closeModal}
     >
-      <ModalHeader title={t('Add Trigger')} />
-      {pipelinePVCLoaded ? (
-        <Formik
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          validationSchema={addTriggerSchema()}
-        >
-          {(formikProps: FormikProps<AddTriggerFormValues>) => (
-            <>
-              <ModalBody tabIndex={0}>
-                <Form id="add-trigger-form" onSubmit={formikProps.handleSubmit}>
-                  {formikProps.status?.submitError && (
-                    <Alert
-                      variant="danger"
-                      isInline
-                      title={formikProps.status.submitError}
-                    />
-                  )}
-
-                  <AddTriggerForm {...formikProps} />
-                </Form>
-              </ModalBody>
-              <ModalFooter>
-                <Button
-                  key="cancel"
-                  variant="secondary"
-                  onClick={closeOverlay}
-                  isDisabled={formikProps.isSubmitting}
-                >
-                  {t('Cancel')}
-                </Button>
-                <Button
-                  key="submit"
-                  variant="primary"
-                  type="submit"
-                  form="add-trigger-form"
-                  isDisabled={
-                    !formikProps.isValid ||
-                    formikProps.isSubmitting ||
-                    Object.keys(formikProps.errors).length > 0
-                  }
-                  isLoading={formikProps.isSubmitting}
-                >
-                  {t('Add')}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </Formik>
-      ) : (
-        <ModalBody>
-          <Skeleton
-            className="pf-v6-u-mb-md pf-v6-u-mt-xl"
-            screenreaderText="Loading content"
-          />
-          <Skeleton
-            className="pf-v6-u-mb-md"
-            screenreaderText="Loading content"
-          />
-          <Skeleton
-            className="pf-v6-u-mb-md"
-            screenreaderText="Loading content"
-          />
-          <Skeleton
-            className="pf-v6-u-mb-xl"
-            screenreaderText="Loading content"
-          />
-        </ModalBody>
-      )}
-    </Modal>
+      <Formik
+        initialValues={initialValues}
+        onSubmit={handleSubmit}
+        validationSchema={addTriggerSchema()}
+      >
+        {(formikProps) => (
+          <ModalStructure
+            submitBtnText={t('Add')}
+            title={t('Add Trigger')}
+            close={closeModal}
+            {...formikProps}
+          >
+            <AddTriggerForm {...formikProps} />
+          </ModalStructure>
+        )}
+      </Formik>
+    </ModalWrapper>
   );
 };
 

@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import {
@@ -28,7 +27,7 @@ type PipelineRunsListPageProps = {
   interval: number;
 };
 
-const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
+const PipelineRunsListPage: React.FC<PipelineRunsListPageProps> = ({
   bordered,
   namespace,
   timespan,
@@ -37,24 +36,24 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
 
-  const [pageFlag, setPageFlag] = useState(1);
-  const [loaded, setloaded] = useState(false);
-  const [pipelineRunsListError, setPipelineRunsListError] = useState<
+  const [pageFlag, setPageFlag] = React.useState(1);
+  const [loaded, setloaded] = React.useState(false);
+  const [pipelineRunsListError, setPipelineRunsListError] = React.useState<
     string | undefined
   >();
-  const [summaryData, setSummaryData] = useState<SummaryProps[]>([]);
-  const [searchText, setSearchText] = useState('');
-  const [summaryDataFiltered, setSummaryDataFiltered] = useState<
+  const [summaryData, setSummaryData] = React.useState<SummaryProps[]>([]);
+  const [searchText, setSearchText] = React.useState('');
+  const [summaryDataFiltered, setSummaryDataFiltered] = React.useState<
     SummaryProps[]
   >([]);
-  const abortControllerRef = useRef<AbortController>();
+  const abortControllerRef = React.useRef<AbortController>();
 
   const date = getDropDownDate(timespan).toISOString();
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -91,20 +90,10 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
       90000,
     )
       .then((response) => {
-        const newSummaryData = (response?.summary || []) ?? [];
         setloaded(true);
         setPipelineRunsListError(undefined);
-        setSummaryData(newSummaryData);
-        setSummaryDataFiltered(
-          searchText
-            ? newSummaryData.filter((summary) =>
-                summary.group_value
-                  .split('/')[1]
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase()),
-              )
-            : newSummaryData,
-        );
+        setSummaryData((response?.summary || []) ?? []);
+        setSummaryDataFiltered((response?.summary || []) ?? []);
       })
       .catch((e) => {
         if (e.name === 'AbortError') {
@@ -123,7 +112,7 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
 
   useInterval(getSummaryData, interval, namespace, date, pageFlag);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setloaded(false);
     setPipelineRunsListError(undefined);
     setSummaryData([]);
@@ -176,12 +165,15 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
             variant="danger"
             isInline
             title={t('Unable to load pipeline runs list')}
-            className="pf-v6-u-mb-md"
+            className="pf-v5-u-mb-md"
           />
         ) : (
           <>
-            <Grid hasGutter>
-              <GridItem span={3} rowSpan={1}>
+            <Grid hasGutter className="pipeline-overview__listpage__grid">
+              <GridItem
+                span={9}
+                className="pipeline-overview__listpage__griditem"
+              >
                 {/* Lastrun Status is not provided by API  */}
                 {/* <StatusDropdown /> */}
                 <SearchInputField
@@ -190,8 +182,8 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
                   handleNameChange={handleNameChange}
                 />
               </GridItem>
-              <GridItem span={9} rowSpan={1}>
-                <ToggleGroup className="pf-v6-u-float-inline-end">
+              <GridItem span={3}>
+                <ToggleGroup className="pipeline-overview__listpage__button">
                   <ToggleGroupItem
                     text={t('Per Pipeline')}
                     buttonId="pipelineButton"
@@ -206,8 +198,9 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
                   />
                 </ToggleGroup>
               </GridItem>
-
-              <GridItem rowSpan={1} span={12}>
+            </Grid>
+            <Grid hasGutter>
+              <GridItem span={12}>
                 {pageFlag === 1 ? (
                   <PipelineRunsForPipelinesList
                     summaryData={summaryData}

@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useRef } from 'react';
+import * as React from 'react';
 import { Tooltip } from '@patternfly/react-core';
 import { NODE_HEIGHT } from './const';
 import { getWhenExpressionDiamondState } from './utils';
@@ -19,7 +18,7 @@ type WhenExpressionDecoratorProps = {
   isPipelineRun: boolean;
 };
 
-const WhenExpressionDecorator: FC<WhenExpressionDecoratorProps> = ({
+const WhenExpressionDecorator: React.FC<WhenExpressionDecoratorProps> = ({
   width,
   height,
   enableTooltip,
@@ -29,7 +28,7 @@ const WhenExpressionDecorator: FC<WhenExpressionDecoratorProps> = ({
   isFinallyTask,
   isPipelineRun,
 }) => {
-  const nodeRef = useRef();
+  const nodeRef = React.useRef();
   const rotation = 45; // 45deg
   const { tooltipContent, diamondColor } = getWhenExpressionDiamondState(
     status,
@@ -55,7 +54,7 @@ const WhenExpressionDecorator: FC<WhenExpressionDecoratorProps> = ({
         stroke={
           isPipelineRun
             ? diamondColor
-            : 'var(--pf-t--global--border--color--default)'
+            : 'var(--pf-v5-global--BorderColor--light-100)'
         }
       />
       {appendLine && (
@@ -64,7 +63,7 @@ const WhenExpressionDecorator: FC<WhenExpressionDecoratorProps> = ({
           y1={diamondHeight / 2}
           x2={width * leftOffset}
           y2={diamondHeight / 2}
-          stroke="var(--pf-t--global--border--color--default)"
+          stroke="var(--pf-v5-global--BorderColor--light-100)"
           data-test="diamond-decorator-line"
         />
       )}

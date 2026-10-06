@@ -13,7 +13,7 @@ import {
   useResolvedExtensions,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
-import { useCallback, useMemo } from 'react';
+import * as React from 'react';
 
 const useCatalogExtensions = (
   catalogId: string,
@@ -27,7 +27,7 @@ const useCatalogExtensions = (
 ] => {
   const [itemTypeExtensions, itemTypesResolved] =
     useResolvedExtensions<CatalogItemType>(
-      useCallback(
+      React.useCallback(
         (e): e is CatalogItemType =>
           isCatalogItemType(e) &&
           (!catalogType || e.properties.type === catalogType),
@@ -37,7 +37,7 @@ const useCatalogExtensions = (
 
   const [typeMetadataExtensions, itemTypeMetadataResolved] =
     useResolvedExtensions<CatalogItemTypeMetadata>(
-      useCallback(
+      React.useCallback(
         (e): e is CatalogItemTypeMetadata =>
           isCatalogItemTypeMetadata(e) &&
           (!catalogType || e.properties.type === catalogType),
@@ -47,7 +47,7 @@ const useCatalogExtensions = (
 
   const [catalogProviderExtensions, providersResolved] =
     useResolvedExtensions<CatalogItemProvider>(
-      useCallback(
+      React.useCallback(
         (e): e is CatalogItemProvider =>
           isCatalogItemProvider(e) &&
           _.castArray(e.properties.catalogId).includes(catalogId) &&
@@ -58,7 +58,7 @@ const useCatalogExtensions = (
 
   const [itemFilterExtensions, filtersResolved] =
     useResolvedExtensions<CatalogItemFilter>(
-      useCallback(
+      React.useCallback(
         (e): e is CatalogItemFilter =>
           isCatalogItemFilter(e) &&
           _.castArray(e.properties.catalogId).includes(catalogId) &&
@@ -69,7 +69,7 @@ const useCatalogExtensions = (
 
   const [metadataProviderExtensions, metadataProvidersResolved] =
     useResolvedExtensions<CatalogItemMetadataProvider>(
-      useCallback(
+      React.useCallback(
         (e): e is CatalogItemMetadataProvider =>
           isCatalogItemMetadataProvider(e) &&
           _.castArray(e.properties.catalogId).includes(catalogId) &&
@@ -78,7 +78,7 @@ const useCatalogExtensions = (
       ),
     );
 
-  const catalogTypeExtensions = useMemo<
+  const catalogTypeExtensions = React.useMemo<
     ResolvedExtension<CatalogItemType>[]
   >(
     () =>

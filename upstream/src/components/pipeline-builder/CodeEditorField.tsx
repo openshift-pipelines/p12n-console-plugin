@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useRef, useState, useCallback } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { Button } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/esm/icons/info-circle-icon';
@@ -42,7 +41,7 @@ const SampleResource: WatchK8sResource = {
   isList: true,
 };
 
-const CodeEditorField: FC<CodeEditorFieldProps> = ({
+const CodeEditorField: React.FC<CodeEditorFieldProps> = ({
   name,
   label,
   model,
@@ -57,9 +56,9 @@ const CodeEditorField: FC<CodeEditorFieldProps> = ({
   const [field] = useField(name);
   const { setFieldValue, setStatus } = useFormikContext<FormikValues>();
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const editorRef = useRef();
+  const editorRef = React.useRef();
 
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(true);
 
   const [sampleResources, loaded, loadError] =
     useK8sWatchResource<K8sResourceCommon[]>(SampleResource);
@@ -81,7 +80,7 @@ const CodeEditorField: FC<CodeEditorFieldProps> = ({
   const [templateExtensions] =
     useResolvedExtensions<YAMLTemplate>(isYAMLTemplate);
 
-  const sanitizeYamlContent = useCallback(
+  const sanitizeYamlContent = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (id = 'default', yaml = '', kind: string) => {
       if (yaml) {
@@ -118,13 +117,13 @@ const CodeEditorField: FC<CodeEditorFieldProps> = ({
             toolbarLinks={
               !sidebarOpen &&
               hasSidebarContent && [
-                <Button icon={<InfoCircleIcon className="co-icon-space-r odc-p-has-sidebar__sidebar-link-icon" />}
+                <Button
                   isInline
                   variant="link"
                   onClick={() => setSidebarOpen(true)}
                   key=""
                 >
-                  
+                  <InfoCircleIcon className="co-icon-space-r odc-p-has-sidebar__sidebar-link-icon" />
                   {t('View sidebar')}
                 </Button>,
               ]

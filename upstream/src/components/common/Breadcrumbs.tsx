@@ -1,4 +1,5 @@
 import { Breadcrumb, BreadcrumbItem } from '@patternfly/react-core';
+import React from 'react';
 import { LinkTo } from './LinkTo';
 
 type Breadcrumb = {

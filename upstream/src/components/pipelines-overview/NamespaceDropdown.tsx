@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import type { FC } from 'react';
-import { useState, useCallback, useMemo } from 'react';
+import * as React from 'react';
 import {
   Dropdown,
   DropdownItem,
@@ -11,6 +10,7 @@ import {
 import { alphanumericCompare } from './utils';
 import { useTranslation } from 'react-i18next';
 
+import './PipelinesOverview.scss';
 import {
   useFlag,
   useK8sWatchResource,
@@ -24,15 +24,15 @@ interface NameSpaceDropdownProps {
   setSelected: (n: string) => void;
 }
 
-const NameSpaceDropdown: FC<NameSpaceDropdownProps> = ({
+const NameSpaceDropdown: React.FC<NameSpaceDropdownProps> = ({
   selected,
   setSelected,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const [isOpen, setValue] = useState(false);
+  const [isOpen, setValue] = React.useState(false);
   const canListNS = useFlag(FLAGS.CAN_LIST_NS);
-  const toggleIsOpen = useCallback(() => setValue((v) => !v), []);
-  const setClosed = useCallback(() => setValue(false), []);
+  const toggleIsOpen = React.useCallback(() => setValue((v) => !v), []);
+  const setClosed = React.useCallback(() => setValue(false), []);
 
   const [projects, projectsLoaded] = useK8sWatchResource<Project[]>({
     isList: true,
@@ -42,7 +42,7 @@ const NameSpaceDropdown: FC<NameSpaceDropdownProps> = ({
 
   const allNamespacesTitle = t('All');
 
-  const optionItems = useMemo(() => {
+  const optionItems = React.useMemo(() => {
     if (!projectsLoaded) {
       return [];
     }
@@ -65,10 +65,8 @@ const NameSpaceDropdown: FC<NameSpaceDropdownProps> = ({
   }, [projects, projectsLoaded]);
 
   return (
-    <div className="form-group">
-      <div>
-        <label>{t('Project')}</label>
-      </div>
+    <>
+      <label className="project-dropdown-label">{t('Project')}</label>
       <Dropdown
         isOpen={isOpen}
         onOpenChange={(isOpen: boolean) => setValue(isOpen)}
@@ -82,6 +80,7 @@ const NameSpaceDropdown: FC<NameSpaceDropdownProps> = ({
             {selected !== ALL_NAMESPACES_KEY ? selected : allNamespacesTitle}
           </MenuToggle>
         )}
+        className="pipeline-overview__variable-dropdown"
         isScrollable
       >
         <DropdownList>
@@ -97,7 +96,7 @@ const NameSpaceDropdown: FC<NameSpaceDropdownProps> = ({
           ))}
         </DropdownList>
       </Dropdown>
-    </div>
+    </>
   );
 };
 

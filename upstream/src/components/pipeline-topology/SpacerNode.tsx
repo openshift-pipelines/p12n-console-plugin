@@ -1,7 +1,7 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { observer, Node } from '@patternfly/react-topology';
 
-const SpacerNode: FC<{ element: Node }> = () => {
+const SpacerNode: React.FC<{ element: Node }> = () => {
   return <g />;
 };
 

@@ -1,4 +1,4 @@
-import { TFunction, TOptions } from 'i18next';
+import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import * as yup from 'yup';
 import {
@@ -19,10 +19,7 @@ import {
 import { findTaskFromFormikData, getTaskParameters } from './utils';
 
 export const nameRegex = /^[a-z]([a-z0-9]-?)*[a-z0-9]$/;
-export const nameValidationSchema = (
-  t: (key: string, options?: TOptions) => string,
-  maxLength = 263,
-) =>
+export const nameValidationSchema = (t: TFunction, maxLength = 263) =>
   yup
     .string()
     .matches(nameRegex, {
@@ -320,7 +317,7 @@ const pipelineBuilderFormSchema = (
   t: TFunction,
 ) => {
   return yup.object({
-    name: nameValidationSchema(t).required(t('Required')),
+    name: nameValidationSchema((tKey) => t(tKey)).required(t('Required')),
     params: yup.array().of(
       yup.object({
         name: yup.string().required(t('Required')),

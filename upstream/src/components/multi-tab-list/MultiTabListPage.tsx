@@ -1,17 +1,13 @@
-import type { ReactNode, FC } from 'react';
-import {
-  ActionList,
-  ActionListGroup,
-  ActionListItem,
-  Button,
-} from '@patternfly/react-core';
+import * as React from 'react';
+import { ActionList, ActionListItem, Button } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useNavigate } from 'react-router';
+import { Link, useParams } from 'react-router-dom-v5-compat';
 import {
   MenuActions,
   MenuAction,
   SecondaryButtonAction,
 } from './multi-tab-list-page-types';
+import { useHistory } from 'react-router';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import {
   HorizontalNav,
@@ -24,14 +20,14 @@ import './MultiTabListPage.scss';
 
 interface MultiTabListPageProps {
   title: string;
-  badge?: ReactNode;
+  badge?: React.ReactNode;
   menuActions?: MenuActions;
   pages: NavPage[];
   secondaryButtonAction?: SecondaryButtonAction;
   telemetryPrefix?: string;
 }
 
-const MultiTabListPage: FC<MultiTabListPageProps> = ({
+const MultiTabListPage: React.FC<MultiTabListPageProps> = ({
   title,
   badge,
   pages,
@@ -41,7 +37,7 @@ const MultiTabListPage: FC<MultiTabListPageProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { ns } = useParams();
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const onSelectCreateAction = (actionName: string) => {
     const selectedMenuItem: MenuAction = menuActions[actionName];
@@ -57,7 +53,7 @@ const MultiTabListPage: FC<MultiTabListPageProps> = ({
       url = selectedMenuItem.onSelection(actionName, selectedMenuItem, url);
     }
     if (url) {
-      navigate(url);
+      history.push(url);
     }
   };
 
@@ -87,31 +83,29 @@ const MultiTabListPage: FC<MultiTabListPageProps> = ({
     <PageTitleContext.Provider value={titleProviderValues}>
       <ListPageHeader title={title} badge={badge}>
         <ActionList>
-          <ActionListGroup>
+          <ActionListItem>
             {secondaryButtonAction && (
-              <ActionListItem>
-                <Button
-                  type="button"
-                  className="opp-secondary-action-btn"
-                  variant="secondary"
-                  data-test="secondary-action"
-                  component={(props) => (
-                    <Link {...props} to={secondaryButtonAction.href} />
-                  )}
-                >
-                  {secondaryButtonAction.label}
-                </Button>
-              </ActionListItem>
-            )}
-            <ActionListItem>
-              <ListPageCreateDropdown
-                items={items}
-                onClick={onSelectCreateAction}
+              <Button
+                type="button"
+                className="opp-secondary-action-btn"
+                variant="secondary"
+                data-test="secondary-action"
+                component={(props) => (
+                  <Link {...props} to={secondaryButtonAction.href} />
+                )}
               >
-                {t('Create')}
-              </ListPageCreateDropdown>
-            </ActionListItem>
-          </ActionListGroup>
+                {secondaryButtonAction.label}
+              </Button>
+            )}
+          </ActionListItem>
+          <ActionListItem>
+            <ListPageCreateDropdown
+              items={items}
+              onClick={onSelectCreateAction}
+            >
+              {t('Create')}
+            </ListPageCreateDropdown>
+          </ActionListItem>
         </ActionList>
       </ListPageHeader>
       <HorizontalNav pages={pages} />

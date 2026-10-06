@@ -2,7 +2,6 @@
 import {
   consoleFetchJSON,
   k8sGet,
-  K8sGroupVersionKind,
   K8sResourceCommon,
   K8sResourceKind,
   MatchExpression,
@@ -18,7 +17,7 @@ import {
   TEKTON_RESULTS_FETCH_URL,
   TEKTON_RESULTS_TASKRUN_LOGS_URL,
 } from '../../consts';
-import { PipelineRunModel, RouteModel, TektonResultModel } from '../../models';
+import { RouteModel, TektonResultModel } from '../../models';
 import {
   DataType,
   DevConsoleEndpointResponse,
@@ -196,16 +195,6 @@ export const selectorToFilter = (selector) => {
   return filter;
 };
 
-// Devs should be careful to not cache a response that may not be complete.
-// In most situtations, caching is unnecessary.
-// Only cache a response that returns a single complete record as lists can change over time.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let CACHE: { [key: string]: [any[], RecordsList] } = {};
-export const clearCache = () => {
-  CACHE = {};
-};
-const InFlightStore: { [key: string]: boolean } = {};
-
 export const fetchTektonResultsURLConfig = async (
   namespace: string,
   dataType?: DataType,
@@ -274,57 +263,12 @@ export const getFilteredRecord = async <R extends K8sResourceCommon>(
   filter?: string,
   options?: TektonResultsOptions,
   nextPageToken?: string,
-  cacheKey?: string,
   isDevConsoleProxyAvailable?: boolean,
-): Promise<[R[], RecordsList, boolean?]> => {
-  if (cacheKey) {
-    const result = CACHE[cacheKey];
-    if (result) {
-      return result;
-    }
-    if (InFlightStore[cacheKey]) {
-      return [
-        [],
-        {
-          nextPageToken: null,
-          records: [],
-        },
-        true,
-      ];
-    }
-  }
-  InFlightStore[cacheKey] = true;
-
-  const value = await (async (): Promise<[R[], RecordsList]> => {
-    try {
-      if (isDevConsoleProxyAvailable) {
-        const { searchNamespace, searchParams } =
-          await fetchTektonResultsURLConfig(
-            namespace,
-            dataType,
-            filter,
-            options,
-            nextPageToken,
-          );
-
-        let list: RecordsList = await fetchTektonResults({
-          searchNamespace,
-          searchParams,
-        });
-
-        if (options?.limit >= 0) {
-          list = {
-            nextPageToken: null,
-            records: list.records.slice(0, options.limit),
-          };
-        }
-
-        return [
-          list.records.map((result) => decodeValueJson(result.data.value)),
-          list,
-        ];
-      } else {
-        const url = await createTektonResultsUrl(
+): Promise<[R[], RecordsList]> => {
+  try {
+    if (isDevConsoleProxyAvailable) {
+      const { searchNamespace, searchParams } =
+        await fetchTektonResultsURLConfig(
           namespace,
           dataType,
           filter,
@@ -332,44 +276,62 @@ export const getFilteredRecord = async <R extends K8sResourceCommon>(
           nextPageToken,
         );
 
-        let list: RecordsList = await consoleProxyFetchJSON({
-          url,
-          method: 'GET',
-          allowInsecure: true,
-          allowAuthHeader: true,
-        });
+      let list: RecordsList = await fetchTektonResults({
+        searchNamespace,
+        searchParams,
+      });
 
-        if (options?.limit >= 0) {
-          list = {
-            nextPageToken: null,
-            records: list.records.slice(0, options.limit),
-          };
-        }
+      if (options?.limit >= 0) {
+        list = {
+          nextPageToken: null,
+          records: list.records.slice(0, options.limit),
+        };
+      }
 
-        return [
-          list.records.map((result) => decodeValueJson(result.data.value)),
-          list,
-        ];
+      return [
+        list.records.map((result) => decodeValueJson(result.data.value)),
+        list,
+      ];
+    } else {
+      const url = await createTektonResultsUrl(
+        namespace,
+        dataType,
+        filter,
+        options,
+        nextPageToken,
+      );
+
+      let list: RecordsList = await consoleProxyFetchJSON({
+        url,
+        method: 'GET',
+        allowInsecure: true,
+        allowAuthHeader: true,
+      });
+
+      if (options?.limit >= 0) {
+        list = {
+          nextPageToken: null,
+          records: list.records.slice(0, options.limit),
+        };
       }
-    } catch (e) {
-      if (e?.code === 404) {
-        return [
-          [],
-          {
-            nextPageToken: null,
-            records: [],
-          },
-        ] as [R[], RecordsList];
-      }
-      throw e;
+
+      return [
+        list.records.map((result) => decodeValueJson(result.data.value)),
+        list,
+      ];
     }
-  })();
-
-  if (cacheKey) {
-    InFlightStore[cacheKey] = false;
-    CACHE[cacheKey] = value;
+  } catch (e) {
+    if (e?.code === 404) {
+      return [
+        [],
+        {
+          nextPageToken: null,
+          records: [],
+        },
+      ] as [R[], RecordsList];
+    }
+    throw e;
   }
-  return value;
 };
 
 const getFilteredPipelineRuns = (
@@ -377,7 +339,6 @@ const getFilteredPipelineRuns = (
   filter: string,
   options?: TektonResultsOptions,
   nextPageToken?: string,
-  cacheKey?: string,
   isDevConsoleProxyAvailable?: boolean,
 ) =>
   getFilteredRecord<PipelineRunKind>(
@@ -386,7 +347,6 @@ const getFilteredPipelineRuns = (
     filter,
     options,
     nextPageToken,
-    cacheKey,
     isDevConsoleProxyAvailable,
   );
 
@@ -395,7 +355,6 @@ const getFilteredTaskRuns = (
   filter: string,
   options?: TektonResultsOptions,
   nextPageToken?: string,
-  cacheKey?: string,
   isDevConsoleProxyAvailable?: boolean,
 ) =>
   getFilteredRecord<TaskRunKind>(
@@ -404,7 +363,6 @@ const getFilteredTaskRuns = (
     filter,
     options,
     nextPageToken,
-    cacheKey,
     isDevConsoleProxyAvailable,
   );
 
@@ -412,8 +370,6 @@ export const getPipelineRuns = (
   namespace: string,
   options?: TektonResultsOptions,
   nextPageToken?: string,
-  // supply a cacheKey only if the PipelineRun is complete and response will never change in the future
-  cacheKey?: string,
   isDevConsoleProxyAvailable?: boolean,
 ) =>
   getFilteredPipelineRuns(
@@ -421,7 +377,6 @@ export const getPipelineRuns = (
     '',
     options,
     nextPageToken,
-    cacheKey,
     isDevConsoleProxyAvailable,
   );
 
@@ -429,8 +384,6 @@ export const getTaskRuns = (
   namespace: string,
   options?: TektonResultsOptions,
   nextPageToken?: string,
-  // supply a cacheKey only if the TaskRun is complete and response will never change in the future
-  cacheKey?: string,
   isDevConsoleProxyAvailable?: boolean,
 ) =>
   getFilteredTaskRuns(
@@ -438,7 +391,6 @@ export const getTaskRuns = (
     '',
     options,
     nextPageToken,
-    cacheKey,
     isDevConsoleProxyAvailable,
   );
 
@@ -645,37 +597,3 @@ export const getTRURLHost = async () => {
   });
   return route?.spec.host;
 };
-
-export async function* fetchAllTektonResultsPages<
-  Kind extends K8sResourceCommon,
->(
-  namespace: string,
-  groupVersionKind: K8sGroupVersionKind,
-  isDevConsoleProxyAvailable: boolean,
-  filter?: string,
-  options?: TektonResultsOptions,
-): AsyncGenerator<Kind[]> {
-  const allRecords: Kind[] = [];
-  let token: string | undefined;
-  let isFirstCall = true;
-  const dataType =
-    groupVersionKind.kind === PipelineRunModel.kind
-      ? DataType.PipelineRun
-      : DataType.TaskRun;
-
-  while (token || isFirstCall) {
-    const [records, list] = await getFilteredRecord<Kind>(
-      namespace,
-      dataType,
-      filter,
-      options,
-      token,
-      undefined,
-      isDevConsoleProxyAvailable,
-    );
-    isFirstCall = false;
-    allRecords.push(...records);
-    yield [...allRecords];
-    token = list.nextPageToken ?? list.next_page_token;
-  }
-}

@@ -1,25 +1,25 @@
 import {
   getGroupVersionKindForModel,
+  K8sResourceCommon,
   ListPageBody,
   useK8sWatchResource,
+  useListPageFilter,
+  VirtualizedTable,
 } from '@openshift-console/dynamic-plugin-sdk';
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
-import { useDefaultColumns } from '../list-pages/useDefaultColumns';
+import { useParams } from 'react-router-dom-v5-compat';
+import { useDefaultColumns } from '../list-pages/default-resources';
 import { TriggerBindingModel } from '../../models';
-import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
-import { DataViewFilterToolbar } from '../common/DataViewFilterToolbar';
-import { getDefaultListPageDataViewRows } from '../list-pages/DefaultListPageRow';
-import { TriggerBindingKind } from 'src/types/triggers';
-import { useDataViewFilter } from '../hooks/useDataViewFilter';
+import EventListenersRow from './EventListenersRow';
+import { ListPageFilter } from '../list-pages/ListPageFilter';
 
 type TriggerBindingsListProps = {
   namespace?: string;
   hideNameLabelFilters?: boolean;
 };
 
-const TriggerBindingsList: FC<TriggerBindingsListProps> = ({
+const TriggerBindingsList: React.FC<TriggerBindingsListProps> = ({
   namespace,
   hideNameLabelFilters,
 }) => {
@@ -28,35 +28,34 @@ const TriggerBindingsList: FC<TriggerBindingsListProps> = ({
   namespace = namespace || ns;
   const columns = useDefaultColumns();
   const [triggerBindings, triggerBindingsLoaded, triggerBindingsLoadError] =
-    useK8sWatchResource<TriggerBindingKind[]>({
+    useK8sWatchResource<K8sResourceCommon[]>({
       groupVersionKind: getGroupVersionKindForModel(TriggerBindingModel),
       isList: true,
       namespace,
     });
-
-  const { filterValues, onFilterChange, onClearAll, filteredData } =
-    useDataViewFilter<TriggerBindingKind>({
-      data: triggerBindings || [],
-    });
+  const [staticData, filteredData, onFilterChange] =
+    useListPageFilter(triggerBindings);
   return (
     <ListPageBody>
-      {!hideNameLabelFilters && (
-        <DataViewFilterToolbar
-          filterValues={filterValues}
-          onFilterChange={onFilterChange}
-          onClearAll={onClearAll}
-        />
-      )}
-      <ConsoleDataView<TriggerBindingKind>
-        label={t('TriggerBinding')}
+      <ListPageFilter
+        data={staticData}
+        onFilterChange={onFilterChange}
+        loaded={triggerBindingsLoaded}
+        hideColumnManagement
+        hideNameLabelFilters={hideNameLabelFilters}
+      />
+      <VirtualizedTable
         columns={columns}
         data={filteredData}
         loaded={triggerBindingsLoaded}
         loadError={triggerBindingsLoadError}
-        getDataViewRows={getDefaultListPageDataViewRows}
-        hideColumnManagement
-        hideNameLabelFilters
-        showNamespaceOverride
+        Row={EventListenersRow}
+        unfilteredData={staticData}
+        EmptyMsg={() => (
+          <div className="cp-text-align-center" id="no-resource-msg">
+            {t('Not found')}
+          </div>
+        )}
       />
     </ListPageBody>
   );

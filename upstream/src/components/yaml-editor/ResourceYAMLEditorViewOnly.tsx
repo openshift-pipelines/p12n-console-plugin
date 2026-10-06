@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   K8sResourceKind,
   ResourceYAMLEditor,
@@ -8,7 +8,7 @@ export interface ResourceYAMLEditorViewOnlyProps {
   obj: K8sResourceKind;
 }
 
-const ResourceYAMLEditorViewOnly: FC<ResourceYAMLEditorViewOnlyProps> = ({
+const ResourceYAMLEditorViewOnly: React.FC<ResourceYAMLEditorViewOnlyProps> = ({
   obj,
 }) => {
   return <ResourceYAMLEditor initialResource={obj} readOnly />;

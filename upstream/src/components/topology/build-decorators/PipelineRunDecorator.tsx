@@ -1,11 +1,10 @@
-import type { FC } from 'react';
-import { useRef } from 'react';
+import * as React from 'react';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {
   AccessReviewResourceAttributes,
   useAccessReview,
-  useOverlay,
+  useModal,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { getLatestPipelineRunStatus } from '../../../components/utils/pipeline-utils';
 import {
@@ -37,11 +36,11 @@ type StateProps = {
   };
 };
 
-export const ConnectedPipelineRunDecorator: FC<
+export const ConnectedPipelineRunDecorator: React.FC<
   PipelineRunDecoratorProps & StateProps
 > = ({ pipeline, pipelineRuns, radius, x, y, impersonate }) => {
-  const ref = useRef();
-  const launchOverlay = useOverlay();
+  const ref = React.useRef();
+  const launchModal = useModal();
 
   const { latestPipelineRun, status } =
     getLatestPipelineRunStatus(pipelineRuns);
@@ -95,7 +94,7 @@ export const ConnectedPipelineRunDecorator: FC<
     let onClick = null;
     if (canStartPipeline) {
       onClick = () => {
-        launchOverlay(startPipelineModal, {
+        launchModal(startPipelineModal, {
           pipeline,
         });
       };

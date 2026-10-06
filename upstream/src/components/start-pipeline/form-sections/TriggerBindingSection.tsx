@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useCallback } from 'react';
+import * as React from 'react';
 import {
   Badge,
   ExpandableSection,
@@ -16,15 +15,15 @@ import {
 import TriggerBindingSelector from './TriggerBindingSelector';
 import './TriggerBindingSection.scss';
 
-const TriggerBindingSection: FC = () => {
+const TriggerBindingSection: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { setFieldValue } = useFormikContext<AddTriggerFormValues>();
   const [bindingVars, setBindingVars] =
-    useState<TriggerBindingParam[]>(null);
+    React.useState<TriggerBindingParam[]>(null);
 
   const paramPrefix = 'tt.params.';
 
-  const updateTriggerBindingVariables = useCallback(
+  const updateTriggerBindingVariables = React.useCallback(
     (selectedTriggerBinding: TriggerBindingKind) => {
       setBindingVars(selectedTriggerBinding.spec.params);
       setFieldValue('triggerBinding.resource', selectedTriggerBinding);

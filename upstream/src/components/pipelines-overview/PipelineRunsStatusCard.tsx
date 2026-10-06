@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { DomainPropType, DomainTuple } from 'victory-core';
@@ -13,7 +12,7 @@ import {
   ChartLegend,
   ChartLine,
   ChartVoronoiContainer,
-} from '@patternfly/react-charts/victory';
+} from '@patternfly/react-charts';
 import {
   Alert,
   Card,
@@ -26,7 +25,7 @@ import {
 import { chart_color_black_200 as othersColor } from '@patternfly/react-tokens/dist/js/chart_color_black_200';
 import { chart_color_black_500 as cancelledColor } from '@patternfly/react-tokens/dist/js/chart_color_black_500';
 import { chart_color_green_400 as successColor } from '@patternfly/react-tokens/dist/js/chart_color_green_400';
-import { t_chart_global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/t_chart_global_danger_color_100';
+import { global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
 import { chart_color_blue_300 as runningColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_300';
 import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
 import {
@@ -39,12 +38,11 @@ import {
 } from './dateTime';
 import { getFilter, useInterval } from './utils';
 import { getResultsSummary } from '../utils/summary-api';
-import { Loading } from '../Loading';
+import './PipelinesOverview.scss';
+import { LoadingInline } from '../Loading';
 import { ALL_NAMESPACES_KEY } from '../../consts';
 import { DataType, FLAGS, SummaryResponse } from '../../types';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
-
-import './PipelinesOverview.scss';
 
 interface PipelinesRunsStatusCardProps {
   timespan?: number;
@@ -92,7 +90,7 @@ const getChartData = (
   return chartData;
 };
 
-const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
+const PipelinesRunsStatusCard: React.FC<PipelinesRunsStatusCardProps> = ({
   timespan,
   domain,
   bordered,
@@ -103,14 +101,14 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
-  const [data, setData] = useState<SummaryResponse>();
-  const [data2, setData2] = useState<SummaryResponse>();
-  const [loaded, setLoaded] = useState(false);
-  const [pipelineRunsStatusError, setPipelineRunsStatusError] = useState<
+  const [data, setData] = React.useState<SummaryResponse>();
+  const [data2, setData2] = React.useState<SummaryResponse>();
+  const [loaded, setLoaded] = React.useState(false);
+  const [pipelineRunsStatusError, setPipelineRunsStatusError] = React.useState<
     string | undefined
   >();
-  const abortControllerRefDonut = useRef<AbortController>();
-  const abortControllerRefLineChart = useRef<AbortController>();
+  const abortControllerRefDonut = React.useRef<AbortController>();
+  const abortControllerRefLineChart = React.useRef<AbortController>();
 
   const startTimespan = timespan - parsePrometheusDuration('1d');
   const endDate = new Date(Date.now()).setHours(0, 0, 0, 0);
@@ -126,7 +124,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
     namespace = '-';
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       abortControllerRefDonut.current?.abort();
       abortControllerRefLineChart.current?.abort();
@@ -188,7 +186,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
     namespace,
     date,
   );
-  useEffect(() => {
+  React.useEffect(() => {
     setLoaded(false);
     setPipelineRunsStatusError(undefined);
     // Clear stale data when namespace or timespan changes
@@ -318,21 +316,15 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
   }
 
   let xAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)' },
   };
   const yAxisStyle: ChartAxisProps['style'] = {
-    tickLabels: {
-      fill: 'var(--pf-t--global--text--color--regular)',
-      fontSize: 12,
-    },
+    tickLabels: { fill: 'var(--pf-v5-global--Color--100)' },
   };
   if (tickValues?.length > 7) {
     xAxisStyle = {
       tickLabels: {
-        fill: 'var(--pf-t--global--text--color--regular)',
+        fill: 'var(--pf-v5-global--Color--100)',
         angle: 320,
         fontSize: 10,
         textAnchor: 'end',
@@ -401,7 +393,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
           'card-border': bordered,
         })}
       >
-        <CardTitle>
+        <CardTitle className="pipeline-overview__pipelinerun-status-card__title">
           <span>
             {t('PipelineRun status')}{' '}
             <Popover
@@ -423,19 +415,19 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
             </Popover>
           </span>
         </CardTitle>
-        <CardBody className="pf-v6-u-pt-0 pf-v6-u-pb-sm">
+        <CardBody className="pipeline-overview__pipelinerun-status-card__title">
           {pipelineRunsStatusError ? (
             <Alert
               variant="danger"
               isInline
               title={t('Unable to load PipelineRun status')}
-              className="pf-v6-u-mb-md"
+              className="pf-v5-u-mb-md"
             />
           ) : (
-            <Grid className="pf-v6-u-align-items-center">
+            <Grid>
               <GridItem xl2={4} xl={12} lg={12} md={12} sm={12}>
-                <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pipeline-overview__chart-area">
-                  {loaded ? (
+                {loaded ? (
+                  <div className="pipeline-overview__pipelinerun-status-card__donut-chart-div">
                     <ChartDonut
                       constrainToVisibleArea={true}
                       data={donutData}
@@ -444,7 +436,6 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
                       colorScale={colorScale}
                       legendOrientation="vertical"
                       legendPosition="right"
-                      height={200}
                       padding={{
                         bottom: 30,
                         right: 140, // Adjusted to accommodate legend
@@ -455,7 +446,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
                           data={legendData}
                           style={{
                             labels: {
-                              fill: 'var(--pf-t--global--text--color--regular)',
+                              fill: 'var(--pf-v5-global--Color--100)',
                               fontSize: 14,
                             },
                           }}
@@ -465,7 +456,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
                       subTitleComponent={
                         <ChartLabel
                           style={{
-                            fill: 'var(--pf-t--global--text--color--subtle)',
+                            fill: 'var(--pf-v5-global--Color--400)',
                             fontSize: 14,
                           }}
                         />
@@ -476,31 +467,20 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
                       titleComponent={
                         <ChartLabel
                           style={{
-                            fill: 'var(--pf-t--global--text--color--regular)',
+                            fill: 'var(--pf-v5-global--Color--100)',
                             fontSize: 24,
                           }}
                         />
                       }
                       width={350}
                     />
-                  ) : (
-                    <div className="pf-v6-u-display-flex pf-v6-u-align-items-center pf-v6-u-justify-content-center pf-v6-u-w-100">
-                      <Loading isInline={true} />
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <LoadingInline />
+                )}
               </GridItem>
               <GridItem xl2={8} xl={12} lg={12} md={12} sm={12}>
-                <div
-                  className={classNames(
-                    'pf-v6-u-display-flex pf-v6-u-h-100 pf-v6-u-w-100 pipeline-overview__chart-area',
-                    {
-                      'pf-v6-u-align-items-flex-end': loaded,
-                      'pf-v6-u-align-items-center pf-v6-u-justify-content-center':
-                        !loaded,
-                    },
-                  )}
-                >
+                <div className="pipeline-overview__pipelinerun-status-card__bar-chart-div">
                   {loaded ? (
                     <Chart
                       containerComponent={
@@ -541,7 +521,7 @@ const PipelinesRunsStatusCard: FC<PipelinesRunsStatusCardProps> = ({
                       </ChartGroup>
                     </Chart>
                   ) : (
-                    <Loading isInline={true} />
+                    <LoadingInline />
                   )}
                 </div>
               </GridItem>

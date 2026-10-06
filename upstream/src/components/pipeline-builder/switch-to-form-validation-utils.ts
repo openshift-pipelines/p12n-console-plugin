@@ -35,7 +35,7 @@ const taskValidationYAMLSchema = (formData: PipelineBuilderFormValues) => {
     yup.lazy((taskObject) =>
       yup
         .object({
-          name: nameValidationSchema(t),
+          name: nameValidationSchema((tKey) => t(tKey)),
           taskRef: yup
             .object({
               name: yup.string(),

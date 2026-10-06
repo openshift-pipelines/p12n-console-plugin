@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { List, ListItem } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import * as _ from 'lodash';
@@ -10,7 +10,7 @@ type PermissionsSectionProps = {
   formContextField?: string;
 };
 
-const PermissionsSection: FC<PermissionsSectionProps> = ({
+const PermissionsSection: React.FC<PermissionsSectionProps> = ({
   formContextField,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

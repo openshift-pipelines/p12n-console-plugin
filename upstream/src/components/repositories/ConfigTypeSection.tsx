@@ -1,12 +1,12 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   Flex,
   FlexItem,
-  Content,
+  Text,
   FormSection,
+  Tile,
 } from '@patternfly/react-core';
-import { Tile } from '@patternfly/react-core/deprecated';
 import { FormikValues, useFormikContext } from 'formik';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,7 @@ type ConfigTypeSectionProps = {
   formContextField?: string;
 };
 
-const ConfigTypeSection: FC<ConfigTypeSectionProps> = ({
+const ConfigTypeSection: React.FC<ConfigTypeSectionProps> = ({
   pac,
   formContextField,
 }) => {
@@ -37,12 +37,12 @@ const ConfigTypeSection: FC<ConfigTypeSectionProps> = ({
 
   return (
     <>
-      <Content component="p">
+      <Text>
         {t(
           'A GitHub App is already set up for this cluster. To use it, install the GitHub app on your personal account or GitHub organization.',
         )}
-      </Content>
-      <FormSection className="pf-v6-u-mt-0">
+      </Text>
+      <FormSection className="pf-v5-u-mt-0">
         <FormGroup fieldId="method">
           <Flex>
             <FlexItem span={3}>

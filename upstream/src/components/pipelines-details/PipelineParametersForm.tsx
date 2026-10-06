@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { Form, PageSection } from '@patternfly/react-core';
 import { FormikProps, FormikValues, getIn } from 'formik';
 import * as _ from 'lodash';
@@ -11,7 +11,7 @@ type PipelineParametersFormProps = FormikProps<FormikValues> & {
   namespace: string;
 };
 
-const PipelineParametersForm: FC<PipelineParametersFormProps> = ({
+const PipelineParametersForm: React.FC<PipelineParametersFormProps> = ({
   namespace,
   handleSubmit,
   handleReset,
@@ -32,9 +32,9 @@ const PipelineParametersForm: FC<PipelineParametersFormProps> = ({
   return (
     <Form onSubmit={handleSubmit}>
       <PageSection
-        hasBodyWrapper={false}
         isFilled
-        className="pipelines-console-plugin__page-section-width pf-v6-u-p-0 pipelines-console-plugin__background-transparent"
+        variant="light"
+        className="pipelines-console-plugin__page-section-width pf-v5-u-p-0 pipelines-console-plugin__background-transparent"
       >
         <PipelineParameters
           fieldName="parameters"

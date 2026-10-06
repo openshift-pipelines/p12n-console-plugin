@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 
@@ -12,7 +12,7 @@ import { getPipelineTaskLinks } from './utils';
 import TriggerTemplateResourceLink from './TriggerTemplateResourceLink';
 import { usePipelineTriggerTemplateNames } from '../utils/triggers';
 
-const PipelineDetails: FC<PipelineDetailsTabProps> = ({
+const PipelineDetails: React.FC<PipelineDetailsTabProps> = ({
   obj: pipeline,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -26,7 +26,7 @@ const PipelineDetails: FC<PipelineDetailsTabProps> = ({
 
   return (
     <>
-      <PageSection hasBodyWrapper={false} isFilled >
+      <PageSection isFilled variant="light">
         <Title headingLevel="h2">{t('Pipeline details')}</Title>
         <PipelineVisualization pipeline={pipeline} />
         <Grid hasGutter>

@@ -1,16 +1,14 @@
 import {
   BreadcrumbItem,
-  Content,
-  ContentVariants,
+  Text,
+  TextVariants,
   Tooltip,
 } from '@patternfly/react-core';
-import { Link } from 'react-router';
-import { useCallback, useMemo } from 'react';
-import { useParams } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
+import * as React from 'react';
+import { useParams } from 'react-router-dom-v5-compat';
 import { ArchiveIcon } from '@patternfly/react-icons';
 import { ResourceStatus } from '@openshift-console/dynamic-plugin-sdk';
-import { LazyActionMenu } from '@openshift-console/dynamic-plugin-sdk-internal';
-import { ActionMenuVariant } from '@openshift-console/dynamic-plugin-sdk-internal/lib/api/internal-types';
 import DetailsPage from '../../details-page/DetailsPage';
 import { getReferenceForModel } from '../../pipelines-overview/utils';
 import { TaskRunModel } from '../../../models';
@@ -18,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import TaskRunDetails from './TaskRunDetails';
 import TaskRunLogsTab from './TaskRunLogsTab';
 import TaskRunEvents from './events/TaskRunEvents';
-import { useTaskRuns } from '../../hooks/useTaskRuns';
+import { useTaskRun } from '../../hooks/useTaskRuns';
 import { navFactory } from '../../utils/horizontal-nav';
 import ResourceYAMLEditorViewOnly from '../../yaml-editor/ResourceYAMLEditorViewOnly';
 import {
@@ -33,33 +31,12 @@ const TaskRunDetailsPage = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const params = useParams();
   const { name, ns: namespace } = params;
-  /* Returning 1 taskrun */
-  const [taskRuns, k8sLoaded, trLoaded] = useTaskRuns(
-    namespace,
-    undefined, // pipelineRunName
-    undefined, // taskName — this is a label filter so can't be used for fetching 1 item without some refactoring
-    undefined, // pipelineRunUid
-    { name, limit: 1 },
-  );
-  const data = taskRuns?.[0];
-  const loaded = k8sLoaded || trLoaded;
-  const trStatus = useMemo(
+  const [data, loaded] = useTaskRun(namespace, name);
+  const trStatus = React.useMemo(
     () => loaded && data && taskRunStatus(data),
     [loaded, data],
   );
-  const customActionMenu = useCallback((_kindObj, obj) => {
-    const reference = getReferenceForModel(TaskRunModel);
-    const context = { [reference]: obj };
-    return (
-      <LazyActionMenu
-        context={context}
-        variant={ActionMenuVariant.DROPDOWN}
-        label={t('Actions')}
-      />
-    );
-  }, [t]);
-
-  const resourceTitleFunc = useMemo(() => {
+  const resourceTitleFunc = React.useMemo(() => {
     return (
       <div className="taskrun-details-page">
         {data?.metadata?.name}{' '}
@@ -86,19 +63,16 @@ const TaskRunDetailsPage = () => {
     <DetailsPage
       obj={data}
       headTitle={name}
-      title={
-        <Content component={ContentVariants.h1}>{resourceTitleFunc}</Content>
-      }
+      title={<Text component={TextVariants.h1}>{resourceTitleFunc}</Text>}
       baseURL={`/tasks/ns/${namespace}/${getReferenceForModel(
         TaskRunModel,
       )}/${name}/task-runs`}
       model={TaskRunModel}
-      customActionMenu={customActionMenu}
       breadcrumbs={[
         <BreadcrumbItem key="app-link" component="div">
           <Link
             data-test="breadcrumb-link"
-            className="pf-v6-c-breadcrumb__link"
+            className="pf-v5-c-breadcrumb__link"
             to={`/tasks/ns/${namespace}/task-runs`}
           >
             {t('TaskRuns')}

@@ -1,27 +1,21 @@
-import { Formik, FormikHelpers, FormikProps } from 'formik';
+import * as React from 'react';
+import { Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';
-import {
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Form,
-  Alert,
-} from '@patternfly/react-core';
+import { ModalComponentProps, ModalWrapper } from '../modals/modal';
 import { PipelineKind, RemoveTriggerFormValues } from '../../types';
+import ModalStructure from '../modals/ModalStructure';
 import RemoveTriggerForm from './RemoveTriggerForm';
-import { OverlayComponent } from '@openshift-console/dynamic-plugin-sdk';
+import { ModalComponent } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/ModalProvider';
 import { removeTrigger } from './remove-utils';
 import { removeTriggerSchema } from './validation-utils';
 
-export type RemoveTriggerModalProps = {
+type RemoveTriggerModalProps = ModalComponentProps & {
   pipeline: PipelineKind;
 };
 
-const RemoveTriggerModal: OverlayComponent<RemoveTriggerModalProps> = ({
+const RemoveTriggerModal: ModalComponent<RemoveTriggerModalProps> = ({
   pipeline,
-  closeOverlay,
+  closeModal,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const initialValues: RemoveTriggerFormValues = {
@@ -34,7 +28,7 @@ const RemoveTriggerModal: OverlayComponent<RemoveTriggerModalProps> = ({
   ) => {
     return removeTrigger(values, pipeline)
       .then(() => {
-        closeOverlay();
+        closeModal();
       })
       .catch((e) => {
         actions.setStatus({ submitError: e.message });
@@ -42,64 +36,28 @@ const RemoveTriggerModal: OverlayComponent<RemoveTriggerModalProps> = ({
   };
 
   return (
-    <Modal
-      variant="large"
-      isOpen
-      onClose={closeOverlay}
-      className="opp-start-pipeline-modal"
+    <ModalWrapper
+      className="modal-lg opp-start-pipeline-modal"
+      onClose={closeModal}
     >
-      <ModalHeader title={t('Remove Trigger')} />
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={removeTriggerSchema()}
       >
-        {(formikProps: FormikProps<RemoveTriggerFormValues>) => (
-          <>
-            <ModalBody tabIndex={0}>
-              <Form
-                id="remove-trigger-form"
-                onSubmit={formikProps.handleSubmit}
-              >
-                {formikProps.status?.submitError && (
-                  <Alert
-                    variant="danger"
-                    isInline
-                    title={formikProps.status.submitError}
-                  />
-                )}
-
-                <RemoveTriggerForm pipeline={pipeline} />
-              </Form>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                key="cancel"
-                variant="secondary"
-                onClick={closeOverlay}
-                isDisabled={formikProps.isSubmitting}
-              >
-                {t('Cancel')}
-              </Button>
-              <Button
-                key="submit"
-                variant="danger"
-                type="submit"
-                form="remove-trigger-form"
-                isDisabled={
-                  !formikProps.isValid ||
-                  formikProps.isSubmitting ||
-                  Object.keys(formikProps.errors).length > 0
-                }
-                isLoading={formikProps.isSubmitting}
-              >
-                {t('Remove')}
-              </Button>
-            </ModalFooter>
-          </>
+        {(formikProps) => (
+          <ModalStructure
+            {...formikProps}
+            submitBtnText={t('Remove')}
+            submitDanger
+            title={t('Remove Trigger')}
+            close={closeModal}
+          >
+            <RemoveTriggerForm pipeline={pipeline} />
+          </ModalStructure>
         )}
       </Formik>
-    </Modal>
+    </ModalWrapper>
   );
 };
 

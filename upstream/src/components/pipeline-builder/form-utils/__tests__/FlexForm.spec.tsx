@@ -1,32 +1,37 @@
-import { render } from '@testing-library/react';
+import * as React from 'react';
+import { TextInputTypes } from '@patternfly/react-core';
+import { shallow, ShallowWrapper } from 'enzyme';
 import FlexForm from '../FlexForm';
+import InputField from '../../../pipelines-details/multi-column-field/InputField';
 
 describe('FlexForm', () => {
+  let wrapper: ShallowWrapper<any>;
+  beforeEach(() => {
+    wrapper = shallow(
+      <FlexForm onSubmit={() => {}}>
+        <InputField type={TextInputTypes.text} name="test-input" required />
+      </FlexForm>,
+    );
+  });
+
   it('it should add styles for flex layout', () => {
-    const { container } = render(<FlexForm onSubmit={() => {}} />);
-    const form = container.querySelector('form');
-    expect(form.style.display).toBe('flex');
-    expect(form.style.flexGrow).toBe('1');
-    expect(form.style.flexDirection).toBe('column');
+    expect(wrapper.getElement().props.style).toEqual({
+      display: 'flex',
+      flex: 1,
+      flexDirection: 'column',
+    });
   });
 
   it('it should return original form props', () => {
-    const onSubmit = jest.fn();
-    const { container } = render(<FlexForm onSubmit={onSubmit} />);
-    expect(container.querySelector('form')).not.toBeNull();
+    expect(wrapper.getElement().props).toHaveProperty('onSubmit');
   });
 
   it('it should return form component as a wrapper', () => {
-    const { container } = render(<FlexForm onSubmit={() => {}} />);
-    expect(container.querySelector('form')).not.toBeNull();
+    expect(wrapper.is('form')).toEqual(true);
   });
 
   it('it should contain inputfield as a children of content wrapper', () => {
-    const { container } = render(
-      <FlexForm onSubmit={() => {}}>
-        <input type="text" name="test-input" required />
-      </FlexForm>,
-    );
-    expect(container.querySelector('input[name="test-input"]')).not.toBeNull();
+    const content = wrapper.children().at(0);
+    expect(content.is(InputField)).toEqual(true);
   });
 });

@@ -1,16 +1,15 @@
-import type { ReactElement, FC } from 'react';
-import { useState, useCallback } from 'react';
+import * as React from 'react';
 import { getParentScrollableElement } from './useScrollContainer';
 
 type WithScrollContainerProps = {
-  children: (scrollContainer: HTMLElement) => ReactElement | null;
+  children: (scrollContainer: HTMLElement) => React.ReactElement | null;
 };
 
-export const WithScrollContainer: FC<WithScrollContainerProps> = ({
+export const WithScrollContainer: React.FC<WithScrollContainerProps> = ({
   children,
 }) => {
-  const [scrollContainer, setScrollContainer] = useState<HTMLElement>();
-  const ref = useCallback((node) => {
+  const [scrollContainer, setScrollContainer] = React.useState<HTMLElement>();
+  const ref = React.useCallback((node) => {
     if (node) {
       setScrollContainer(getParentScrollableElement(node));
     }

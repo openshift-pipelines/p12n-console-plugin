@@ -1,5 +1,4 @@
-import type { FC, FormEvent } from 'react';
-import { useState } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -21,7 +20,7 @@ import FormFooter from '../pipelines-details/multi-column-field/FormFooter';
 
 import './PacPage.scss';
 
-const PacAppForm: FC<FormikProps<FormikValues>> = ({
+const PacAppForm: React.FC<FormikProps<FormikValues>> = ({
   errors,
   handleReset,
   status,
@@ -30,9 +29,9 @@ const PacAppForm: FC<FormikProps<FormikValues>> = ({
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { setStatus } = useFormikContext<FormikValues>();
-  const [manifestVal, setManifestVal] = useState<string>('');
+  const [manifestVal, setManifestVal] = React.useState<string>('');
 
-  const submitFrom = (event: FormEvent<EventTarget>) => {
+  const submitFrom = (event: React.FormEvent<EventTarget>) => {
     if (!values.manifestData.hook_attributes.url) {
       setStatus({
         submitError: t('Unable to detect Event listener URL'),

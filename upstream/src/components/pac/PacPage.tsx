@@ -1,10 +1,9 @@
-import type { FC } from 'react';
-import { useEffect } from 'react';
+import * as React from 'react';
 import {
   useParams,
   useLocation,
   useNavigate,
-} from 'react-router';
+} from 'react-router-dom-v5-compat';
 
 import { usePacData } from './hooks/usePacData';
 import PacForm from './PacForm';
@@ -17,7 +16,7 @@ import { FLAG_OPENSHIFT_PIPELINE, PIPELINE_NAMESPACE } from '../../consts';
 import { AccessDenied, ErrorPage404 } from '../common/error';
 import { LoadingBox } from '../status/status-box';
 
-const PacPage: FC = () => {
+const PacPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -30,7 +29,7 @@ const PacPage: FC = () => {
   const code = queryParams.get('code');
   const { ns: namespace } = useParams();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isPipelinesEnabled && namespace !== PIPELINE_NAMESPACE) {
       navigate(`/pac/ns/${PIPELINE_NAMESPACE}`);
     }

@@ -1,16 +1,16 @@
-import type { ReactNode, FC } from 'react';
+import * as React from 'react';
 import LogSnippetFromPod from './LogSnippetFromPod';
 import { CombinedErrorDetails } from '../../types/log-snippet-types';
 
 type LogSnippetBlockProps = {
-  children: (logSnippet: string) => ReactNode;
+  children: (logSnippet: string) => React.ReactNode;
   logDetails: CombinedErrorDetails;
   namespace: string;
   isResourceManagedByKueue?: boolean;
   pipelineRunName?: string;
 };
 
-const LogSnippetBlock: FC<LogSnippetBlockProps> = ({
+const LogSnippetBlock: React.FC<LogSnippetBlockProps> = ({
   children,
   logDetails,
   namespace,

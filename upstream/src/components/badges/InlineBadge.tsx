@@ -1,9 +1,9 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { Badge } from '@patternfly/react-core';
 import './Badge.scss';
 import { useTranslation } from 'react-i18next';
 
-export const InlineTechPreviewBadge: FC = () => {
+export const InlineTechPreviewBadge: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Badge className="ocs-badge__inline" isRead>
@@ -12,7 +12,7 @@ export const InlineTechPreviewBadge: FC = () => {
   );
 };
 
-export const InlineDevPreviewBadge: FC = () => {
+export const InlineDevPreviewBadge: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Badge className="ocs-badge__inline" isRead>

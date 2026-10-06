@@ -1,11 +1,11 @@
-import type { SetStateAction, Dispatch, ReactNode, FC } from 'react';
+import * as React from 'react';
 import {
   Button,
   ButtonVariant,
-  Content,
+  TextContent,
   Title,
 } from '@patternfly/react-core';
-import { useNavigate } from 'react-router';
+import { useHistory } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CatalogItem } from '@openshift-console/dynamic-plugin-sdk';
 import CatalogBadges from '../catalog/CatalogBadges';
@@ -19,17 +19,17 @@ export type QuickSearchDetailsRendererProps = {
   closeModal: () => void;
   namespace?: string;
   callback?: TaskSearchCallback;
-  setFailedTasks?: Dispatch<SetStateAction<string[]>>;
+  setFailedTasks?: React.Dispatch<React.SetStateAction<string[]>>;
 };
 export type DetailsRendererFunction = (
   props: QuickSearchDetailsRendererProps,
-) => ReactNode;
+) => React.ReactNode;
 export interface QuickSearchDetailsProps
   extends QuickSearchDetailsRendererProps {
   detailsRenderer: DetailsRendererFunction;
 }
 
-const QuickSearchDetails: FC<QuickSearchDetailsProps> = ({
+const QuickSearchDetails: React.FC<QuickSearchDetailsProps> = ({
   selectedItem,
   closeModal,
   detailsRenderer,
@@ -38,10 +38,10 @@ const QuickSearchDetails: FC<QuickSearchDetailsProps> = ({
   setFailedTasks,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const navigate = useNavigate();
+  const history = useHistory();
   const defaultContentRenderer: DetailsRendererFunction = (
     props: QuickSearchDetailsProps,
-  ): ReactNode => {
+  ): React.ReactNode => {
     return (
       <>
         <Title headingLevel="h4">{props.selectedItem.name}</Title>
@@ -60,14 +60,14 @@ const QuickSearchDetails: FC<QuickSearchDetailsProps> = ({
           className="ocs-quick-search-details__form-button"
           data-test="create-quick-search"
           onClick={(e) => {
-            handleCta(e, props.selectedItem, props.closeModal, navigate);
+            handleCta(e, props.selectedItem, props.closeModal, history);
           }}
         >
           {props.selectedItem.cta.label}
         </Button>
-        <Content className="ocs-quick-search-details__description">
+        <TextContent className="ocs-quick-search-details__description">
           {props.selectedItem.description}
-        </Content>
+        </TextContent>
       </>
     );
   };

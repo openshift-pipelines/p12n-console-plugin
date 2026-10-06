@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { useRef } from 'react';
+import * as React from 'react';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import { PlusIcon } from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { BUILDER_NODE_ADD_RADIUS } from './const';
@@ -14,14 +13,14 @@ type PlusNodeProps = {
   onClick?: () => void;
 };
 
-const PlusNodeDecorator: FC<PlusNodeProps> = ({
+const PlusNodeDecorator: React.FC<PlusNodeProps> = ({
   x,
   y,
   onClick,
   tooltip,
   tooltipPosition,
 }) => {
-  const iconRef = useRef();
+  const iconRef = React.useRef();
   return (
     <Tooltip triggerRef={iconRef} content={tooltip} position={tooltipPosition}>
       <g

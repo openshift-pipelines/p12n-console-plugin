@@ -1,11 +1,10 @@
-import { Component, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { t } from '../utils/common-utils';
 
 export const withHandlePromise: WithHandlePromise = (Component) => (props) => {
-  const [inProgress, setInProgress] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [inProgress, setInProgress] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
 
   const { t } = useTranslation('plugin__pipelines-console-plugin');
 
@@ -48,7 +47,7 @@ export const withHandlePromise: WithHandlePromise = (Component) => (props) => {
 export class PromiseComponent<
   P,
   S extends PromiseComponentState,
-> extends Component<P, S> {
+> extends React.Component<P, S> {
   constructor(props) {
     super(props);
     this.state = {
@@ -99,8 +98,8 @@ export type HandlePromiseProps = {
 declare type Diff<T, K> = Omit<T, keyof K>;
 
 export type WithHandlePromise = <P extends HandlePromiseProps>(
-  C: ComponentType<P>,
-) => FC<Diff<P, HandlePromiseProps>>;
+  C: React.ComponentType<P>,
+) => React.FC<Diff<P, HandlePromiseProps>>;
 
 export type PromiseComponentState = {
   inProgress: boolean;

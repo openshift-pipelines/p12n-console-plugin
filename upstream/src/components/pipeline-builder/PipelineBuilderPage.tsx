@@ -1,6 +1,7 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { Formik, FormikBag } from 'formik';
 import { load } from 'js-yaml';
+import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import { PipelineKind } from '../../types';
 import { initialPipelineFormData } from './const';
@@ -16,10 +17,10 @@ import {
   convertPipelineToBuilderForm,
 } from './utils';
 import { validationSchema } from './validation-utils';
-import { DocumentTitle, k8sCreate, k8sUpdate } from '@openshift-console/dynamic-plugin-sdk';
+import { k8sCreate, k8sUpdate } from '@openshift-console/dynamic-plugin-sdk';
 import { returnValidPipelineModel } from '../utils/pipeline-utils';
 import { getReferenceForModel } from '../pipelines-overview/utils';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom-v5-compat';
 
 import './PipelineBuilderPage.scss';
 
@@ -27,7 +28,7 @@ type PipelineBuilderPageProps = {
   existingPipeline?: PipelineKind;
 };
 
-const PipelineBuilderPage: FC<PipelineBuilderPageProps> = (props) => {
+const PipelineBuilderPage: React.FC<PipelineBuilderPageProps> = (props) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const navigate = useNavigate();
   const { ns } = useParams();
@@ -98,9 +99,9 @@ const PipelineBuilderPage: FC<PipelineBuilderPageProps> = (props) => {
 
   return (
     <div className="odc-pipeline-builder-page">
-      <DocumentTitle>
-        {t('Pipeline builder')}
-      </DocumentTitle>
+      <Helmet>
+        <title>{t('Pipeline builder')}</title>
+      </Helmet>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}

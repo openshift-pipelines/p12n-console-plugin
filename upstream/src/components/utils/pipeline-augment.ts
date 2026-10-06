@@ -1,14 +1,13 @@
 import {
   GroupVersionKind,
   K8sKind,
-  ObjectMetadata,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { chart_color_black_400 as skippedColor } from '@patternfly/react-tokens/dist/js/chart_color_black_400';
 import { chart_color_black_500 as cancelledColor } from '@patternfly/react-tokens/dist/js/chart_color_black_500';
 import { chart_color_blue_100 as pendingColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_100';
 import { chart_color_blue_300 as runningColor } from '@patternfly/react-tokens/dist/js/chart_color_blue_300';
 import { chart_color_green_400 as successColor } from '@patternfly/react-tokens/dist/js/chart_color_green_400';
-import { t_chart_global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/t_chart_global_danger_color_100';
+import { global_danger_color_100 as failureColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
 import { TektonResourceLabel } from '../../consts';
 import {
   ClusterTriggerBindingModel,
@@ -32,8 +31,13 @@ import {
   pipelineRunFilterReducer,
 } from './pipeline-filter-reducer';
 
+interface Metadata {
+  name: string;
+  namespace?: string;
+}
+
 export interface PropPipelineData {
-  metadata: ObjectMetadata;
+  metadata: Metadata;
   latestRun?: PipelineRunKind;
 }
 
@@ -357,20 +361,51 @@ export const getModelReferenceFromTaskKind = (
   return getReferenceForModel(model);
 };
 
-export const shouldHidePipelineRunStopOrCancel = (
+export const countRunningTasks = (
   pipelineRun: PipelineRunKind,
-): boolean => {
-  if (!pipelineRun) {
-    return true;
-  }
-
-  const status = pipelineRunFilterReducer(pipelineRun);
-
-  return [
-    ComputedStatus.Succeeded,
-    ComputedStatus.Failed,
-    ComputedStatus.Cancelled,
-
-    ComputedStatus.Cancelling,
-  ].includes(status);
+  taskRuns: TaskRunKind[],
+): number => {
+  const taskStatuses =
+    taskRuns && getTaskStatus(pipelineRun, undefined, taskRuns);
+  return taskStatuses?.Running;
 };
+
+export const shouldHidePipelineRunStop = (
+  pipelineRun: PipelineRunKind,
+  taskRuns: TaskRunKind[],
+): boolean =>
+  !(
+    pipelineRun &&
+    (countRunningTasks(pipelineRun, taskRuns) > 0 ||
+      pipelineRunFilterReducer(pipelineRun) === ComputedStatus.Running)
+  );
+
+export const shouldHidePipelineRunStopForTaskRunStatus = (
+  pipelineRun: PipelineRunKind,
+  taskRunStatusObj: TaskStatus,
+): boolean =>
+  !(
+    pipelineRun &&
+    (taskRunStatusObj?.Running > 0 ||
+      pipelineRunFilterReducer(pipelineRun) === ComputedStatus.Running)
+  );
+
+export const shouldHidePipelineRunCancel = (
+  pipelineRun: PipelineRunKind,
+  taskRuns: TaskRunKind[],
+): boolean =>
+  !(
+    pipelineRun &&
+    countRunningTasks(pipelineRun, taskRuns) > 0 &&
+    pipelineRunFilterReducer(pipelineRun) !== ComputedStatus.Cancelled
+  );
+
+export const shouldHidePipelineRunCancelForTaskRunStatus = (
+  pipelineRun: PipelineRunKind,
+  taskRunStatusObj: TaskStatus,
+): boolean =>
+  !(
+    pipelineRun &&
+    taskRunStatusObj?.Running > 0 &&
+    pipelineRunFilterReducer(pipelineRun) !== ComputedStatus.Cancelled
+  );

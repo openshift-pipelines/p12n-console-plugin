@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { Fragment } from 'react';
+import * as React from 'react';
 import { ComputedStatus } from '../../../types';
 import { TaskStatus, getRunStatusColor } from '../../utils/pipeline-augment';
 import './TaskStatusTooltip.scss';
@@ -9,16 +8,16 @@ interface TaskStatusToolTipProps {
   taskStatus: TaskStatus;
 }
 
-const TaskStatusToolTip: FC<TaskStatusToolTipProps> = ({
+const TaskStatusToolTip: React.FC<TaskStatusToolTipProps> = ({
   taskStatus,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
-    (<div className="odc-task-status-tooltip">
+    <div className="odc-task-status-tooltip">
       {Object.keys(ComputedStatus).map((status) => {
         const { message, pftoken } = getRunStatusColor(status, t);
         return taskStatus[status] ? (
-          <Fragment key={status}>
+          <React.Fragment key={status}>
             <div
               className="odc-task-status-tooltip__legend"
               style={{ background: pftoken.value }}
@@ -29,10 +28,10 @@ const TaskStatusToolTip: FC<TaskStatusToolTipProps> = ({
                 ? message
                 : `${taskStatus[status]} ${message}`}
             </div>
-          </Fragment>
+          </React.Fragment>
         ) : null;
       })}
-    </div>)
+    </div>
   );
 };
 

@@ -1,16 +1,17 @@
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import useProjectsColumns from './useProjectsColumns';
 import {
   getGroupVersionKindForModel,
   K8sResourceKind,
   ListPageBody,
+  ListPageFilter,
   useK8sWatchResource,
+  useListPageFilter,
+  VirtualizedTable,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
 import { ProjectModel } from '../../models';
-import { getProjectsDataViewRows } from './ProjectsRow';
-import { DataViewFilterToolbar } from '../common/DataViewFilterToolbar';
-import { useDataViewFilter } from '../hooks/useDataViewFilter';
+import ProjectsRow from './ProjectsRow';
 
 const ProjectsList = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -22,25 +23,30 @@ const ProjectsList = () => {
     optional: true,
   });
   const columns = useProjectsColumns();
-  const { filterValues, onFilterChange, onClearAll, filteredData } =
-    useDataViewFilter<K8sResourceKind>({ data: projects || [] });
-
+  const [staticData, filteredData, onFilterChange] =
+    useListPageFilter(projects);
   return (
     <ListPageBody>
-      <DataViewFilterToolbar
-        filterValues={filterValues}
+      <ListPageFilter
+        data={staticData}
         onFilterChange={onFilterChange}
-        onClearAll={onClearAll}
+        loaded={projectsLoaded}
       />
-      <ConsoleDataView<K8sResourceKind>
-        label={t('Projects')}
+      <VirtualizedTable
+        EmptyMsg={() => (
+          <div
+            className="cp-text-align-center virtualized-table-empty-msg"
+            id="no-templates-msg"
+          >
+            {t('No Projects found')}
+          </div>
+        )}
         columns={columns}
         data={filteredData}
         loaded={projectsLoaded}
         loadError={projectsLoadError}
-        getDataViewRows={getProjectsDataViewRows}
-        hideColumnManagement
-        hideNameLabelFilters
+        Row={ProjectsRow}
+        unfilteredData={staticData}
       />
     </ListPageBody>
   );

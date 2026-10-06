@@ -1,4 +1,4 @@
-import type { ReactNode, FC } from 'react';
+import * as React from 'react';
 import {
   FormGroup,
   FormHelperText,
@@ -12,9 +12,9 @@ import { useFormikValidationFix } from './formik-validation-fix';
 import { RedExclamationCircleIcon } from '@openshift-console/dynamic-plugin-sdk';
 import { getFieldId } from './utils';
 
-const BaseInputField: FC<
+const BaseInputField: React.FC<
   BaseInputFieldProps & {
-    children: (props) => ReactNode;
+    children: (props) => React.ReactNode;
   }
 > = ({
   label,

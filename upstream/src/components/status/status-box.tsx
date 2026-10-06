@@ -1,16 +1,15 @@
 import * as _ from 'lodash-es';
-import type { FC, ReactNode } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { Button } from '@patternfly/react-core';
 import { useTranslation, Trans } from 'react-i18next';
-import { Loading } from '../Loading';
 import './status-box.scss';
 
-export const Box: FC<BoxProps> = ({ children, className }) => (
+export const Box: React.FC<BoxProps> = ({ children, className }) => (
   <div className={classNames('cos-status-box', className)}>{children}</div>
 );
 
-export const LoadError: FC<LoadErrorProps> = ({
+export const LoadError: React.FC<LoadErrorProps> = ({
   label,
   className,
   message,
@@ -19,7 +18,7 @@ export const LoadError: FC<LoadErrorProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <Box className={className}>
-      <div className="cp-text-align-center pf-v6-u-text-color-status-danger">
+      <div className="cp-text-align-center cos-error-title">
         {_.isString(message)
           ? t('Error Loading {{label}}: {{message}}', {
               label,
@@ -48,16 +47,38 @@ export const LoadError: FC<LoadErrorProps> = ({
 };
 LoadError.displayName = 'LoadError';
 
-export const LoadingBox: FC<LoadingBoxProps> = ({ className, message }) => (
-  <Box className={classNames('pf-v6-u-h-100 pf-v6-u-w-100', className)}>
+export const Loading: React.FC<LoadingProps> = ({ className }) => (
+  <div
+    className={classNames('co-m-loader co-an-fade-in-out', className)}
+    data-test="loading-indicator"
+  >
+    <div className="co-m-loader-dot__one" />
+    <div className="co-m-loader-dot__two" />
+    <div className="co-m-loader-dot__three" />
+  </div>
+);
+Loading.displayName = 'Loading';
+
+export const LoadingInline: React.FC = () => (
+  <Loading className="co-m-loader--inline" />
+);
+LoadingInline.displayName = 'LoadingInline';
+
+export const LoadingBox: React.FC<LoadingBoxProps> = ({
+  className,
+  message,
+}) => (
+  <Box className={classNames('cos-status-box--loading', className)}>
     <Loading />
-    {message && <div className="pf-v6-u-mt-md">{message}</div>}
+    {message && (
+      <div className="cos-status-box__loading-message">{message}</div>
+    )}
   </Box>
 );
 LoadingBox.displayName = 'LoadingBox';
 
 type BoxProps = {
-  children: ReactNode;
+  children: React.ReactNode;
   className?: string;
 };
 
@@ -66,6 +87,10 @@ type LoadErrorProps = {
   className?: string;
   message?: string;
   canRetry?: boolean;
+};
+
+type LoadingProps = {
+  className?: string;
 };
 
 type LoadingBoxProps = {

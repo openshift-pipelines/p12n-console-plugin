@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   render,
   fireEvent,
@@ -5,33 +6,25 @@ import {
   cleanup,
   waitFor,
   configure,
-  act,
 } from '@testing-library/react';
 import { cloneDeep, omit } from 'lodash';
 import {
   sampleTaskCatalogItem,
-  sampleTektonHubCatalogItem,
-  sampleTektonHubCatalogItemWithHubURL,
+  sampleArtifactHubCatalogItem,
 } from './catalog-item-data';
 import PipelineQuickSearchDetails from '../PipelineQuickSearchDetails';
-import { consoleFetch, useFlag } from '@openshift-console/dynamic-plugin-sdk';
+import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
 
 configure({ testIdAttribute: 'data-test' });
 
-const coFetchMock = consoleFetch as jest.Mock;
 const useFlagMock = useFlag as jest.Mock;
 
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  consoleFetch: jest.fn(),
   useFlag: jest.fn(),
 }));
 
 jest.mock('@console/shared/src/hooks/useTelemetry', () => ({
   useTelemetry: () => {},
-}));
-
-jest.mock('react-router', () => ({
-  useNavigate: jest.fn(() => jest.fn()),
 }));
 
 // FIXME Remove this code when jest is updated to at least 25.1.0 -- see https://github.com/jsdom/jsdom/issues/1555
@@ -48,16 +41,6 @@ if (!Element.prototype.closest) {
 }
 
 beforeEach(() => {
-  coFetchMock.mockClear();
-  coFetchMock.mockReturnValue(
-    Promise.resolve({
-      json: () => ({
-        data: {
-          versions: sampleTektonHubCatalogItem.attributes.versions,
-        },
-      }),
-    }),
-  );
   useFlagMock.mockReturnValue(true);
 });
 
@@ -67,8 +50,8 @@ describe('pipelineQuickSearchDetails', () => {
     closeModal: jest.fn(),
   };
 
-  const tektonHubProps = {
-    selectedItem: sampleTektonHubCatalogItem,
+  const artifactHubProps = {
+    selectedItem: sampleArtifactHubCatalogItem,
     closeModal: jest.fn(),
   };
 
@@ -84,18 +67,18 @@ describe('pipelineQuickSearchDetails', () => {
       });
     });
 
-    it('should show the installed badge for the installed tekton hub task', async () => {
-      const installedTektonHubTask = {
-        ...sampleTektonHubCatalogItem,
+    it('should show the installed badge for the installed artifact hub task', async () => {
+      const installedArtifactHubTask = {
+        ...sampleArtifactHubCatalogItem,
         attributes: {
-          ...sampleTektonHubCatalogItem.attributes,
+          ...sampleArtifactHubCatalogItem.attributes,
           installed: '0.1',
         },
       };
       const { queryByTestId } = render(
         <PipelineQuickSearchDetails
-          {...tektonHubProps}
-          selectedItem={installedTektonHubTask}
+          {...artifactHubProps}
+          selectedItem={installedArtifactHubTask}
         />,
       );
       await waitFor(() => {
@@ -103,9 +86,9 @@ describe('pipelineQuickSearchDetails', () => {
       });
     });
 
-    it('should not show the installed badge for the uninstalled tekton hub task', async () => {
+    it('should not show the installed badge for the uninstalled artifact hub task', async () => {
       const { queryByTestId } = render(
-        <PipelineQuickSearchDetails {...tektonHubProps} />,
+        <PipelineQuickSearchDetails {...artifactHubProps} />,
       );
       await waitFor(() => {
         expect(queryByTestId('task-installed-badge')).toBeNull();
@@ -114,30 +97,19 @@ describe('pipelineQuickSearchDetails', () => {
   });
 
   describe('CTA button tests', () => {
-    it('Add button should be disabled if the versions is not available', async () => {
-      const taskWithoutVersion = cloneDeep({ ...tektonHubProps.selectedItem });
+    it('should show Install and add button when versions are empty', async () => {
+      const taskWithoutVersion = cloneDeep({ ...artifactHubProps.selectedItem });
       taskWithoutVersion.attributes.versions = [];
-      coFetchMock.mockReturnValue(
-        Promise.resolve({
-          json: () => ({
-            data: {
-              versions: [],
-            },
-          }),
-        }),
-      );
       const { getByRole } = render(
         <PipelineQuickSearchDetails
-          {...tektonHubProps}
+          {...artifactHubProps}
           selectedItem={taskWithoutVersion}
         />,
       );
       await waitFor(() => {
-        const button = getByRole('button', { name: 'Install and add' });
         expect(
-          button.hasAttribute('disabled') ||
-            button.getAttribute('aria-disabled') === 'true',
-        ).toBe(true);
+          getByRole('button', { name: 'Install and add' }),
+        ).not.toBeNull();
       });
     });
 
@@ -149,7 +121,7 @@ describe('pipelineQuickSearchDetails', () => {
       await waitFor(() => {
         expect(
           getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBeNull();
+        ).toBe('false');
       });
     });
 
@@ -160,7 +132,7 @@ describe('pipelineQuickSearchDetails', () => {
       await waitFor(() => {
         expect(
           getByRole('button', { name: 'Add' }).getAttribute('aria-disabled'),
-        ).toBeNull();
+        ).toBe('false');
       });
     });
 
@@ -173,9 +145,9 @@ describe('pipelineQuickSearchDetails', () => {
       });
     });
 
-    it('should show the Install and add button for uninstalled tekton hub task', async () => {
+    it('should show the Install and add button for uninstalled artifact hub task', async () => {
       const { getByRole } = render(
-        <PipelineQuickSearchDetails {...tektonHubProps} />,
+        <PipelineQuickSearchDetails {...artifactHubProps} />,
       );
       await waitFor(() => {
         expect(getByRole('button', { name: 'Install and add' })).not.toBeNull();
@@ -183,17 +155,17 @@ describe('pipelineQuickSearchDetails', () => {
     });
 
     it('should show the Update and add button for already installed task', async () => {
-      const installedTektonHubTask = {
-        ...sampleTektonHubCatalogItem,
+      const installedArtifactHubTask = {
+        ...sampleArtifactHubCatalogItem,
         attributes: {
-          ...sampleTektonHubCatalogItem.attributes,
+          ...sampleArtifactHubCatalogItem.attributes,
           installed: '0.1',
         },
       };
       const { getByRole, queryByTestId } = render(
         <PipelineQuickSearchDetails
-          {...tektonHubProps}
-          selectedItem={installedTektonHubTask}
+          {...artifactHubProps}
+          selectedItem={installedArtifactHubTask}
         />,
       );
       await waitFor(async () => {
@@ -225,51 +197,6 @@ describe('pipelineQuickSearchDetails', () => {
       );
       await waitFor(() => {
         expect(queryByTestId('task-version-dropdown')).toBeNull();
-      });
-    });
-  });
-
-  describe('Hub Link', () => {
-    beforeAll(() => {
-      configure({ testIdAttribute: 'data-test-id' });
-    });
-    afterAll(() => {
-      configure({ testIdAttribute: 'data-test' });
-    });
-
-    it('should show correct hub link when hubURL present', async () => {
-      const installedTektonHubTask = {
-        ...sampleTektonHubCatalogItemWithHubURL,
-      };
-      const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...tektonHubProps}
-          selectedItem={installedTektonHubTask}
-        />,
-      );
-      await waitFor(async () => {
-        expect(queryByTestId('task-hub-link').getAttribute('href')).toBe(
-          'https://hub.tekton.dev/foo/bar/test',
-        );
-      });
-    });
-
-    it('should not show the hub link if the hub url is not available', async () => {
-      const installedTektonHubTask = {
-        ...sampleTektonHubCatalogItem,
-        attributes: {
-          ...sampleTektonHubCatalogItem.attributes,
-          installed: '0.1',
-        },
-      };
-      const { queryByTestId } = render(
-        <PipelineQuickSearchDetails
-          {...tektonHubProps}
-          selectedItem={installedTektonHubTask}
-        />,
-      );
-      await waitFor(async () => {
-        expect(queryByTestId('task-hub-link')).toBeNull();
       });
     });
   });
@@ -321,67 +248,6 @@ describe('pipelineQuickSearchDetails', () => {
       );
       await waitFor(() => {
         expect(queryByTestId('task-tag-list')).toBeNull();
-      });
-    });
-  });
-
-  describe('Fetching Versions API', () => {
-    it('should not call the versions API multiple times for the same task', async () => {
-      const taskWithoutVersion = cloneDeep({ ...tektonHubProps.selectedItem });
-      taskWithoutVersion.attributes.versions = [];
-
-      await act(async () => {
-        render(
-          <PipelineQuickSearchDetails
-            {...tektonHubProps}
-            selectedItem={taskWithoutVersion}
-          />,
-        );
-      });
-
-      await act(async () => {
-        render(
-          <PipelineQuickSearchDetails
-            {...tektonHubProps}
-            selectedItem={tektonHubProps.selectedItem}
-          />,
-        );
-      });
-
-      await waitFor(() => {
-        expect(coFetchMock).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('should call the versions API multiple times for different task', async () => {
-      const taskWithoutVersion = cloneDeep({ ...tektonHubProps.selectedItem });
-      taskWithoutVersion.uid = '12345';
-      taskWithoutVersion.attributes.versions = [];
-
-      await act(async () => {
-        render(
-          <PipelineQuickSearchDetails
-            {...tektonHubProps}
-            selectedItem={taskWithoutVersion}
-          />,
-        );
-      });
-
-      const newTask = cloneDeep({ ...tektonHubProps.selectedItem });
-      newTask.uid = '54678';
-      newTask.attributes.versions = [];
-
-      await act(async () => {
-        render(
-          <PipelineQuickSearchDetails
-            {...tektonHubProps}
-            selectedItem={newTask}
-          />,
-        );
-      });
-
-      await waitFor(() => {
-        expect(coFetchMock).toHaveBeenCalledTimes(2);
       });
     });
   });

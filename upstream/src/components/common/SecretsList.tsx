@@ -4,7 +4,7 @@ import {
   useK8sWatchResources,
   WatchK8sResources,
 } from '@openshift-console/dynamic-plugin-sdk';
-import type { FC } from 'react';
+import * as React from 'react';
 import { SecretModel, ServiceAccountModel } from '../../models';
 import { PIPELINE_SERVICE_ACCOUNT } from '../../consts';
 import { SecretKind, SecretType } from '../../types';
@@ -28,7 +28,7 @@ const secretTypes = [
   SecretType.sshAuth,
 ];
 
-export const Secrets: FC<SecretsProps> = ({
+export const Secrets: React.FC<SecretsProps> = ({
   secrets,
   serviceaccounts,
 }) => {
@@ -62,7 +62,7 @@ export const Secrets: FC<SecretsProps> = ({
   );
 };
 
-const SecretsList: FC<SecretsListProps> = ({ namespace }) => {
+const SecretsList: React.FC<SecretsListProps> = ({ namespace }) => {
   const watchedResources: WatchK8sResources<{
     secrets: SecretKind[];
     serviceaccounts: ServiceAccountType;

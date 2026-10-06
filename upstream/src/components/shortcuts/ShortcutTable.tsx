@@ -1,6 +1,6 @@
-import type { ReactNode, FC } from 'react';
+import * as React from 'react';
 
-const ShortcutTable: FC<{ children?: ReactNode }> = ({ children }) => (
+const ShortcutTable: React.FC = ({ children }) => (
   <table>
     <tbody>{children}</tbody>
   </table>

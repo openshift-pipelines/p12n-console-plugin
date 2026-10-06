@@ -2,7 +2,6 @@ import {
   consoleFetchText,
   k8sGet,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { LaunchOverlay } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/OverlayProvider';
 import { saveAs } from 'file-saver';
 import { LOG_SOURCE_TERMINATED, LOG_SOURCE_WAITING } from '../../consts';
 import { PodModel } from '../../models';
@@ -12,7 +11,7 @@ import {
   PodKind,
   TaskRunKind,
 } from '../../types';
-import { ModalErrorContent } from '../modals/error-modal';
+import { errorModal } from '../modals/error-modal';
 import { t } from '../utils/common-utils';
 import { resourceURL } from '../utils/k8s-utils';
 import {
@@ -64,7 +63,6 @@ export const getRenderContainers = (
 const getOrderedStepsFromPod = (
   name: string,
   ns: string,
-  launchOverlay: LaunchOverlay,
 ): Promise<ContainerStatus[]> => {
   return k8sGet({ model: PodModel, name, ns })
     .then((pod: PodKind) => {
@@ -74,7 +72,7 @@ const getOrderedStepsFromPod = (
       );
     })
     .catch((err) => {
-      launchOverlay(ModalErrorContent, {
+      errorModal({
         error: err.message || t('Error downloading logs.'),
       });
       return [];
@@ -99,18 +97,14 @@ export const getDownloadAllLogsCallback = (
   taskRuns: TaskRunKind[],
   namespace: string,
   pipelineRunName: string,
-  launchOverlay: LaunchOverlay,
+  isDevConsoleProxyAvailable?: boolean,
 ): (() => Promise<Error | null>) => {
   const getWatchUrls = async (): Promise<StepsWatchUrl> => {
     const stepsList: ContainerStatus[][] = await Promise.all(
       sortedTaskRunNames.map((currTask) => {
         const { status } =
           taskRuns.find((t) => t.metadata.name === currTask) ?? {};
-        return getOrderedStepsFromPod(
-          status?.podName,
-          namespace,
-          launchOverlay,
-        );
+        return getOrderedStepsFromPod(status?.podName, namespace);
       }),
     );
     return sortedTaskRunNames.reduce((acc, currTask, i) => {
@@ -181,9 +175,10 @@ export const getDownloadAllLogsCallback = (
         }
       } else {
         // eslint-disable-next-line no-await-in-loop
-        allLogs += await getTaskRunLog(task.taskRunPath).then(
-          (log) => `${tasks[currTask].name.toUpperCase()}\n\n${log}\n\n`,
-        );
+        allLogs += await getTaskRunLog(
+          task.taskRunPath,
+          isDevConsoleProxyAvailable,
+        ).then((log) => `${tasks[currTask].name.toUpperCase()}\n\n${log}\n\n`);
       }
     }
     const buffer = new LineBuffer(null);
@@ -205,6 +200,7 @@ export const getDownloadAllLogsCallbackMultiCluster = (
   taskRuns: TaskRunKind[],
   namespace: string,
   pipelineRunName: string,
+  isDevConsoleProxyAvailable?: boolean,
 ): (() => Promise<Error | null>) => {
   const fetchMcLogs = async (): Promise<Error | null> => {
     let allLogs = '';
@@ -251,7 +247,10 @@ export const getDownloadAllLogsCallbackMultiCluster = (
 
         if (taskRunPath) {
           try {
-            const log = await getTaskRunLog(taskRunPath);
+            const log = await getTaskRunLog(
+              taskRunPath,
+              isDevConsoleProxyAvailable,
+            );
             allLogs += `${log}\n\n`;
           } catch (trErr) {
             allLogs += `Error fetching logs from Tekton Results: ${
@@ -296,7 +295,10 @@ export const getDownloadAllLogsCallbackMultiCluster = (
 
           if (taskRunPath) {
             try {
-              const log = await getTaskRunLog(taskRunPath);
+              const log = await getTaskRunLog(
+                taskRunPath,
+                isDevConsoleProxyAvailable,
+              );
               allLogs += `${container.name.toUpperCase()}\n\n${log}\n\n`;
             } catch (trErr) {
               allLogs += `${container.name.toUpperCase()}\n\nError fetching logs (multi-cluster: ${
@@ -323,4 +325,26 @@ export const getDownloadAllLogsCallbackMultiCluster = (
   };
 
   return () => fetchMcLogs();
+};
+
+/**
+ * Simulate terminal carriage return (\r) behavior: \r moves the cursor to
+ * the beginning of the current line, so subsequent text overwrites from
+ * position 0.  We keep only the last non-empty segment after splitting by
+ * \r, which matches what `kubectl logs` displays for progress-style output.
+ */
+export const processCarriageReturns = (text: string): string => {
+  if (!text || !text.includes('\r')) return text;
+
+  return text
+    .split('\n')
+    .map((line) => {
+      if (!line.includes('\r')) return line;
+      const segments = line.split('\r');
+      for (let i = segments.length - 1; i >= 0; i--) {
+        if (segments[i] !== '') return segments[i];
+      }
+      return '';
+    })
+    .join('\n');
 };

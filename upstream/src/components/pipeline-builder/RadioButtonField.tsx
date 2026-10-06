@@ -1,17 +1,17 @@
-import type { ReactText, ReactNode, FC } from 'react';
+import * as React from 'react';
 import { Radio } from '@patternfly/react-core';
 import { useField, useFormikContext, FormikValues } from 'formik';
 import { getFieldId } from '../pipelines-details/multi-column-field/utils';
 import { FieldProps } from '../pipelines-details/multi-column-field/types';
 
 interface RadioButtonFieldProps extends FieldProps {
-  value: ReactText;
-  description?: ReactNode;
-  onChange?: (value: ReactText) => void;
+  value: React.ReactText;
+  description?: React.ReactNode;
+  onChange?: (value: React.ReactText) => void;
   isChecked?: boolean;
 }
 
-const RadioButtonField: FC<RadioButtonFieldProps> = ({
+const RadioButtonField: React.FC<RadioButtonFieldProps> = ({
   name,
   label,
   value,

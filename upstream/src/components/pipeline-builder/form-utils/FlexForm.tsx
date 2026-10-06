@@ -1,10 +1,10 @@
-import type { ReactNode, HTMLProps, FC } from 'react';
+import * as React from 'react';
 
 type FlexFormProps = {
-  children?: ReactNode;
+  children?: React.ReactNode;
 };
 
-const FlexForm: FC<FlexFormProps & HTMLProps<HTMLFormElement>> = ({
+const FlexForm: React.FC<FlexFormProps & React.HTMLProps<HTMLFormElement>> = ({
   children,
   ...props
 }) => (

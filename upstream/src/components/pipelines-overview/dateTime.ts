@@ -272,19 +272,19 @@ export const getDuration = (seconds: number, long?: boolean): string => {
   }
   if (hr > 0) {
     duration += long
-      ? t('{{value}} hour', { value: hr })
+      ? t('{{count}} hour', { count: hr })
       : t('{{hr}}h', { hr });
     duration += ' ';
   }
   if (min > 0) {
     duration += long
-      ? t('{{value}} minute', { value: min })
+      ? t('{{count}} minute', { count: min })
       : t('{{min}}m', { min });
     duration += ' ';
   }
   if (sec > 0) {
     duration += long
-      ? t('{{value}} second', { value: sec })
+      ? t('{{count}} second', { count: sec })
       : t('{{sec}}s', { sec });
   }
 
@@ -334,12 +334,12 @@ export const fromNow = (
 
   if (options?.omitSuffix) {
     if (days) {
-      return t('{{value}} day', { value: days });
+      return t('{{count}} day', { count: days });
     }
     if (hours) {
-      return t('{{value}} hour', { value: hours });
+      return t('{{count}} hour', { count: hours });
     }
-    return t('{{value}} minute', { value: minutes });
+    return t('{{count}} minute', { count: minutes });
   }
 
   // Fallback to normal date/time formatting if Intl.RelativeTimeFormat is not

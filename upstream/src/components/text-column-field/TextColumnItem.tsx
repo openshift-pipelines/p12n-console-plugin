@@ -1,8 +1,8 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { TextColumnItemProps } from './text-column-types';
 import TextColumnItemContent from './TextColumnItemContent';
 
-const TextColumnItem: FC<TextColumnItemProps> = (props) => {
+const TextColumnItem: React.FC<TextColumnItemProps> = (props) => {
   return (
     <TextColumnItemContent
       {...props}

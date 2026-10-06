@@ -1,5 +1,4 @@
-import type { FunctionComponent } from 'react';
-import { useRef, useMemo } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@patternfly/react-core';
 import {
@@ -15,10 +14,10 @@ import {
   WhenDecorator,
   WithContextMenuProps,
   WithSelectionProps,
-  observer,
 } from '@patternfly/react-topology';
 import classNames from 'classnames';
-import { Link } from 'react-router';
+import { observer } from 'mobx-react';
+import { Link } from 'react-router-dom-v5-compat';
 import { NodeType } from './const';
 import { PipelineRunModel, TaskModel } from '../../models';
 import { getReferenceForModel } from '../pipelines-overview/utils';
@@ -39,7 +38,7 @@ type PipelineTaskNodeProps = {
 } & WithContextMenuProps &
   WithSelectionProps;
 
-const PipelineTaskNode: FunctionComponent<PipelineTaskNodeProps> = ({
+const PipelineTaskNode: React.FunctionComponent<PipelineTaskNodeProps> = ({
   element,
   onContextMenu,
   contextMenuOpen,
@@ -48,7 +47,7 @@ const PipelineTaskNode: FunctionComponent<PipelineTaskNodeProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const data = element.getData();
   const [hover, hoverRef] = useHover();
-  const taskRef = useRef();
+  const taskRef = React.useRef();
   const detailsLevel = useDetailsLevel();
   const isFinallyTask = element.getType() === NodeType.FINALLY_NODE;
   let resources;
@@ -125,7 +124,7 @@ const PipelineTaskNode: FunctionComponent<PipelineTaskNodeProps> = ({
       ? `${succeededStepsCount}/${stepStatusList.length}`
       : null;
 
-  const passedData = useMemo(() => {
+  const passedData = React.useMemo(() => {
     const newData = { ...data };
     Object.keys(newData).forEach((key) => {
       if (newData[key] === undefined) {
@@ -223,4 +222,4 @@ const PipelineTaskNode: FunctionComponent<PipelineTaskNodeProps> = ({
   );
 };
 
-export default observer(PipelineTaskNode);
+export default React.memo(observer(PipelineTaskNode));

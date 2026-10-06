@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 
 import './LogSnippet.scss';
 
@@ -7,7 +7,7 @@ type LogSnippetProps = {
   message: string;
 };
 
-const LogSnippet: FC<LogSnippetProps> = ({ logSnippet, message }) => {
+const LogSnippet: React.FC<LogSnippetProps> = ({ logSnippet, message }) => {
   return (
     <div className="opp-log-snippet">
       <p className="opp-log-snippet__status-message">{message}</p>

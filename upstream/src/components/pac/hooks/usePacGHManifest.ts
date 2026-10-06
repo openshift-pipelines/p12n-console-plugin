@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { PAC_GH_APP_NAME } from '../const';
 import { getControllerUrl } from '../pac-utils';
 
@@ -14,11 +14,11 @@ type GHManifestData = {
 };
 
 export const usePacGHManifest = (): { loaded: boolean; manifestData: GHManifestData } => {
-  const [elRoute, setElRoute] = useState<string>();
-  const [loaded, setLoded] = useState<boolean>(false);
+  const [elRoute, setElRoute] = React.useState<string>();
+  const [loaded, setLoded] = React.useState<boolean>(false);
   const locURL = window.location.href;
 
-  useEffect(() => {
+  React.useEffect(() => {
     const getELRoute = async () => {
       try {
         const controllerUrl = await getControllerUrl();

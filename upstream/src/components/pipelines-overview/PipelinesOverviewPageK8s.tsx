@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flex, FlexItem, PageSection, Title } from '@patternfly/react-core';
 import {
@@ -23,10 +23,9 @@ import {
   usePersistedTimespanWithUrl,
   usePersistedIntervalWithUrl,
 } from '../hooks/usePersistedFiltersForPipelineOverview';
-
 import './PipelinesOverview.scss';
 
-const PipelinesOverviewPageK8s: FC = () => {
+const PipelinesOverviewPageK8s: React.FC = () => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const canListNS = useFlag(FLAGS.CAN_LIST_NS);
   const [activeNamespace, setActiveNamespace] = useActiveNamespace();
@@ -57,13 +56,13 @@ const PipelinesOverviewPageK8s: FC = () => {
 
   return (
     <>
-      <PageSection hasBodyWrapper={false} className="pf-v6-u-pl-md">
+      <PageSection variant="light" className="pf-v5-u-pl-md">
         <Title headingLevel="h2">{t('Overview')}</Title>
       </PageSection>
-      <div className="pf-v6-u-m-md">
+      <div className="pf-v5-u-m-md">
         <K8sDataLimitationAlert />
       </div>
-      <Flex className="pf-v6-u-pl-md pf-v6-u-pr-md pf-v6-u-mb-md">
+      <Flex className="project-dropdown-label__flex">
         <FlexItem>
           <NameSpaceDropdown
             selected={activeNamespace}
@@ -77,7 +76,7 @@ const PipelinesOverviewPageK8s: FC = () => {
           <RefreshDropdown interval={interval} setInterval={setInterval} />
         </FlexItem>
       </Flex>
-      <div className="pf-v6-u-pl-md pf-v6-u-pr-md">
+      <div className="pipeline-overview__duration-total-plr-grid">
         <PipelineRunsStatusCardK8s
           timespan={timespan}
           domain={{ y: [0, 100] }}
@@ -86,13 +85,12 @@ const PipelinesOverviewPageK8s: FC = () => {
           interval={interval}
         />
 
-        <Flex
-          className="pf-v6-u-mt-md"
-          alignItems={{ default: 'alignItemsStretch' }}
-          gap={{ default: 'gapMd' }}
-          flexWrap={{ default: 'wrap' }}
-        >
-          <FlexItem flex={{ default: 'flex_1' }}>
+        <Flex>
+          <FlexItem
+            spacer={{ default: 'spacerXs' }}
+            grow={{ default: 'grow' }}
+            className="pipelines-overview__cards"
+          >
             <PipelineRunsDurationCardK8s
               namespace={activeNamespace}
               timespan={timespan}
@@ -100,7 +98,11 @@ const PipelinesOverviewPageK8s: FC = () => {
               bordered={true}
             />
           </FlexItem>
-          <FlexItem flex={{ default: 'flex_1' }}>
+          <FlexItem
+            spacer={{ default: 'spacerXs' }}
+            grow={{ default: 'grow' }}
+            className="pipelines-overview__cards"
+          >
             <PipelineRunsTotalCardK8s
               namespace={activeNamespace}
               timespan={timespan}
@@ -108,7 +110,10 @@ const PipelinesOverviewPageK8s: FC = () => {
               bordered={true}
             />
           </FlexItem>
-          <FlexItem flex={{ default: 'flex_1', xl: 'flex_2' }}>
+          <FlexItem
+            grow={{ default: 'grow' }}
+            className="pipelines-overview__cards"
+          >
             <PipelineRunsNumbersChartK8s
               namespace={activeNamespace}
               timespan={timespan}
@@ -118,14 +123,12 @@ const PipelinesOverviewPageK8s: FC = () => {
             />
           </FlexItem>
         </Flex>
-        <div className="pf-v6-u-mt-md">
-          <PipelineRunsListPageK8s
-            namespace={activeNamespace}
-            timespan={timespan}
-            interval={interval}
-            bordered
-          />
-        </div>
+        <PipelineRunsListPageK8s
+          namespace={activeNamespace}
+          timespan={timespan}
+          interval={interval}
+          bordered
+        />
       </div>
     </>
   );

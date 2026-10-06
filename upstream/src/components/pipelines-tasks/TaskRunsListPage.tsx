@@ -1,7 +1,7 @@
-import type { FC } from 'react';
+import * as React from 'react';
+import Helmet from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import {
-  DocumentTitle,
   K8sResourceCommon,
   ListPageCreateLink,
   ListPageHeader,
@@ -22,7 +22,7 @@ interface TaskRunsListPageProps {
 
 const taskRunModelRef = getReferenceForModel(TaskRunModel);
 
-const TaskRunsListPage: FC<TaskRunsListPageProps> = ({
+const TaskRunsListPage: React.FC<TaskRunsListPageProps> = ({
   showPipelineColumn = true,
   namespace,
   showTitle = true,
@@ -32,9 +32,9 @@ const TaskRunsListPage: FC<TaskRunsListPageProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <>
-      <DocumentTitle>
-        {t('TaskRuns')}
-      </DocumentTitle>
+      <Helmet>
+        <title>{t('TaskRuns')}</title>
+      </Helmet>
       {showTitle && (
         <ListPageHeader title={t('TaskRuns')}>
           <ListPageCreateLink

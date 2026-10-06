@@ -1,9 +1,11 @@
-import { createContext, useState, useEffect } from 'react';
+import * as React from 'react';
 import { AlertVariant } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import {
   WatchK8sResource,
+  useAccessReview,
   useActiveNamespace,
+  useActivePerspective,
 } from '@openshift-console/dynamic-plugin-sdk';
 import {
   getGroupVersionKindForModel,
@@ -16,7 +18,12 @@ import {
   ApproverStatusResponse,
 } from '../../../types';
 import { ApprovalTaskModel } from '../../../models';
-import { ApprovalLabels, ApprovalFields } from '../../../consts';
+import {
+  ApprovalLabels,
+  ApprovalFields,
+  DEV_PERSPECTIVE_BASE_PATH,
+  ADMIN_PERSPECTIVE_BASE_PATH,
+} from '../../../consts';
 import { useToast } from '../../toast/useToast';
 import { useActiveUserWithUpdate } from '../../hooks/hooks';
 import { isUserAuthorizedForApproval } from '../../utils/approval-group-utils';
@@ -35,7 +42,7 @@ const getPipelineRunsofApprovals = (
   return pipelineRuns;
 };
 
-export const PipelineApprovalContext = createContext({});
+export const PipelineApprovalContext = React.createContext({});
 
 export const PipelineApprovalContextProvider = PipelineApprovalContext.Provider;
 
@@ -44,11 +51,21 @@ export const usePipelineApprovalToast = () => {
   const { addToast, removeToast } = useToast();
   const [namespace] = useActiveNamespace();
   const { currentUser, updateUserInfo } = useActiveUserWithUpdate();
-  const [currentToasts, setCurrentToasts] = useState<{
+  const [currentToasts, setCurrentToasts] = React.useState<{
     [key: string]: { toastId: string };
   }>({});
-  const devconsolePath = `/dev-pipelines/ns/${namespace}/approvals?rowFilter-status=pending`;
-  const adminconsolePath = `pipelines/all-namespaces/approvals?rowFilter-status=pending`;
+  const [perspective] = useActivePerspective();
+  const basePath =
+    perspective.toLowerCase() === 'dev'
+      ? DEV_PERSPECTIVE_BASE_PATH
+      : ADMIN_PERSPECTIVE_BASE_PATH;
+  const currentNsPath = `${basePath}/ns/${namespace}/approvals?rowFilter-status=pending`;
+
+  const [canAccessAllNamespace] = useAccessReview({
+    group: '',
+    resource: 'namespaces',
+    verb: 'list',
+  });
 
   const approvalsResource: WatchK8sResource = {
     groupVersionKind: getGroupVersionKindForModel(ApprovalTaskModel),
@@ -56,21 +73,32 @@ export const usePipelineApprovalToast = () => {
   };
   const [approvalTasks] =
     useK8sWatchResource<ApprovalTaskKind[]>(approvalsResource);
-  useEffect(() => {
-    if (currentToasts?.current?.toastId) {
-      removeToast(currentToasts.current.toastId);
-      setCurrentToasts((toasts) => ({ ...toasts, current: { toastId: '' } }));
-    }
-    if (currentToasts?.other?.toastId) {
-      removeToast(currentToasts.other.toastId);
-      setCurrentToasts((toasts) => ({ ...toasts, other: { toastId: '' } }));
-    }
-  }, [approvalTasks, currentUser.username, t, addToast, removeToast]);
+  React.useEffect(() => {
+    Object.entries(currentToasts).forEach(([key, { toastId }]) => {
+      if (toastId) {
+        removeToast(toastId);
+        setCurrentToasts((toasts) => ({ ...toasts, [key]: { toastId: '' } }));
+      }
+    });
+    //cleanup to removeToast
+    return () => {
+      Object.entries(currentToasts).forEach(([key, { toastId }]) => {
+        if (toastId) {
+          removeToast(toastId);
+        }
+      });
+    };
+  }, [
+    approvalTasks,
+    currentUser.username,
+    t,
+    addToast,
+    removeToast,
+    namespace,
+  ]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const processApprovalTasks = async () => {
-      let toastID = '';
-
       // Filter approval tasks for current user with async group checking
       const userApprovalTasksInWait = [];
       for (const approvalTask of approvalTasks) {
@@ -132,50 +160,89 @@ export const usePipelineApprovalToast = () => {
         ).size;
 
         if (uniquePipelineRuns > 0) {
-          toastID = addToast({
+          const toastID = addToast({
             variant: AlertVariant.custom,
             title: t('Task approval required'),
             content: (
               <ApprovalToastContent
                 type="current"
                 uniquePipelineRuns={uniquePipelineRuns}
-                devconsolePath={devconsolePath}
+                path={currentNsPath}
               />
             ),
             timeout: 25000,
             dismissible: true,
           }) as any;
+          setCurrentToasts((toasts) => ({
+            ...toasts,
+            current: { toastId: toastID },
+          }));
         }
-        setCurrentToasts((toasts) => ({
-          ...toasts,
-          current: { toastId: toastID },
-        }));
       }
 
       if (otherNsApprovalTasks.length > 0) {
-        const uniquePipelineRuns = new Set(
-          getPipelineRunsofApprovals(otherNsApprovalTasks),
-        ).size;
+        const tasksByNamespace = otherNsApprovalTasks.reduce<
+          Record<string, ApprovalTaskKind[]>
+        >((acc, task) => {
+          const ns = task?.metadata?.namespace;
+          if (ns) {
+            acc[ns] = acc[ns] || [];
+            acc[ns].push(task);
+          }
+          return acc;
+        }, {});
 
-        if (uniquePipelineRuns > 0) {
-          toastID = addToast({
+        if (canAccessAllNamespace) {
+          const allNsPath = `${basePath}/all-namespaces/approvals?rowFilter-status=pending`;
+          const totalPipelineRuns = new Set(
+            getPipelineRunsofApprovals(otherNsApprovalTasks),
+          ).size;
+          const toastId = addToast({
             variant: AlertVariant.custom,
             title: t('Task approval required'),
             content: (
               <ApprovalToastContent
-                type="other"
-                uniquePipelineRuns={uniquePipelineRuns}
-                adminconsolePath={adminconsolePath}
+                type="admin"
+                uniquePipelineRuns={totalPipelineRuns}
+                path={allNsPath}
               />
             ),
             timeout: 25000,
             dismissible: true,
+          }) as any;
+          setCurrentToasts((toasts) => ({
+            ...toasts,
+            [`all-ns`]: { toastId: toastId },
+          }));
+        } else {
+          Object.entries(tasksByNamespace).forEach(([ns, tasks]) => {
+            const uniquePipelineRuns = new Set(
+              getPipelineRunsofApprovals(tasks),
+            ).size;
+
+            if (uniquePipelineRuns > 0) {
+              const nsPath = `${basePath}/ns/${ns}/approvals?rowFilter-status=pending`;
+              const toastID = addToast({
+                variant: AlertVariant.custom,
+                title: t('Task approval required'),
+                content: (
+                  <ApprovalToastContent
+                    type="other"
+                    uniquePipelineRuns={uniquePipelineRuns}
+                    path={nsPath}
+                    namespaceName={ns}
+                  />
+                ),
+                timeout: 25000,
+                dismissible: true,
+              }) as any;
+              setCurrentToasts((toasts) => ({
+                ...toasts,
+                [`other-${ns}`]: { toastId: toastID },
+              }));
+            }
           });
         }
-        setCurrentToasts((toasts) => ({
-          ...toasts,
-          other: { toastId: toastID },
-        }));
       }
     };
 
@@ -186,7 +253,9 @@ export const usePipelineApprovalToast = () => {
     namespace,
     t,
     addToast,
-    devconsolePath,
-    adminconsolePath,
+    basePath,
+    currentNsPath,
+    updateUserInfo,
+    canAccessAllNamespace,
   ]);
 };

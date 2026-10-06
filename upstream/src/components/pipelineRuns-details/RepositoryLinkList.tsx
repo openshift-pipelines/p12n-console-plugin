@@ -1,6 +1,6 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import {
   ClipboardCopy,
   ClipboardCopyVariant,
@@ -34,7 +34,7 @@ export type RepositoryLinkListProps = {
   pipelineRun: PipelineRunKind;
 };
 
-const RepositoryLinkList: FC<RepositoryLinkListProps> = ({
+const RepositoryLinkList: React.FC<RepositoryLinkListProps> = ({
   pipelineRun,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
@@ -53,7 +53,7 @@ const RepositoryLinkList: FC<RepositoryLinkListProps> = ({
   if (!repoName) return null;
 
   return (
-    <DescriptionList className="pf-v6-u-mt-md">
+    <DescriptionList className="pf-v5-u-mt-md">
       <DescriptionListGroup>
         <DescriptionListTerm>{t('Repository')}</DescriptionListTerm>
         <DescriptionListDescription>

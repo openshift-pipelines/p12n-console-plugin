@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { useField } from 'formik';
 import { Trans, useTranslation } from 'react-i18next';
 import { PipelineKind } from '../../types';
@@ -15,7 +15,9 @@ type TriggerTemplateSelectorProps = {
   placeholder: string;
 };
 
-const TriggerTemplateSelector: FC<TriggerTemplateSelectorProps> = (props) => {
+const TriggerTemplateSelector: React.FC<TriggerTemplateSelectorProps> = (
+  props,
+) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const { name, pipeline, placeholder } = props;
   const {
@@ -46,12 +48,10 @@ const TriggerTemplateSelector: FC<TriggerTemplateSelectorProps> = (props) => {
       />
       {selection ? (
         <div className="co-break-word odc-trigger-template-selector__confirmationMessage">
-          <Trans
-            t={t}
-            i18nKey="Are you sure you want to remove <1>{{selection}}</1> from <4>{{pipelineName}}</4>?"
-            values={{ selection, pipelineName }}
-            components={{ 1: <b />, 4: <b /> }}
-          />
+          <Trans t={t}>
+            Are you sure you want to remove <b>{{ selection }}</b> from{' '}
+            <b>{{ pipelineName }}</b>?
+          </Trans>
         </div>
       ) : (
         <div className="odc-trigger-template-selector__pfModalHack" />

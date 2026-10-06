@@ -1,7 +1,7 @@
-import type { FC } from 'react';
+import * as React from 'react';
+import Helmet from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import {
-  DocumentTitle,
   ListPageCreateLink,
   ListPageHeader,
   getGroupVersionKindForModel,
@@ -19,7 +19,7 @@ type TasksListPageProps = {
   hideNameLabelFilters?: boolean;
 };
 
-const TasksListPage: FC<TasksListPageProps> = ({
+const TasksListPage: React.FC<TasksListPageProps> = ({
   namespace,
   showTitle = true,
   hideColumnManagement = false,
@@ -28,9 +28,9 @@ const TasksListPage: FC<TasksListPageProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   return (
     <>
-      <DocumentTitle>
-        {t('Tasks')}
-      </DocumentTitle>
+      <Helmet>
+        <title>{t('Tasks')}</title>
+      </Helmet>
       {showTitle && (
         <ListPageHeader title={t('Tasks')}>
           <ListPageCreateLink

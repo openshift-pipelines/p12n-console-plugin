@@ -1,7 +1,5 @@
-import type { FormEvent, ReactNode, FC } from 'react';
-import { useRef } from 'react';
+import * as React from 'react';
 import {
-  Bullseye,
   InputGroup,
   InputGroupText,
   Spinner,
@@ -17,15 +15,14 @@ interface QuickSearchBarProps {
   autoFocus: boolean;
   searchTerm: string;
   onSearch: (
-    event: FormEvent<HTMLInputElement>,
+    event: React.FormEvent<HTMLInputElement>,
     searchTerm: string,
   ) => void;
   searchPlaceholder: string;
-  icon?: ReactNode;
-  showError: boolean;
+  icon?: React.ReactNode;
 }
 
-const QuickSearchBar: FC<QuickSearchBarProps> = ({
+const QuickSearchBar: React.FC<QuickSearchBarProps> = ({
   showNoResults,
   itemsLoaded,
   autoFocus = false,
@@ -33,22 +30,19 @@ const QuickSearchBar: FC<QuickSearchBarProps> = ({
   searchPlaceholder,
   onSearch,
   icon,
-  showError
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const inputRef = useRef<HTMLInputElement>(null);
-  const spanRef = useRef<HTMLSpanElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const spanRef = React.useRef<HTMLSpanElement>(null);
   return (
     <InputGroup
       onClick={() => inputRef.current?.focus()}
       className="ocs-quick-search-bar"
       data-test="quick-search-bar"
     >
-      <Bullseye className="ocs-quick-search-bar__icon">
-        <InputGroupText isPlain >
-          {icon || <QuickSearchIcon />}
-        </InputGroupText>
-      </Bullseye>
+      <InputGroupText className="ocs-quick-search-bar__icon ocs-quick-search-bar__border-none">
+        {icon || <QuickSearchIcon />}
+      </InputGroupText>
       <div className="ocs-quick-search-bar__input-wrapper">
         {/* <span> is only used to calculate the width of input based on the text in search */}
         <span className="ocs-quick-search-bar__input-dummy" ref={spanRef}>
@@ -74,24 +68,15 @@ const QuickSearchBar: FC<QuickSearchBarProps> = ({
         />
         {itemsLoaded && showNoResults && (
           <InputGroupText
-            isPlain
-            className="ocs-quick-search-bar__message ocs-quick-search-bar__border-none"
+            className="ocs-quick-search-bar__no-results ocs-quick-search-bar__border-none"
             data-test="quick-search-no-results"
           >
             &mdash; {t('No results')}
           </InputGroupText>
         )}
-        {showError && (
-          <InputGroupText
-            isPlain
-            className="ocs-quick-search-bar__message ocs-quick-search-bar__border-none"
-          >
-            &mdash; {t('Unable to show results at the moment')}
-          </InputGroupText>
-        )}
       </div>
       {!itemsLoaded && (
-        <InputGroupText isPlain className="ocs-quick-search-bar__spinner">
+        <InputGroupText className="ocs-quick-search-bar__border-none ocs-quick-search-bar__spinner">
           <Spinner size="lg" />
         </InputGroupText>
       )}

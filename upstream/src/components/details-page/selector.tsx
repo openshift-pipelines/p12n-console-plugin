@@ -1,11 +1,11 @@
 import * as _ from 'lodash-es';
-import type { FC } from 'react';
+import * as React from 'react';
 import { SearchIcon } from '@patternfly/react-icons/dist/esm/icons/search-icon';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import { useTranslation } from 'react-i18next';
 import { selectorToString } from '../utils/k8s-utils';
 
-const Requirement: FC<RequirementProps> = ({
+const Requirement: React.FC<RequirementProps> = ({
   kind,
   requirements,
   namespace = '',
@@ -36,7 +36,7 @@ const Requirement: FC<RequirementProps> = ({
 };
 Requirement.displayName = 'Requirement';
 
-export const Selector: FC<SelectorProps> = ({
+export const Selector: React.FC<SelectorProps> = ({
   kind = 'Pod',
   selector = {},
   namespace = undefined,

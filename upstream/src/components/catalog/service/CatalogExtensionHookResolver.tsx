@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 import {
   CatalogExtensionHookOptions,
   ExtensionHook,
@@ -21,13 +21,13 @@ const CatalogExtensionHookResolver = function <T>({
 }: CatalogExtensionHookResolverProps<T>) {
   const [value, loaded, loadError] = useValue(options);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (loaded) onValueResolved(value, id);
     // unnecessary to run effect again if the onValueResolved callback changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, loaded, value]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (loadError && onValueError) onValueError(loadError, id);
     // unnecessary to run effect again if the onValueError callback changes
     // eslint-disable-next-line react-hooks/exhaustive-deps

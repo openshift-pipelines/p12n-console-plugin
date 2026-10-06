@@ -1,5 +1,4 @@
-import type { FC } from 'react';
-import { memo } from 'react';
+import * as React from 'react';
 import { ComponentFactory, Model } from '@patternfly/react-topology';
 import classNames from 'classnames';
 import PipelineVisualizationSurface from './PipelineVisualizationSurface';
@@ -13,7 +12,7 @@ type PipelineTopologyGraphProps = {
   showControlBar?: boolean;
 };
 
-const PipelineTopologyGraph: FC<PipelineTopologyGraphProps> = ({
+const PipelineTopologyGraph: React.FC<PipelineTopologyGraphProps> = ({
   builder,
   model,
   componentFactory,
@@ -34,4 +33,4 @@ const PipelineTopologyGraph: FC<PipelineTopologyGraphProps> = ({
   );
 };
 
-export default memo(PipelineTopologyGraph);
+export default React.memo(PipelineTopologyGraph);

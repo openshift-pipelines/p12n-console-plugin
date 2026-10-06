@@ -1,5 +1,5 @@
 import { ListPageHeader } from '@openshift-console/dynamic-plugin-sdk';
-import type { FC } from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { EventListenerModel } from '../../models';
 import EventListenersList from './EventListenersList';
@@ -10,7 +10,7 @@ type EventListenersListPageProps = {
   hideNameLabelFilters?: boolean;
 };
 
-const EventListenersListPage: FC<EventListenersListPageProps> = (
+const EventListenersListPage: React.FC<EventListenersListPageProps> = (
   props,
 ) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');

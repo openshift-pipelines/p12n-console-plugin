@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   ListPageFilter as ListPageFilterSDK,
   ListPageFilterProps,
@@ -6,7 +6,7 @@ import {
 
 import './ListPage.scss';
 
-export const ListPageFilter: FC<ListPageFilterProps> = (props) => {
+export const ListPageFilter: React.FC<ListPageFilterProps> = (props) => {
   return (
     <div className="cp-list-page-filter-toolbar">
       <ListPageFilterSDK {...props} />

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { PageSection, TextInputTypes } from '@patternfly/react-core';
 import MultiColumnField from './multi-column-field/MultiColumnField';
 import InputField from './multi-column-field/InputField';
@@ -18,7 +18,7 @@ type PipelineParametersProps = {
   className?: string;
 };
 
-const PipelineParameters: FC<PipelineParametersProps> = ({
+const PipelineParameters: React.FC<PipelineParametersProps> = ({
   addLabel,
   nameLabel,
   nameFieldName,
@@ -33,7 +33,7 @@ const PipelineParameters: FC<PipelineParametersProps> = ({
   className,
 }) => {
   return (
-    <PageSection hasBodyWrapper={false}  isFilled className={className}>
+    <PageSection variant="light" isFilled className={className}>
       <MultiColumnField
         data-test="pipeline-parameters"
         name={fieldName}

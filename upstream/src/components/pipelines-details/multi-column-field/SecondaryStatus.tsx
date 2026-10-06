@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import * as _ from 'lodash';
 
 type SecondaryStatusProps = {
@@ -7,7 +7,7 @@ type SecondaryStatusProps = {
   dataStatusID?: string;
 };
 
-const SecondaryStatus: FC<SecondaryStatusProps> = ({
+const SecondaryStatus: React.FC<SecondaryStatusProps> = ({
   status,
   className,
   dataStatusID,

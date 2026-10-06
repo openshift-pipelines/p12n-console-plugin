@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import {
   DescriptionList,
@@ -26,7 +26,7 @@ type DynamicResourceLinkListProps = {
   removeSpaceBelow?: boolean;
 };
 
-const DynamicResourceLinkList: FC<DynamicResourceLinkListProps> = ({
+const DynamicResourceLinkList: React.FC<DynamicResourceLinkListProps> = ({
   links = [],
   namespace,
   title,

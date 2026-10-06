@@ -1,5 +1,5 @@
 import { k8sGet } from '@openshift-console/dynamic-plugin-sdk';
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { PipelineModel } from '../../models';
 import { PipelineKind, PipelineRunKind } from '../../types';
 import { getPipelineFromPipelineRun } from '../utils/pipeline-augment';
@@ -7,8 +7,8 @@ import { getPipelineFromPipelineRun } from '../utils/pipeline-augment';
 export const usePipelineFromPipelineRun = (
   pipelineRun: PipelineRunKind,
 ): PipelineKind => {
-  const [pipeline, setPipeline] = useState<PipelineKind>(null);
-  useEffect(() => {
+  const [pipeline, setPipeline] = React.useState<PipelineKind>(null);
+  React.useEffect(() => {
     const emptyPipeline: PipelineKind = { spec: { tasks: [] } };
     const pipelineFromPipelineRun = getPipelineFromPipelineRun(pipelineRun);
     if (pipelineFromPipelineRun) {

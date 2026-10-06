@@ -1,22 +1,22 @@
-import type { ReactNode, FC } from 'react';
+import * as React from 'react';
 import { Split, SplitItem } from '@patternfly/react-core';
 
 import './ModalContent.scss';
 
 type ModalContentProps = {
-  icon?: ReactNode;
+  icon?: React.ReactNode;
   title: string;
   message: string;
 };
 
-const ModalContent: FC<ModalContentProps> = ({
+const ModalContent: React.FC<ModalContentProps> = ({
   icon,
   message,
   title,
 }) => {
   return (
     <Split className="odc-modal-content" hasGutter>
-      {icon && <SplitItem className='odc-modal-content__confirm-title'>{icon}</SplitItem>}
+      {icon && <SplitItem>{icon}</SplitItem>}
       <SplitItem isFilled>
         <h2 className="co-break-word odc-modal-content__confirm-title">
           {title}

@@ -1,5 +1,4 @@
-import type { FC, Ref } from 'react';
-import { useState, useCallback } from 'react';
+import * as React from 'react';
 import {
   Dropdown,
   DropdownItem,
@@ -19,14 +18,14 @@ interface TimeRangeDropdownProps {
   setTimespan: (t: number) => void;
 }
 
-const TimeRangeDropdown: FC<TimeRangeDropdownProps> = ({
+const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({
   timespan,
   setTimespan,
 }) => {
-  const [isOpen, setValue] = useState(false);
-  const toggleIsOpen = useCallback(() => setValue((v) => !v), []);
-  const setClosed = useCallback(() => setValue(false), []);
-  const onChange = useCallback(
+  const [isOpen, setValue] = React.useState(false);
+  const toggleIsOpen = React.useCallback(() => setValue((v) => !v), []);
+  const setClosed = React.useCallback(() => setValue(false), []);
+  const onChange = React.useCallback(
     (v: string) => setTimespan(parsePrometheusDuration(v)),
     [setTimespan],
   );
@@ -37,14 +36,14 @@ const TimeRangeDropdown: FC<TimeRangeDropdownProps> = ({
     ? TimeRangeOptions()
     : TimeRangeOptionsK8s();
   return (
-    (<div className="form-group">
+    <div className="form-group">
       <label>{t('Time Range')}</label>
       <div>
         <Dropdown
           className="pipeline-overview__variable-dropdown"
           isOpen={isOpen}
           onOpenChange={(isOpen: boolean) => setValue(isOpen)}
-          toggle={(toggleRef: Ref<MenuToggleElement>) => (
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
             <MenuToggle ref={toggleRef} onClick={toggleIsOpen}>
               {timeRangeOptions[formatPrometheusDuration(timespan)]}
             </MenuToggle>
@@ -66,7 +65,7 @@ const TimeRangeDropdown: FC<TimeRangeDropdownProps> = ({
           </DropdownList>
         </Dropdown>
       </div>
-    </div>)
+    </div>
   );
 };
 

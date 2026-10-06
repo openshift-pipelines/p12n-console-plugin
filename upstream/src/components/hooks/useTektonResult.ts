@@ -1,23 +1,123 @@
-import { Selector, useFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { useEffect, useState } from 'react';
-import { RepositoryFields, RepositoryLabels } from '../../consts';
-import { FLAGS, PipelineRunKind } from '../../types';
-import { getTaskRunLog } from '../utils/tekton-results';
-import { usePipelineRuns } from './useTaskRuns';
+import {
+  K8sResourceCommon,
+  Selector,
+  useFlag,
+} from '@openshift-console/dynamic-plugin-sdk';
+import { uniqBy } from 'lodash';
+import * as React from 'react';
+import {
+  FLAG_PIPELINE_TEKTON_RESULT_INSTALLED,
+  RepositoryFields,
+  RepositoryLabels,
+  TektonResourceLabel,
+} from '../../consts';
+import {
+  FLAGS,
+  PipelineRunKind,
+  RecordsList,
+  TaskRunKind,
+  TektonResultsOptions,
+} from '../../types';
+import {
+  getPipelineRuns,
+  getTaskRunLog,
+  getTaskRuns,
+} from '../utils/tekton-results';
+import { usePipelineRuns, useTaskRuns } from './useTaskRuns';
 
 export type GetNextPage = () => void | undefined;
+
+const useTRRuns = <Kind extends K8sResourceCommon>(
+  getRuns: (
+    namespace: string,
+    options?: TektonResultsOptions,
+    nextPageToken?: string,
+    isDevConsoleProxyAvailable?: boolean,
+  ) => Promise<[Kind[], RecordsList]>,
+  namespace: string,
+  options?: TektonResultsOptions,
+): [Kind[], boolean, unknown, GetNextPage] => {
+  const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
+  const [nextPageToken, setNextPageToken] = React.useState<string>(null);
+
+  const [result, setResult] = React.useState<
+    [Kind[], boolean, unknown, GetNextPage]
+  >([[], false, undefined, undefined]);
+
+  // reset token if namespace or options change
+  React.useEffect(() => {
+    setNextPageToken(null);
+  }, [namespace, options]);
+
+  // eslint-disable-next-line consistent-return
+  React.useEffect(() => {
+    let disposed = false;
+    (async () => {
+      try {
+        const tkPipelineRuns = await getRuns(
+          namespace,
+          options,
+          nextPageToken,
+          isDevConsoleProxyAvailable,
+        );
+        if (!disposed) {
+          const token = tkPipelineRuns[1].nextPageToken;
+          setResult((cur) => [
+            nextPageToken
+              ? [...cur[0], ...tkPipelineRuns[0]]
+              : tkPipelineRuns[0],
+            true,
+            undefined,
+            token
+              ? (() => {
+                  // ensure we can only call this once
+                  let executed = false;
+                  return () => {
+                    if (!disposed && !executed) {
+                      executed = true;
+                      // trigger the update
+                      setNextPageToken(token);
+                      return true;
+                    }
+                    return false;
+                  };
+                })()
+              : undefined,
+          ]);
+        }
+      } catch (e) {
+        if (!disposed) {
+          if (nextPageToken) {
+            setResult((cur) => [cur[0], cur[1], e, undefined]);
+          } else {
+            setResult([[], false, e, undefined]);
+          }
+        }
+      }
+    })();
+    return () => {
+      disposed = true;
+    };
+  }, [namespace, options, nextPageToken, getRuns]);
+  return result;
+};
+
+export const useTRPipelineRuns = (
+  namespace: string,
+  options?: TektonResultsOptions,
+): [PipelineRunKind[], boolean, unknown, GetNextPage] =>
+  useTRRuns<PipelineRunKind>(getPipelineRuns, namespace, options);
+
+export const useTRTaskRuns = (
+  namespace: string,
+  options?: TektonResultsOptions,
+): [TaskRunKind[], boolean, unknown, GetNextPage] =>
+  useTRRuns<TaskRunKind>(getTaskRuns, namespace, options);
 
 export const useGetPipelineRuns = (
   ns: string,
   options?: { name: string; kind: string },
-): [
-  PipelineRunKind[],
-  boolean,
-  boolean,
-  Error | undefined,
-  boolean,
-  boolean,
-] => {
+): [PipelineRunKind[], boolean, unknown, GetNextPage] => {
   let selector: Selector;
 
   if (options?.kind === 'Pipeline') {
@@ -31,12 +131,61 @@ export const useGetPipelineRuns = (
     };
   }
 
-  return usePipelineRuns(
+  const [pipelineRuns, loaded, error, getNextPage] = usePipelineRuns(
     ns,
     selector && {
       selector,
     },
   );
+
+  return React.useMemo(
+    () => [pipelineRuns, loaded, error, getNextPage],
+    [pipelineRuns, loaded, error, getNextPage],
+  );
+};
+
+export const useGetTaskRuns = (
+  ns: string,
+  pipelineRunName?: string,
+): [TaskRunKind[], boolean, unknown, GetNextPage] => {
+  let selector: Selector;
+  const isTektonResultEnabled = useFlag(FLAG_PIPELINE_TEKTON_RESULT_INSTALLED);
+
+  if (pipelineRunName) {
+    selector = {
+      matchLabels: {
+        [TektonResourceLabel.pipelinerun]: pipelineRunName,
+      },
+    };
+  }
+  const [k8sTaskRuns, k8sTaskRunsLoaded, k8sTaskRunsLoadError] = useTaskRuns(
+    ns,
+    pipelineRunName,
+  );
+  const [
+    resultTaskRuns,
+    resultTaskRunsLoaded,
+    resultTaskRunsLoadError,
+    getNextPage,
+  ] = isTektonResultEnabled
+    ? useTRTaskRuns(
+        ns,
+        pipelineRunName && {
+          selector,
+        },
+      )
+    : [[], true, undefined, undefined];
+
+  const mergedTaskRuns =
+    resultTaskRunsLoaded || k8sTaskRunsLoaded
+      ? uniqBy([...k8sTaskRuns, ...resultTaskRuns], (r) => r.metadata.uid)
+      : [];
+  return [
+    mergedTaskRuns,
+    resultTaskRunsLoaded || k8sTaskRunsLoaded,
+    k8sTaskRunsLoadError || resultTaskRunsLoadError,
+    getNextPage,
+  ];
 };
 
 export const useTRTaskRunLog = (
@@ -44,14 +193,14 @@ export const useTRTaskRunLog = (
   taskRunName: string,
   taskRunPath: string,
 ): [string, boolean, unknown] => {
-  const [result, setResult] = useState<[string, boolean, unknown]>([
+  const [result, setResult] = React.useState<[string, boolean, unknown]>([
     null,
     false,
     undefined,
   ]);
   const isDevConsoleProxyAvailable = useFlag(FLAGS.DEVCONSOLE_PROXY);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let disposed = false;
     if (namespace && taskRunName) {
       (async () => {

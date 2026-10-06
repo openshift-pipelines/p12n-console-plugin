@@ -1,41 +1,41 @@
 .odc-task-list-node {
-  border: 1px solid var(--pf-t--global--border--color--default);
+  border: 1px solid var(--pf-v5-global--BorderColor--light-100);
 
   &__container {
     overflow: hidden;
-    box-shadow: var(--pf-v6-c-dropdown__menu--BoxShadow);
+    box-shadow: var(--pf-v5-c-dropdown__menu--BoxShadow);
   }
   &__trigger-background {
-    stroke: var(--pf-t--global--border--color--default);
-    fill: var(--pf-t--global--background--color--primary--default);
+    stroke: var(--pf-v5-global--BorderColor--100);
+    fill: var(--pf-v5-global--BackgroundColor--light-100);
     &.is-disabled {
-      fill: var(--pf-t--global--color--nonstatus--gray--200);
+      fill: var(--pf-v5-global--disabled-color--300);
     }
   }
   &__trigger-underline {
-    fill: var(--pf-t--global--text--color--regular);
+    fill: var(--pf-v5-global--Color--100);
     &--hover {
-      fill: var(--pf-t--global--color--brand--default);
+      fill: var(--pf-v5-global--link--Color);
     }
   }
   &__trigger {
-    font-size: var(--pf-t--global--font--size--sm);
+    font-size: var(--pf-v5-global--FontSize--md);
     text-anchor: middle;
     dominant-baseline: middle;
     cursor: pointer;
   }
   &__trigger-disabled {
-    fill: var(--pf-t--global--text--color--disabled);
+    fill: var(--pf-v5-global--disabled-color--100);
   }
   &__list-items {
     max-height: 350px;
     overflow: auto;
   }
   &__divider {
-    border-color: var(--pf-t--global--border--color--default);
+    border-color: var(--pf-v5-global--BorderColor--100);
     margin: 0;
   }
   &__render-text {
-    fill: var(--pf-t--global--text--color--regular);
+    fill: var(--pf-v5-global--Color--100);
   }
 }

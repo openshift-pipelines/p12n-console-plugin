@@ -1,9 +1,8 @@
-import type { FC } from 'react';
-import { useState } from 'react';
+import * as React from 'react';
 import { render } from '@testing-library/react';
 
 const useRerender = () => {
-  const [, setState] = useState(0);
+  const [, setState] = React.useState(0);
   return () => setState((value) => value + 1);
 };
 
@@ -16,7 +15,7 @@ interface TestComponentProps {
   rerenderRef: RerenderRef;
 }
 
-const TestHook: FC<TestComponentProps> = ({
+const TestHook: React.FC<TestComponentProps> = ({
   hook,
   result,
   rerenderRef,

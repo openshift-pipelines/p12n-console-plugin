@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import {
   DescriptionList,
   DescriptionListDescription,
@@ -17,7 +17,7 @@ type TriggerResourceLinksProps = {
   model: K8sKind;
   links: RouteTemplate[];
 };
-const TriggerResourceLinks: FC<TriggerResourceLinksProps> = ({
+const TriggerResourceLinks: React.FC<TriggerResourceLinksProps> = ({
   links = [],
   namespace,
   model,

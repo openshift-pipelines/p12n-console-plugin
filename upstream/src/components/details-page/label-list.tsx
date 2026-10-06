@@ -1,7 +1,6 @@
-import type { FC } from 'react';
-import { Component } from 'react';
+import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import classNames from 'classnames';
 import * as _ from 'lodash-es';
 import {
@@ -11,7 +10,7 @@ import {
 import { K8sResourceKindReference } from '@openshift-console/dynamic-plugin-sdk';
 import { kindForReference } from '../utils/k8s-utils';
 
-export const Label: FC<LabelProps> = ({ kind, name, value, expand }) => {
+export const Label: React.SFC<LabelProps> = ({ kind, name, value, expand }) => {
   const href = `/search?kind=${kind}&q=${
     value ? encodeURIComponent(`${name}=${value}`) : name
   }`;
@@ -21,7 +20,7 @@ export const Label: FC<LabelProps> = ({ kind, name, value, expand }) => {
   return (
     <>
       <PfLabel className={klass}>
-        <Link className="pf-v6-c-label__content" to={href}>
+        <Link className="pf-v5-c-label__content" to={href}>
           <span className="co-label__key" data-test="label-key">
             {name}
           </span>
@@ -33,7 +32,7 @@ export const Label: FC<LabelProps> = ({ kind, name, value, expand }) => {
   );
 };
 
-class TranslatedLabelList extends Component<LabelListProps> {
+class TranslatedLabelList extends React.Component<LabelListProps> {
   shouldComponentUpdate(nextProps) {
     return !_.isEqual(nextProps, this.props);
   }

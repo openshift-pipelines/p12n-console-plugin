@@ -1,10 +1,19 @@
-import type { ReactNode, ReactElement, PropsWithChildren, FC } from 'react';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
+  Dropdown,
+  DropdownItem,
+  DropdownItemProps,
+  DropdownList,
   Flex,
   FlexItem,
+  MenuToggle,
+  MenuToggleElement,
   PageGroup,
   PageSection,
-  Content,
+  PageSectionVariants,
+  Text,
+  TextContent,
 } from '@patternfly/react-core';
 import {
   HorizontalNav,
@@ -17,33 +26,71 @@ import BreadCrumbs from './breadcrumbs/BreadCrumbs';
 import { getReferenceForModel } from '../pipelines-overview/utils';
 import './DetailsPage.scss';
 
+export type Action = {
+  type?: string;
+  key: string;
+  label: React.ReactNode;
+  hidden?: boolean;
+  disabledTooltip?: React.ReactNode;
+} & Omit<DropdownItemProps, 'label'>;
+
 type DetailsPageProps = {
   obj?: K8sResourceKind;
-  title: ReactNode;
+  title: React.ReactNode;
   headTitle?: string;
-  preComponent?: ReactNode;
-  children?: ReactNode;
-  footer?: ReactNode;
-  description?: ReactNode;
-  breadcrumbs?: ({ name: string; path: string } | ReactElement)[];
-  customActionMenu?: (kindObj: K8sModel, obj: K8sResourceKind) => ReactNode;
+  preComponent?: React.ReactNode;
+  children?: React.ReactNode;
+  footer?: React.ReactNode;
+  description?: React.ReactNode;
+  breadcrumbs?: ({ name: string; path: string } | React.ReactElement)[];
+  actions?: Action[];
   baseURL?: string;
   onTabSelect?: (selectedTabKey: string) => void;
   model?: K8sModel;
   pages?: NavPage[];
 };
 
-const DetailsPage: FC<PropsWithChildren<DetailsPageProps>> = ({
+const DetailsPage: React.FC<React.PropsWithChildren<DetailsPageProps>> = ({
   obj,
   title,
   preComponent = null,
   footer,
   description,
   breadcrumbs,
-  customActionMenu,
+  actions = [],
   model,
   pages,
 }) => {
+  const { t } = useTranslation('plugin__pipelines-console-plugin');
+  const [isOpen, setIsOpen] = React.useState(false);
+  const toggleIsOpen = React.useCallback(() => setIsOpen((v) => !v), []);
+  const setClosed = React.useCallback(() => setIsOpen(false), []);
+
+  const dropdownItems = React.useMemo(
+    () =>
+      actions?.reduce((acc, action) => {
+        const { key, label, isDisabled, component, ...props } = action;
+        if (action.hidden) {
+          return acc;
+        }
+
+        acc.push(
+          <DropdownItem
+            key={key}
+            data-test={key}
+            isDisabled={isDisabled}
+            component={!isDisabled ? component : 'a'}
+            {...props}
+          >
+            {label}
+          </DropdownItem>,
+        );
+
+        return acc;
+      }, [] as React.ReactNode[]),
+    [actions],
+  );
+
   const renderTitle = () => {
     return (
       <div className="co-m-pane__name co-resource-item co-m-pane__heading">
@@ -65,35 +112,49 @@ const DetailsPage: FC<PropsWithChildren<DetailsPageProps>> = ({
 
   return (
     <PageGroup data-test="details" className="app-details">
-      <PageSection
-        hasBodyWrapper={false}
-        type="breadcrumb"
-        className="co-m-nav-title--detail"
-      >
+      <PageSection type="breadcrumb" className="co-m-nav-title--detail">
         {breadcrumbs && (
           <BreadCrumbs
             data-test="details__breadcrumbs"
             breadcrumbs={breadcrumbs}
           />
         )}
-        <Flex style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+        <Flex style={{ paddingTop: 'var(--pf-v5-global--spacer--md)' }}>
           <FlexItem>
-            <Content>
+            <TextContent>
               {renderTitle()}
-              {description && <Content component="p">{description}</Content>}
-            </Content>
+              {description && <Text component="p">{description}</Text>}
+            </TextContent>
           </FlexItem>
-          {customActionMenu && model && obj && (
+          {actions?.length ? (
             <FlexItem align={{ default: 'alignRight' }}>
-              {customActionMenu(model, obj)}
+              <Dropdown
+                data-test="details__actions"
+                onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+                onSelect={setClosed}
+                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    onClick={toggleIsOpen}
+                    isExpanded={isOpen}
+                  >
+                    {t('Actions')}
+                  </MenuToggle>
+                )}
+                isOpen={isOpen}
+              >
+                <DropdownList className="action-menu-dropdown">
+                  {dropdownItems}
+                </DropdownList>
+              </Dropdown>
             </FlexItem>
-          )}
+          ) : null}
         </Flex>
       </PageSection>
       {preComponent}
       <HorizontalNav pages={pages} resource={obj} />
       {footer && (
-        <PageSection hasBodyWrapper={false} isFilled={false}>
+        <PageSection variant={PageSectionVariants.light} isFilled={false}>
           {footer}
         </PageSection>
       )}

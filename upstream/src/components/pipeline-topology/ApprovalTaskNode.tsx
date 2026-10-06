@@ -1,9 +1,8 @@
-import type { FC } from 'react';
-import { useRef, useMemo, memo } from 'react';
+import * as React from 'react';
 import classnames from 'classnames';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom-v5-compat';
 import { Tooltip } from '@patternfly/react-core';
 import {
   observer,
@@ -63,7 +62,7 @@ interface ApprovalTaskComponentProps {
 
 const FILTER_ID = 'SvgTaskDropShadowFilterId';
 
-const ApprovalTaskComponent: FC<ApprovalTaskComponentProps> = ({
+const ApprovalTaskComponent: React.FC<ApprovalTaskComponentProps> = ({
   pipelineRunName,
   namespace,
   task,
@@ -77,8 +76,8 @@ const ApprovalTaskComponent: FC<ApprovalTaskComponentProps> = ({
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const showStatusState = !!pipelineRunName;
   const visualName = name || _.get(task, ['metadata', 'name'], '');
-  const nameRef = useRef();
-  const pillRef = useRef();
+  const nameRef = React.useRef();
+  const pillRef = React.useRef();
 
   const path = customTask?.metadata?.name
     ? `/dev-pipelines/ns/${namespace}/approvals?name=${customTask?.metadata?.name}`
@@ -90,7 +89,7 @@ const ApprovalTaskComponent: FC<ApprovalTaskComponentProps> = ({
     : getApprovalStatusInfo(ApprovalStatus.Idle).pftoken.value;
 
   const [hover, hoverRef] = useHover();
-  const truncatedVisualName = useMemo(
+  const truncatedVisualName = React.useMemo(
     () =>
       truncateMiddle(visualName, {
         length: showStatusState ? 11 : 14,
@@ -179,7 +178,7 @@ const ApprovalTaskComponent: FC<ApprovalTaskComponentProps> = ({
   );
 };
 
-const ApprovalTaskNode: FC<ApprovalTaskNodeProps> = ({
+const ApprovalTaskNode: React.FC<ApprovalTaskNodeProps> = ({
   element,
   disableTooltip,
 }) => {
@@ -228,4 +227,4 @@ const ApprovalTaskNode: FC<ApprovalTaskNodeProps> = ({
   return taskComponent;
 };
 
-export default memo(observer(ApprovalTaskNode));
+export default React.memo(observer(ApprovalTaskNode));

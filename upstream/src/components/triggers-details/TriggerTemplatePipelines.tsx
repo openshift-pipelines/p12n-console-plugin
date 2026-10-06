@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import * as React from 'react';
 import { TriggerTemplateKind } from '../../types';
 import { getTriggerTemplatePipelineName } from '../utils/triggers';
 import DynamicResourceLinkList from './DynamicResourceLinkList';
@@ -8,7 +8,7 @@ type TriggerTemplatePipelinesProps = {
   obj: TriggerTemplateKind;
 };
 
-const TriggerTemplatePipelines: FC<TriggerTemplatePipelinesProps> = ({
+const TriggerTemplatePipelines: React.FC<TriggerTemplatePipelinesProps> = ({
   obj,
 }) => {
   const namespace = obj?.metadata.namespace;

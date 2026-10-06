@@ -1,14 +1,14 @@
 .opp-builder-finally-node {
-  fill: var(--pf-t--global--background--color--primary--default);
+  fill: var(--pf-v5-global--BackgroundColor--light-100);
   stroke-width: 1;
-  stroke: var(--pf-t--global--border--color--default);
+  stroke: var(--pf-v5-global--BorderColor--light-100);
 
   &__task-connectors {
-    stroke: var(--pf-t--global--border--color--default);
+    stroke: var(--pf-v5-global--BorderColor--light-100);
     fill: none;
     transform: translate(0.5, 0.5);
   }
   &__text {
-    fill: var(--pf-t--global--color--brand--default);
+    fill: var(--pf-v5-global--link--Color);
   }
 }

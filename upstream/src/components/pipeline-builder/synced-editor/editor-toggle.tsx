@@ -1,4 +1,4 @@
-import type { FC, FormEvent } from 'react';
+import * as React from 'react';
 import { Flex, Radio } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import './styles.scss';
@@ -8,12 +8,12 @@ export enum EditorType {
   YAML = 'yaml',
 }
 
-export const EditorToggle: FC<EditorToggleProps> = ({
+export const EditorToggle: React.FC<EditorToggleProps> = ({
   value,
   onChange,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
-  const handleChange = (event: FormEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
     onChange(event?.currentTarget?.value as EditorType);
   };
   return (
