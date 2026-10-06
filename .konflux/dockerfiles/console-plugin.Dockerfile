@@ -32,7 +32,7 @@ ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
 LABEL \
     com.redhat.component="openshift-pipelines-console-plugin-rhel9-container" \
-    cpe="cpe:/a:redhat:openshift_pipelines:next::el9" \
+    cpe="cpe:/a:redhat:openshift_pipelines:next::" \
     description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
     io.k8s.description="Red Hat OpenShift Pipelines console-plugin console-plugin" \
     io.k8s.display-name="Red Hat OpenShift Pipelines console-plugin console-plugin" \
