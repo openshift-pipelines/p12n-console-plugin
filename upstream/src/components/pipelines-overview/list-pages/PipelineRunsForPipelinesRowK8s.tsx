@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from 'react-router';
-import { Tooltip } from '@patternfly/react-core';
 import {
-  ResourceIcon,
   ResourceLink,
   getGroupVersionKindForModel,
 } from '@openshift-console/dynamic-plugin-sdk';
 import type { ReactNode } from 'react';
 import { GetDataViewRows } from '@openshift-console/dynamic-plugin-sdk-internal/lib/api/internal-types';
 import { formatTime, formatTimeLastRunTime } from '../dateTime';
-import { SummaryProps, getReferenceForModel } from '../utils';
+import {
+  SummaryProps,
+  doesNamespaceExists,
+  getReferenceForModel,
+} from '../utils';
 
 type RowCell = { cell: ReactNode; props?: Record<string, unknown> };
 import {
   NamespaceModel,
   PipelineModel,
   PipelineModelV1Beta1,
-  ProjectModel,
 } from '../../../models';
-import { Project } from '../../../types';
+import { PipelineKind, Project } from '../../../types';
 import { t } from '../../utils/common-utils';
+import { TooltipforDeletedContent } from './PipelineRunsForPipelinesRow';
 
 const getClusterVersion = () => {
   const clusterVersion = (window as any).SERVER_FLAGS?.releaseVersion;
@@ -45,6 +47,7 @@ export const getPipelineRunsForPipelinesK8sDataViewRows: GetDataViewRows<
     hideLastRunTime?: boolean;
     projects?: Project[];
     projectsLoaded?: boolean;
+    clusterPipelines?: PipelineKind[];
   }
 > = (data, columns) => {
   return data.map(({ obj, rowData }) => {
@@ -53,38 +56,40 @@ export const getPipelineRunsForPipelinesK8sDataViewRows: GetDataViewRows<
     const pipelineReference = getReferenceForModel(
       isV1SupportCluster ? PipelineModel : PipelineModelV1Beta1,
     );
-    const projectReference = getReferenceForModel(ProjectModel);
 
-    const isNamespaceExists = (namespaceName: string) => {
-      if (!rowData?.projectsLoaded) return false;
-      return rowData?.projects?.some(
-        (project) => project?.metadata?.name === namespaceName,
-      );
-    };
+    const nsExists = doesNamespaceExists(rowData, namespace);
 
-    const nsExists = isNamespaceExists(namespace);
+    const isClusterPipeline = !!rowData?.clusterPipelines?.find(
+      (pipeline) =>
+        pipeline.metadata.name === name &&
+        pipeline.metadata.namespace === namespace,
+    );
 
     const rowCells: Record<string, RowCell> = {
       [tableColumnInfo[0].id]: {
-        cell: nsExists ? (
-          <ResourceLink
-            /* needs to be removed when we update console-extension.json */
-            groupVersionKind={
-              isV1SupportCluster
-                ? getGroupVersionKindForModel(PipelineModel)
-                : getGroupVersionKindForModel(PipelineModelV1Beta1)
-            }
-            name={name}
-            namespace={namespace}
-          />
-        ) : (
-          <Tooltip content={t('Resource is deleted.')}>
-            <span>
-              <ResourceIcon kind={pipelineReference} />
-              {name}
-            </span>
-          </Tooltip>
-        ),
+        cell:
+          nsExists && isClusterPipeline ? (
+            <ResourceLink
+              /* needs to be removed when we update console-extension.json */
+              groupVersionKind={
+                isV1SupportCluster
+                  ? getGroupVersionKindForModel(PipelineModel)
+                  : getGroupVersionKindForModel(PipelineModelV1Beta1)
+              }
+              name={name}
+              namespace={namespace}
+            />
+          ) : (
+            <TooltipforDeletedContent
+              content={
+                !nsExists
+                  ? t('This resource belongs to a deleted namespace')
+                  : t('Pipeline Definition does not exist.')
+              }
+              model={PipelineModel}
+              name={name}
+            />
+          ),
         props: {
           isStickyColumn: true,
           hasRightBorder: true,
@@ -98,22 +103,22 @@ export const getPipelineRunsForPipelinesK8sDataViewRows: GetDataViewRows<
             name={namespace}
           />
         ) : (
-          <Tooltip content={t('Resource is deleted.')}>
-            <span>
-              <ResourceIcon kind={projectReference} />
-              {namespace}
-            </span>
-          </Tooltip>
+          <TooltipforDeletedContent
+            content={t('This namespace has been deleted')}
+            model={NamespaceModel}
+            name={namespace}
+          />
         ),
       },
       [tableColumnInfo[2].id]: {
-        cell: nsExists ? (
-          <Link to={`/k8s/ns/${namespace}/${pipelineReference}/${name}/Runs`}>
-            {obj.total}
-          </Link>
-        ) : (
-          <span>{obj.total}</span>
-        ),
+        cell:
+          nsExists && isClusterPipeline ? (
+            <Link to={`/k8s/ns/${namespace}/${pipelineReference}/${name}/Runs`}>
+              {obj.total}
+            </Link>
+          ) : (
+            <span>{obj.total}</span>
+          ),
       },
       [tableColumnInfo[3].id]: {
         cell: formatTime(obj.total_duration),
