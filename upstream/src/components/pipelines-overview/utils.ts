@@ -158,6 +158,10 @@ export const sortTimeStrings = (
 ) => {
   return array.slice().sort((a, b) => {
     const getTimeValue = (timeString) => {
+      if (typeof timeString !== 'string') {
+        return 0;
+      }
+
       const components = timeString?.split(/\s+/);
       let totalSeconds = 0;
 
@@ -494,4 +498,13 @@ export const getPipelineRunAverageDuration = (
 
 export const roundToNearestSecond = (timestamp) => {
   return Math.round(timestamp);
+};
+
+export const doesNamespaceExists = (rowData: any, namespaceName: string) => {
+  if (!rowData?.projectsLoaded) return false;
+  return (
+    rowData?.projects?.some(
+      (project) => project?.metadata?.name === namespaceName,
+    ) ?? false
+  );
 };
