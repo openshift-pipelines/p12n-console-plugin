@@ -1,5 +1,5 @@
 ARG BUILDER=registry.redhat.io/ubi9/nodejs-22@sha256:78e3970b218eeb5870efc098e6dec31d6b17eccb949f000f5c4004df625e1989
-ARG RUNTIME=registry.access.redhat.com/ubi9/nginx-124@sha256:d830c4d4aa22d8e491c3d881e331f9cf9b25dd1ac8849448827774bf3c7571fe
+ARG NGX_RUNTIME=registry.access.redhat.com/ubi9/nginx-124@sha256:d830c4d4aa22d8e491c3d881e331f9cf9b25dd1ac8849448827774bf3c7571fe
 
 FROM $BUILDER AS builder-ui
 
@@ -20,7 +20,7 @@ RUN CYPRESS_INSTALL_BINARY=0 yarn install --immutable && \
     yarn build
 
 
-FROM $RUNTIME
+FROM $NGX_RUNTIME
 ARG VERSION=1.24
 
 COPY --from=builder-ui /go/src/github.com/openshift-pipelines/console-plugin/dist /usr/share/nginx/html
