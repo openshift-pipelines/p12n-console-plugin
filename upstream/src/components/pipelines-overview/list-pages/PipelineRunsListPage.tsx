@@ -12,15 +12,20 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
-import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  getGroupVersionKindForModel,
+  useFlag,
+  useK8sWatchResource,
+} from '@openshift-console/dynamic-plugin-sdk';
 import PipelineRunsForRepositoriesList from './PipelineRunsForRepositoriesList';
 import PipelineRunsForPipelinesList from './PipelineRunsForPipelinesList';
 import SearchInputField from '../SearchInput';
 import { SummaryProps, useInterval, useQueryParams } from '../utils';
 import { getResultsSummary } from '../../../components/utils/summary-api';
-import { DataType, FLAGS } from '../../../types';
+import { DataType, FLAGS, PipelineKind, Project } from '../../../types';
 import { getDropDownDate } from '../dateTime';
 import { ALL_NAMESPACES_KEY } from '../../../consts';
+import { PipelineModel } from '../../../models';
 
 type PipelineRunsListPageProps = {
   bordered?: boolean;
@@ -55,6 +60,11 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
   if (namespace == ALL_NAMESPACES_KEY) {
     namespace = '-';
   }
+  const [projects, projectsLoaded] = useK8sWatchResource<Project[]>({
+    isList: true,
+    kind: 'Project',
+    optional: true,
+  });
 
   useEffect(() => {
     return () => {
@@ -122,6 +132,15 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
         setSummaryDataFiltered([]);
       });
   };
+
+  const [clusterPipelines, clusterPipelinesLoaded] = useK8sWatchResource<
+    PipelineKind[]
+  >({
+    isList: true,
+    groupVersionKind: getGroupVersionKindForModel(PipelineModel),
+    // namespace is '-' for Tekton Results all-ns; omit for cluster-scoped watch
+    ...(namespace !== '-' ? { namespace } : {}),
+  });
 
   useInterval(getSummaryData, interval, namespace, date, pageFlag);
 
@@ -220,13 +239,18 @@ const PipelineRunsListPage: FC<PipelineRunsListPageProps> = ({
                   <PipelineRunsForPipelinesList
                     summaryData={summaryData}
                     summaryDataFiltered={summaryDataFiltered}
-                    loaded={loaded}
+                    clusterPipelines={clusterPipelines}
+                    loaded={loaded && clusterPipelinesLoaded}
+                    projects={projects}
+                    projectsLoaded={projectsLoaded}
                   />
                 ) : (
                   <PipelineRunsForRepositoriesList
                     summaryData={summaryData}
                     summaryDataFiltered={summaryDataFiltered}
                     loaded={loaded}
+                    projects={projects}
+                    projectsLoaded={projectsLoaded}
                   />
                 )}
               </GridItem>
