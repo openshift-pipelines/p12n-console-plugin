@@ -5,8 +5,8 @@ import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
 import {
   SummaryProps,
-  sortByNumbers,
   sortByProperty,
+  sortBySuccessRate,
   sortByTimestamp,
   sortTimeStrings,
 } from '../utils';
@@ -15,7 +15,7 @@ import {
   tableColumnInfo,
 } from './PipelineRunsForPipelinesRowK8s';
 import { ALL_NAMESPACES_KEY } from '../../../consts';
-import { Project } from '../../../types';
+import { PipelineKind, Project } from '../../../types';
 
 type PipelineRunsForPipelinesListProps = {
   summaryData: SummaryProps[];
@@ -24,6 +24,7 @@ type PipelineRunsForPipelinesListProps = {
   hideLastRunTime?: boolean;
   projects?: Project[];
   projectsLoaded?: boolean;
+  clusterPipelines?: PipelineKind[];
 };
 
 const PipelineRunsForPipelinesListK8s: FC<
@@ -35,6 +36,7 @@ const PipelineRunsForPipelinesListK8s: FC<
   hideLastRunTime,
   projects,
   projectsLoaded,
+  clusterPipelines,
 }) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [activeNamespace] = useActiveNamespace();
@@ -96,7 +98,7 @@ const PipelineRunsForPipelinesListK8s: FC<
         id: tableColumnInfo[5].id,
         title: t('Success rate'),
         sort: (summary, direction: 'asc' | 'desc') =>
-          sortByNumbers(summary, 'succeeded', direction),
+          sortBySuccessRate(summary, direction),
         props: {
           modifier: 'nowrap',
           info: {
@@ -130,7 +132,12 @@ const PipelineRunsForPipelinesListK8s: FC<
       loaded={loaded}
       loadError={false}
       getDataViewRows={getPipelineRunsForPipelinesK8sDataViewRows}
-      customRowData={{ hideLastRunTime, projects, projectsLoaded }}
+      customRowData={{
+        hideLastRunTime,
+        projects,
+        projectsLoaded,
+        clusterPipelines,
+      }}
       hideColumnManagement
       hideNameLabelFilters
     />
