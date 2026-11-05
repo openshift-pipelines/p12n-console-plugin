@@ -158,6 +158,10 @@ export const sortTimeStrings = (
 ) => {
   return array.slice().sort((a, b) => {
     const getTimeValue = (timeString) => {
+      if (typeof timeString !== 'string') {
+        return 0;
+      }
+
       const components = timeString?.split(/\s+/);
       let totalSeconds = 0;
 
@@ -216,18 +220,34 @@ export const sortByNumbers = (
   prop: string,
   direction: string,
 ) => {
-  const modifier = direction === 'desc' ? -1 : 1;
+  return [...array].sort((a, b) => {
+    // Distinguish 0 from missing values by normalizing only nullish values.
+    const valueA = a[prop] ?? null;
+    const valueB = b[prop] ?? null;
 
-  return array.slice().sort((a, b) => {
-    const valueA = a[prop];
-    const valueB = b[prop];
-
-    // If 0 is a valid value, handle it separately
-    if (valueA === 0 || valueB === 0) {
-      return modifier * (valueA - valueB);
+    // Keep rows without a value last in both directions.
+    if (valueA === null && valueB === null) {
+      return 0;
     }
 
-    return modifier * (valueA || Infinity) - (valueB || Infinity);
+    if (valueA === null || valueB === null) {
+      return valueA === null ? 1 : -1;
+    }
+
+    return direction === 'desc' ? valueB - valueA : valueA - valueB;
+  });
+};
+
+export const getSuccessRate = ({ succeeded = 0, total = 0 }: SummaryProps) =>
+  total > 0 ? Math.round((100 * succeeded) / total) : 0;
+
+export const sortBySuccessRate = (array: SummaryProps[], direction: string) => {
+  return [...array].sort((a, b) => {
+    const successRateDifference = getSuccessRate(a) - getSuccessRate(b);
+
+    return direction === 'desc'
+      ? -successRateDifference
+      : successRateDifference;
   });
 };
 
@@ -494,4 +514,13 @@ export const getPipelineRunAverageDuration = (
 
 export const roundToNearestSecond = (timestamp) => {
   return Math.round(timestamp);
+};
+
+export const doesNamespaceExists = (rowData: any, namespaceName: string) => {
+  if (!rowData?.projectsLoaded) return false;
+  return (
+    rowData?.projects?.some(
+      (project) => project?.metadata?.name === namespaceName,
+    ) ?? false
+  );
 };

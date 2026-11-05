@@ -5,8 +5,8 @@ import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 import { ConsoleDataView } from '@openshift-console/dynamic-plugin-sdk-internal';
 import {
   SummaryProps,
-  sortByNumbers,
   sortByProperty,
+  sortBySuccessRate,
   sortByTimestamp,
   sortTimeStrings,
 } from '../utils';
@@ -15,16 +15,25 @@ import {
   tableColumnInfo,
 } from './PipelineRunsForRepositoriesRow';
 import { ALL_NAMESPACES_KEY } from '../../../consts';
+import { Project } from '../../../types';
 
 type PipelineRunsForRepositoriesListProps = {
   summaryData: SummaryProps[];
   summaryDataFiltered: SummaryProps[];
   loaded: boolean;
+  projects?: Project[];
+  projectsLoaded?: boolean;
 };
 
 const PipelineRunsForRepositoriesList: FC<
   PipelineRunsForRepositoriesListProps
-> = ({ summaryData, summaryDataFiltered, loaded }) => {
+> = ({
+  summaryData,
+  summaryDataFiltered,
+  loaded,
+  projects,
+  projectsLoaded,
+}) => {
   const { t } = useTranslation('plugin__pipelines-console-plugin');
   const [activeNamespace] = useActiveNamespace();
 
@@ -85,7 +94,7 @@ const PipelineRunsForRepositoriesList: FC<
         id: tableColumnInfo[5].id,
         title: t('Success rate'),
         sort: (summary, direction: 'asc' | 'desc') =>
-          sortByNumbers(summary, 'succeeded', direction),
+          sortBySuccessRate(summary, direction),
         props: {
           modifier: 'nowrap',
           info: {
@@ -115,6 +124,7 @@ const PipelineRunsForRepositoriesList: FC<
       loaded={loaded}
       loadError={false}
       getDataViewRows={getPipelineRunsForRepositoriesDataViewRows}
+      customRowData={{ projects, projectsLoaded }}
       hideColumnManagement
       hideNameLabelFilters
     />
